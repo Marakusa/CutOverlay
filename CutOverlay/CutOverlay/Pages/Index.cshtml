@@ -1,5 +1,7 @@
 ﻿@page
-@model IndexModel
+@using CutOverlay.Models
+@using System.Globalization
+@model CutOverlay.Pages.IndexModel
 @{}
 
 <div id="panelBottomGradient"></div>
@@ -25,25 +27,28 @@
     <p id="progressText"></p>
     <p id="progressTextShadow"></p>
 </div>
-<div id="heartRateDiv">
-    <p id="heartRate">HEART</p>
-    <p id="heartRateShadow">HEART</p>
-</div>
-<div id="timezoneTextDiv">
-    <p id="timezoneText"></p>
-    <p id="timezoneTextShadow"></p>
-</div>
-<div id="clockTextDiv">
-    <p id="clockText"></p>
-    <p id="clockTextShadow"></p>
-</div>
+@await Html.PartialAsync("_StylizedText", new TextModel
+       {
+           Text = "HEART",
+           StyleId = "heartRate"
+       })
+@await Html.PartialAsync("_StylizedText", new TextModel
+       {
+           Text = @Model.TimeZoneString,
+           StyleId = "timezoneText"
+       })
+@await Html.PartialAsync("_StylizedText", new TextModel
+       {
+           Text = DateTime.Now.ToString("HH:mm:ss", CultureInfo.InvariantCulture),
+           StyleId = "clockText"
+       })
 
 <div id="bigdiv">
     <img id="image" alt="">
     <img id="image2" src="img/Snip_Artwork.jpg" alt="">
     <div id="smalldiv">
         <div id="artistNameDiv">
-            <p id="artist"> </p>
+            <p id="artist">@Model.Artist</p>
             <p id="artistShadow"> </p>
         </div>
         <br>

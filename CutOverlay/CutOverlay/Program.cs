@@ -7,13 +7,13 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var builder = WebApplication.CreateBuilder(args);
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
         builder.WebHost.UseElectron(args);
 
         builder.Services.AddElectron();
         builder.Services.AddRazorPages();
 
-        var app = builder.Build();
+        WebApplication app = builder.Build();
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
@@ -38,8 +38,11 @@ public class Program
         };
 
         // Open the Electron-Window here
-        var window = await Electron.WindowManager.CreateWindowAsync(options, "http://localhost:8001/");
+        BrowserWindow? window = await Electron.WindowManager.CreateWindowAsync(options, "http://localhost:8001/");
         window.SetSize(1920, 1080);
+
+        //CutOverlayApp overlay = new();
+        //overlay.StartAsync();
 
         await app.WaitForShutdownAsync();
 

@@ -57,6 +57,7 @@ const RGBToHSL = (r, g, b) => {
 };
 
 function checkUpdate() {
+
     $.get("../Snip_Artist.txt", function (art) {
         newArtist = art.replace(/&/g, "&amp;");
     }).then(
@@ -82,48 +83,6 @@ function checkUpdate() {
 
     setTimeout(checkUpdate, 2000);
 }
-
-// Handle clock
-setInterval(function () {
-    var date = new Date();
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var seconds = date.getSeconds();
-
-    // Get timezone
-    var timezone = date.toString().match(/([-\+][0-9]+)\s/)[1];
-
-    // Format timezone
-    if (timezone != null) {
-        timezone = timezone.substring(0, 3) + ":" + timezone.substring(3, 5);
-
-        // Get timezone name
-        let lastIndex = date.toString().lastIndexOf("(") + 1;
-        let lastIndexEnd = date.toString().lastIndexOf(")");
-        let timezoneName = date.toString().substring(lastIndex, lastIndexEnd);
-
-        if (timezoneName == "Eastern European Summer Time" || timezoneName == "Itä-Euroopan kesäaika")
-            timezoneName = "EEST";
-        else if (timezoneName == "Eastern European Time" || timezoneName == "Itä-Euroopan aika")
-            timezoneName = "EET";
-
-        // Calculate offset        
-        let offset = parseInt(timezone.substring(1, 3));
-        if (offset > 0)
-            offset = "+" + offset;
-
-        // Add timezone name
-        timezone = timezoneName + " / UTC" + (offset);
-    }
-
-    // Set to text
-    document.getElementById("clockText").innerHTML = hours + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
-    document.getElementById("clockTextShadow").innerHTML = hours + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
-
-    // Timezone text
-    document.getElementById("timezoneText").innerHTML = timezone;
-    document.getElementById("timezoneTextShadow").innerHTML = timezone;
-}, 1000);
 
 // Handle the music progress bar
 setInterval(function () {
