@@ -1,0 +1,752 @@
+@import url('https://fonts.googleapis.com/css2?family=Geologica:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Geologica', sans-serif;
+    width: 1920px;
+    height: 1080px;
+    background-color: rgba(0, 0, 0, 0);
+    margin: 0px auto;
+    overflow: hidden;
+}
+
+#startingHeaderDiv {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 23;
+    left: 0;
+    top: 0;
+    margin-top: 36px;
+    margin-left: 10px;
+    padding-left: 10px;
+}
+
+#startingHeader, #startingHeaderShadow {
+    font-size: 38px;
+    font-family: 'Geologica', sans-serif;
+    font-weight: 600;
+    margin-top: -20px;
+    margin-left: 0;
+    padding: 0;
+    display: inline-block;
+    position: absolute;
+    background: linear-gradient(to top, #ff0000 0%, #ffffff 100%);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    z-index: 25;
+    transition: 0.4s;
+}
+
+#startingHeaderShadow {
+    text-shadow: 0 0 8px #111111, 0 0 8px #111111;
+    background: none;
+    z-index: 24;
+    transition: 0.4s;
+}
+
+#panelBorders {
+    width: 1920px;
+    height: 1080px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: absolute;
+    z-index: 20;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+#borderBottom {
+    background: linear-gradient(90deg, #000000 0%, #ffffffff 5%, #000000 10%, #000000 50%, #ffffffff 55%, #000000 60%);
+    background-repeat: repeat;
+    background-size: 500% 100%;
+    width: 1920px;
+    height: 2px;
+    position: absolute;
+    z-index: 21;
+    left: 0;
+    bottom: 98px;
+    animation: linear infinite borderBottomGradient 30s;
+}
+
+#borderRightChat {
+    background-color: white;
+    width: 2px;
+    height: 980px;
+    position: absolute;
+    z-index: 21;
+    right: 700px;
+    top: 0;
+}
+
+#panelBottomGradient {
+    width: 1920px;
+    height: 100px;
+    position: absolute;
+    z-index: 2;
+    position: absolute;
+    transform-origin: bottom left;
+    left: 0;
+    bottom: 0;
+    transition: 0.4s;
+    background: linear-gradient(0deg, #00000056 0%, #000000b7 70%, #000000 100%);
+}
+
+#panelBordersBottom {
+    background-image: url(./Panel_Bottom_5.png);
+    width: 1920px;
+    height: 1080px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: absolute;
+    z-index: 20;
+}
+
+#screenRef {
+    background-image: url(./ScreenSize.png);
+    width: 1920px;
+    height: 1080px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: absolute;
+    z-index: -2;
+    transform-origin: top left;
+}
+
+#chatBox {
+    background-image: url(./chatborder.png);
+    width: 600px;
+    height: 900px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: absolute;
+    z-index: 1;
+    transform-origin: top left;
+    right: 45px;
+    top: 30px;
+}
+
+#panelOverColor {
+    width: 1920px;
+    height: 980px;
+    position: absolute;
+    z-index: 1;
+    position: absolute;
+    transform-origin: top left;
+    left: 0;
+    top: 0;
+    transition: 0.4s;
+    filter: brightness(0.5);
+}
+
+#panelOverColorGradient {
+    width: 1920px;
+    height: 980px;
+    position: absolute;
+    z-index: 1;
+    position: absolute;
+    transform-origin: top left;
+    left: 0;
+    top: 0;
+    filter: brightness(0.6);
+}
+
+#panelBottom {
+    width: 1920px;
+    height: 100px;
+    position: absolute;
+    z-index: 1;
+    position: absolute;
+    transform-origin: bottom left;
+    left: 0;
+    bottom: 0;
+    transition: 0.4s;
+}
+
+#panelBottomBackgroundAnimation {
+    background-image: url(./img/Mask2.png);
+    width: 1920px;
+    height: 100px;
+    background-repeat: repeat;
+    background-size: 100%;
+    position: absolute;
+    z-index: 2;
+    transform-origin: bottom left;
+    animation: linear infinite panelBottomBackgroundAnimation 5s;
+    filter: hue-rotate(0deg) saturate(100%) brightness(100%);
+    transition: 0.4s;
+    left: 0;
+    bottom: 0;
+}
+
+#panelSideSmall {
+    width: 192px;
+    height: 980px;
+    position: absolute;
+    z-index: 1;
+    position: absolute;
+    transform-origin: top right;
+    right: 0;
+    top: 0;
+    transition: 0.4s;
+}
+
+#panelChat {
+    width: 700px;
+    height: 980px;
+    position: absolute;
+    z-index: 1;
+    position: absolute;
+    transform-origin: top right;
+    right: 0;
+    top: 0;
+    transition: 0.4s;
+}
+
+#chatBackgroundAnimation {
+    background-image: url(./img/Mask1.png);
+    width: 700px;
+    height: 980px;
+    background-repeat: repeat;
+    background-size: 200%;
+    position: absolute;
+    z-index: 2;
+    transform-origin: top right;
+    animation: linear infinite chatBackgroundAnimation 10s;
+    filter: hue-rotate(0deg) saturate(100%) brightness(100%);
+    transition: 0.4s;
+    right: 0;
+    top: 0;
+}
+
+#bigdiv {
+    justify-content: flex-start;
+    width: 1920px;
+    height: 80px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    transform-origin: bottom left;
+    z-index: 2;
+    left: 10px;
+    bottom: 8px;
+}
+
+#smalldiv {
+    width: 50%;
+    height: 90px;
+    overflow: hidden;
+    margin-top: -90px;
+    margin-left: 79.5px;
+    padding: 0;
+}
+
+#divright {
+    width: 50%;
+    height: 90px;
+    overflow: hidden;
+    margin-top: -90px;
+    margin-left: 79.5px;
+    padding: 0;
+    position: absolute;
+    right: 20px;
+}
+
+.column {
+    width: 100px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+}
+
+#imageDefault {
+    width: 80px;
+    height: 80px;
+    padding: 0;
+    margin-left: 0;
+    position: absolute;
+    z-index: 2;
+    border-radius: 10px;
+    left: 10px;
+    bottom: 8px;
+    box-shadow: 0 0 8px #111111;
+}
+
+#image {
+    width: 80px;
+    height: 80px;
+    padding: 0;
+    margin-left: 0;
+    position: relative;
+    z-index: 5;
+    border-radius: 10px;
+}
+
+#image2 {
+    width: 80px;
+    height: 80px;
+    padding: 0;
+    position: relative;
+    margin-left: -84px;
+    z-index: 10;
+    border-radius: 10px;
+}
+
+
+body {
+    background-color: #ffffff;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+#artist, #artistShadow, #mapper, #mapperShadow {
+    font-size: 20px;
+    color: #ffffff;
+    font-family: 'Geologica', sans-serif;
+    font-weight: 500;
+    margin-top: 14px;
+    margin-left: 10px;
+    padding-left: 10px;
+    margin-bottom: 10px;
+    display: inline-block;
+    position: absolute;
+    background: linear-gradient(to top, #cccccc 0%, #ffffff 80%);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    z-index: 3;
+    transition: 0.4s;
+}
+
+#artistShadow, #mapperShadow {
+    text-shadow: 0 0 3px #111111a1, 0 0 3px #111111;
+    background: none;
+    z-index: 2;
+}
+
+#songNameDiv {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    margin-top: 36px;
+    margin-left: 10px;
+    padding-left: 10px;
+}
+
+#song, #songShadow {
+    font-size: 30px;
+    color: #ffffff;
+    font-family: 'Geologica', sans-serif;
+    font-weight: 800;
+    margin-top: 0;
+    margin-left: 0;
+    padding-left: 0;
+    display: inline-block;
+    position: absolute;
+    background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    z-index: 3;
+    transition: 0.4s;
+}
+
+#songShadow {
+    text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
+    background: none;
+    z-index: 2;
+}
+
+.pDiv {
+    height: 42px;
+    z-index: 2;
+}
+
+    .pDiv p:nth-child(1), .pDiv p:nth-child(2) {
+        font-size: 30px;
+        color: #ffffff;
+        font-family: 'Geologica', sans-serif;
+        font-weight: 700;
+        display: inline-block;
+        position: absolute;
+        margin: 0;
+        padding: 0 5px;
+        background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+        z-index: 3;
+        transition: 0.4s;
+    }
+
+    .pDiv p:nth-child(2) {
+        text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
+        background: none;
+        z-index: 2;
+    }
+
+p {
+    white-space: nowrap;
+}
+
+.scrolling {
+    /*animation: slide 20s linear infinite;*/
+}
+
+.chat-container, .chat-container-shadow {
+    position: absolute;
+    bottom: 120px;
+    right: 20px;
+    width: 500px;
+    height: 980px;
+    background: none;
+    border-radius: 5px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 20;
+}
+
+.chat-container-shadow {
+    filter: blur(3px) brightness(0);
+    z-index: 18;
+}
+
+.chat-messages {
+    overflow: hidden;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.chatUser {
+    padding-right: 15px;
+    font-weight: 800;
+    background: linear-gradient(-60deg, #cccccc 0%, #ffffff 50%);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+}
+
+.message {
+    display: block;
+    margin-top: 10px; /* Adjusting margin top */
+    padding: 0;
+    border-radius: 5px;
+    color: white;
+    font-family: 'Geologica', sans-serif;
+    font-weight: 500;
+    font-size: 32px;
+    animation: slide-in 0.5s ease;
+    animation-duration: 0.5s;
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+    bottom: 0;
+}
+
+    .message span:last-child {
+        background: linear-gradient(-60deg, #9b9b9b 0%, #ffffff 50%);
+        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+    }
+
+        .message span:last-child img {
+            -webkit-text-fill-color: initial;
+            width: 26px;
+            margin: -3px 2px;
+        }
+
+.highlighted {
+    padding: 5px;
+    background: linear-gradient(-60deg, #ffffff3b 0%, #ffffff07 50%);
+    -webkit-text-fill-color: unset;
+    -webkit-background-clip: unset;
+    border: 2px solid #299fff;
+}
+
+.first-msg {
+    padding: 5px;
+    border: 2px solid #299fff;
+}
+
+.badge {
+    margin: -4px 4px -4px 0;
+    width: 26px;
+    height: 26px;
+}
+
+.broadcaster::before {
+    content: url("img/broadcaster.png");
+}
+
+.moderator::before {
+    content: url("img/mod.png");
+}
+
+.vip::before {
+    content: url("img/vip.png");
+}
+
+.subscriber::before {
+    content: url("img/subscriber.png");
+}
+
+.founder::before {
+    content: url("img/1st.png");
+}
+
+#progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: white;
+    z-index: 40;
+    transition: 0.1s;
+}
+
+#progressHeaderDiv {
+    height: 42px;
+    z-index: 2;
+    width: 100%;
+    position: absolute;
+    bottom: 38px;
+    right: calc(650px - 360px);
+}
+
+    #progressHeaderDiv p:nth-child(1), #progressHeaderDiv p:nth-child(2) {
+        font-size: 20px;
+        font-family: 'Geologica', sans-serif;
+        font-weight: 500;
+        text-transform: uppercase;
+        display: inline-block;
+        position: absolute;
+        margin: 0;
+        padding: 0 5px;
+        background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+        z-index: 3;
+        transition: 0.4s;
+        width: 100%;
+        text-align: right;
+    }
+
+    #progressHeaderDiv p:nth-child(2) {
+        text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
+        background: none;
+        z-index: 2;
+        width: 100%;
+        text-align: right;
+    }
+
+#progressTextDiv {
+    height: 42px;
+    z-index: 2;
+    width: 100%;
+    position: absolute;
+    bottom: 10px;
+    right: calc(650px - 360px);
+}
+
+    #progressTextDiv p:nth-child(1), #progressTextDiv p:nth-child(2) {
+        font-size: 30px;
+        font-family: 'Geologica', sans-serif;
+        font-weight: 800;
+        display: inline-block;
+        position: absolute;
+        margin: 0;
+        padding: 0 5px;
+        background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+        z-index: 3;
+        transition: 0.4s;
+        width: 100%;
+        text-align: right;
+    }
+
+    #progressTextDiv p:nth-child(2) {
+        text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
+        background: none;
+        z-index: 2;
+        width: 100%;
+        text-align: right;
+    }
+
+#clockTextDiv {
+    height: 42px;
+    z-index: 2;
+    width: 100%;
+    position: absolute;
+    bottom: 10px;
+    right: 380px;
+    right: calc(380px - 360px);
+}
+
+    #clockTextDiv p:nth-child(1), #clockTextDiv p:nth-child(2) {
+        font-size: 30px;
+        font-family: 'Geologica', sans-serif;
+        font-weight: 800;
+        display: inline-block;
+        position: absolute;
+        margin: 0;
+        padding: 0 5px;
+        background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+        z-index: 3;
+        transition: 0.4s;
+        width: 100%;
+        text-align: right;
+    }
+
+    #clockTextDiv p:nth-child(2) {
+        text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
+        background: none;
+        z-index: 2;
+        width: 100%;
+        text-align: right;
+    }
+
+#timezoneTextDiv {
+    height: 42px;
+    z-index: 2;
+    width: 100%;
+    position: absolute;
+    bottom: 38px;
+    right: calc(380px - 360px);
+}
+
+    #timezoneTextDiv p:nth-child(1), #timezoneTextDiv p:nth-child(2) {
+        font-size: 20px;
+        font-family: 'Geologica', sans-serif;
+        font-weight: 500;
+        display: inline-block;
+        position: absolute;
+        margin: 0;
+        padding: 0 5px;
+        background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+        z-index: 3;
+        transition: 0.4s;
+        width: 100%;
+        text-align: right;
+    }
+
+    #timezoneTextDiv p:nth-child(2) {
+        text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
+        background: none;
+        z-index: 2;
+        width: 100%;
+        text-align: right;
+    }
+
+#heartRateDiv {
+    height: 42px;
+    z-index: 2;
+    width: 100%;
+    position: absolute;
+    bottom: 38px;
+    right: calc(550px - 360px);
+}
+
+    #heartRateDiv p:nth-child(1), #heartRateDiv p:nth-child(2) {
+        font-size: 20px;
+        font-family: 'Geologica', sans-serif;
+        font-weight: 500;
+        display: inline-block;
+        position: absolute;
+        margin: 0;
+        padding: 0 5px;
+        background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+        z-index: 3;
+        transition: 0.4s;
+        width: 100%;
+        text-align: right;
+    }
+
+    #heartRateDiv p:nth-child(2) {
+        text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
+        background: none;
+        z-index: 2;
+        width: 100%;
+        text-align: right;
+    }
+
+
+@keyframes slide-up {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+}
+
+@keyframes slide-in {
+    0% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slide {
+    0% {
+        /* left: 100%; */
+        transform: translateX(290px);
+    }
+
+    100% {
+        /* left: -100%; */
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes chatBackgroundAnimation {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 100% 0;
+    }
+}
+
+@keyframes panelBottomBackgroundAnimation {
+    0% {
+        background-position: -1595px 0px;
+    }
+
+    100% {
+        background-position: -1595px calc(100% - 100px);
+    }
+}
+
+@keyframes borderBottomGradient {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: -500% 0;
+    }
+}
