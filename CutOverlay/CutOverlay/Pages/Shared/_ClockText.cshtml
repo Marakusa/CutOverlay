@@ -1,0 +1,18 @@
+﻿@using TextModel = CutOverlay.Models.TextModel
+
+@await Html.PartialAsync("_StylizedText", new TextModel
+       {
+           Text = "",
+           StyleId = "clockText"
+       })
+
+<script>
+    setInterval(function () {
+        const clockElement = document.getElementById('clockText');
+        const clockElementShadow = document.getElementById('clockTextShadow');
+        const currentTime = new Date();
+        let currentTimeString = parseInt(currentTime.getHours()) + ':' + currentTime.getMinutes().toString().padStart(2, '0') + ':' + currentTime.getSeconds().toString().padStart(2, '0');
+        clockElement.innerText = currentTimeString;
+        clockElementShadow.innerText = currentTimeString;
+    }, 1000);
+</script>

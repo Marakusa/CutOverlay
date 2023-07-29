@@ -1,0 +1,55 @@
+﻿@using TextModel = CutOverlay.Models.TextModel
+
+@await Html.PartialAsync("_StylizedText", new TextModel
+       {
+           Text = "",
+           StyleId = "heartRateText"
+       })
+
+<script>
+    const pulsoidApiToken = "REDACTED";
+    const heartRateElement = document.getElementById('heartRateText');
+    const heartRateElementShadow = document.getElementById('heartRateTextShadow');
+    let socket;
+    let reconnectInterval = 3000; // 3 seconds
+
+    function updateHeartRate(data) {
+        const heartRate = data?.data?.heart_rate;
+        if (heartRate !== undefined) {
+            heartRateElement.innerText = heartRate;
+            heartRateElementShadow.innerText = heartRate;
+        } else {
+            heartRateElement.innerText = "";
+            heartRateElementShadow.innerText = "";
+        }
+    }
+
+    function setupWebSocket() {
+        const url = 'wss://dev.pulsoid.net/api/v1/data/real_time?access_token=' + pulsoidApiToken;
+        socket = new WebSocket(url);
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            updateHeartRate(data);
+        };
+
+        socket.onclose = (event) => {
+            // Attempt reconnection after a certain interval
+            setTimeout(setupWebSocket, reconnectInterval);
+            // Increase the reconnect interval for the next attempt
+            reconnectInterval = Math.min(reconnectInterval * 2, 60000); // Max 1 minute
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            heartRateElement.innerText = 'WebSocket connection error';
+            // Attempt reconnection after a certain interval
+            setTimeout(setupWebSocket, reconnectInterval);
+            // Increase the reconnect interval for the next attempt
+            reconnectInterval = Math.min(reconnectInterval * 2, 60000); // Max 1 minute
+        };
+    }
+
+    // Initialize WebSocket connection
+    setupWebSocket();
+</script>

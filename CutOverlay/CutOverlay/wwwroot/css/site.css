@@ -581,15 +581,15 @@ p {
         text-align: right;
     }
 
-#clockTextDiv {
-    height: 42px;
-    z-index: 2;
-    width: 100%;
-    position: absolute;
-    bottom: 10px;
-    right: 380px;
-    right: calc(380px - 360px);
-}
+    #clockTextDiv {
+        height: 42px;
+        z-index: 2;
+        width: 100%;
+        position: absolute;
+        bottom: 10px;
+        right: 380px;
+        right: calc(380px - 360px);
+    }
 
     #clockTextDiv p:nth-child(1), #clockTextDiv p:nth-child(2) {
         font-size: 30px;
@@ -609,6 +609,41 @@ p {
     }
 
     #clockTextDiv p:nth-child(2) {
+        text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
+        background: none;
+        z-index: 2;
+        width: 100%;
+        text-align: right;
+    }
+
+#heartRateTextDiv {
+    height: 42px;
+    z-index: 2;
+    width: 100%;
+    position: absolute;
+    bottom: 10px;
+    right: 380px;
+    right: calc(550px - 360px);
+}
+
+    #heartRateTextDiv p:nth-child(1), #heartRateTextDiv p:nth-child(2) {
+        font-size: 30px;
+        font-family: 'Geologica', sans-serif;
+        font-weight: 800;
+        display: inline-block;
+        position: absolute;
+        margin: 0;
+        padding: 0 5px;
+        background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+        z-index: 3;
+        transition: 0.4s;
+        width: 100%;
+        text-align: right;
+    }
+
+    #heartRateTextDiv p:nth-child(2) {
         text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
         background: none;
         z-index: 2;
