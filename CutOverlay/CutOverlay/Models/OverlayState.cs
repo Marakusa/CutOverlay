@@ -6,6 +6,7 @@ public class OverlayStateSongColor
     public double Green { get; set; }
     public double Blue { get; set; }
 }
+
 public class OverlayStateSong
 {
     public string? Artist { get; set; }

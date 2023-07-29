@@ -1,60 +1,86 @@
 ﻿@page
 @using CutOverlay.Models
-@using System.Globalization
 @model CutOverlay.Pages.IndexModel
-@{}
+@{
+}
 
-<div id="panelBottomGradient"></div>
-<div id="panelBorders">
-    <div id="borderBottom"></div>
-    <!--<div id=borderRightChat></div>-->
-</div>
-<div id="panelBottomBackgroundAnimation"></div>
-<div id="panelBottom"></div>
-<!--<div id=chatBackgroundAnimation></div>
-<div id=panelChat></div>-->
-<img id="imageDefault" src="img/cover-shadow.png" alt="">
+<link rel="stylesheet" href="css/settings.css">
 
-<div class="chat-container" style="left: 20px;right: auto;"><div class="chat-messages"></div></div>
-<div class="chat-container-shadow" style="left: 20px;right: auto;"><div class="chat-messages"></div></div>
+<script src="~/js/settings.js"></script>
 
-<!--div id=progress></div-->
-<div id="progressHeaderDiv">
-    <p id="progressHeader"></p>
-    <p id="progressHeaderShadow"></p>
-</div>
-<div id="progressTextDiv">
-    <p id="progressText"></p>
-    <p id="progressTextShadow"></p>
-</div>
-@await Html.PartialAsync("_StylizedText", new TextModel
-       {
-           Text = "HEART",
-           StyleId = "heartRate"
-       })
-@await Html.PartialAsync("_HeartRateText")
-@await Html.PartialAsync("_StylizedText", new TextModel
-       {
-           Text = @Model.TimeZoneString,
-           StyleId = "timezoneText"
-       })
-@await Html.PartialAsync("_ClockText")
+<div id="settingsPanel">
+    <div id="settingsContent">
+        <div class="settingsSection">
 
-<div id="bigdiv">
-    <img id="image" alt="">
-    <img id="image2" src="img/Snip_Artwork.jpg" alt="">
-    <div id="smalldiv">
-        <div id="artistNameDiv">
-            <p id="artist">@Model.Artist</p>
-            <p id="artistShadow"> </p>
-        </div>
-        <br>
-        <div id="songNameDiv">
-            <p id="song"> </p>
-            <p id="songShadow"> </p>
+            
+            @await Html.PartialAsync("_Header", new TextModel
+                   {
+                       Text = "Spotify"
+                   })
+            @await Html.PartialAsync("_Text", new TextModel
+                   {
+                       Text = "This client information can be found in the Spotify Developer Dashboard under your apps settings."
+                   })
+            @await Html.PartialAsync("_TextField", new InputModel
+                   {
+                       Label = "Spotify Client ID",
+                       Id = "spotifyClientId",
+                       Value = ""
+                   })
+            @await Html.PartialAsync("_SecretField", new InputModel
+                   {
+                       Label = "Spotify Client Secret",
+                       Id = "spotifyClientSecret",
+                       Value = ""
+                   })
+
+            @await Html.PartialAsync("_Text", new TextModel
+                   {
+                       Text = "CUT Overlay requires a Spotify app for it to function properly (not the Spotify client). A new app has to be created in the Spotify Developer Dashboard, open the dashboard by clicking the button below. You may need to log in to Spotify."
+                   })
+            @await Html.PartialAsync("_Text", new TextModel
+                   {
+                       Text = "Add the following URI to the \"Redirect URI\":"
+                   })
+            @await Html.PartialAsync("_CopyTextField", new InputModel
+                   {
+                       Id = "spotifyCallbackCopy",
+                       Value = "http://localhost:8001/configuration/SpotifyCallback"
+                   })
+            @await Html.PartialAsync("_Button", new InputModel
+                   {
+                       Id = "spotifyDashboard",
+                       Value = "Open Spotify Dashboard",
+                       OnClick = "spotifyDashboard()"
+                   })
+
+            <hr />
+            
+
+            @await Html.PartialAsync("_Header", new TextModel
+                   {
+                       Text = "Pulsoid"
+                   })
+            @await Html.PartialAsync("_SecretField", new InputModel
+                   {
+                       Label = "Pulsoid Access Token",
+                       Id = "pulsoidAccessToken",
+                       Value = ""
+                   })
+            @await Html.PartialAsync("_Button", new InputModel
+                   {
+                       Id = "pulsoidDashboard",
+                       Value = "Open Pulsoid Dashboard",
+                       OnClick = "pulsoidDashboard()"
+                   })
         </div>
     </div>
+    <div id="settingsBottomBar">
+        @await Html.PartialAsync("_Button", new InputModel
+               {
+                   Id = "saveSettings",
+                   Value = "Save",
+                   OnClick = "saveConfig()"
+               })
+    </div>
 </div>
-
-<script src="~/js/site.js"></script>
-<script src="~/js/chat.js"></script>

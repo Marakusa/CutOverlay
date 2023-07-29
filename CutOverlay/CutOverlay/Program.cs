@@ -14,13 +14,17 @@ public class Program
         builder.Services.AddRazorPages();
 
         WebApplication app = builder.Build();
-
+        
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
         app.UseRouting();
 
         app.MapRazorPages();
+
+        app.MapControllerRoute(
+            name: "default",
+            pattern: "{controller=Index}");
 
         await app.StartAsync();
 
@@ -32,14 +36,15 @@ public class Program
             AlwaysOnTop = false,
             AutoHideMenuBar = true,
             Center = false,
-            Width = 1920,
-            Height = 1080,
-            Resizable = false
+            Width = 1000,
+            Height = 740,
+            MinWidth = 750,
+            MinHeight = 650,
+            Resizable = true
         };
 
         // Open the Electron-Window here
-        BrowserWindow? window = await Electron.WindowManager.CreateWindowAsync(options, "http://localhost:8001/");
-        window.SetSize(1920, 1080);
+        await Electron.WindowManager.CreateWindowAsync(options, "http://localhost:8001/");
 
         //CutOverlayApp overlay = new();
         //overlay.StartAsync();

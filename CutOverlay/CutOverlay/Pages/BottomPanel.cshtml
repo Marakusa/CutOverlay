@@ -1,0 +1,64 @@
+﻿@page
+@using CutOverlay.Models
+@model CutOverlay.Pages.BottomPanelModel
+@{
+}
+
+<div id="panelBottomGradient"></div>
+<div id="panelBorders">
+    <div id="borderBottom"></div>
+    <!--<div id=borderRightChat></div>-->
+</div>
+<div id="panelBottomBackgroundAnimation"></div>
+<div id="panelBottom"></div>
+<!--<div id=chatBackgroundAnimation></div>
+<div id=panelChat></div>-->
+<img id="imageDefault" src="img/cover-shadow.png" alt="">
+
+<div class="chat-container" style="left: 20px;right: auto;">
+    <div class="chat-messages"></div>
+</div>
+<div class="chat-container-shadow" style="left: 20px;right: auto;">
+    <div class="chat-messages"></div>
+</div>
+
+<!--div id=progress></div-->
+<div id="progressHeaderDiv">
+    <p id="progressHeader"></p>
+    <p id="progressHeaderShadow"></p>
+</div>
+<div id="progressTextDiv">
+    <p id="progressText"></p>
+    <p id="progressTextShadow"></p>
+</div>
+@await Html.PartialAsync("_StylizedText", new TextModel
+       {
+           Text = "HEART",
+           StyleId = "heartRate"
+       })
+@await Html.PartialAsync("_HeartRateText")
+@await Html.PartialAsync("_StylizedText", new TextModel
+       {
+           Text = Model.TimeZoneString,
+           StyleId = "timezoneText"
+       })
+@await Html.PartialAsync("_ClockText")
+
+<div id="bigdiv">
+    <img id="image" alt="">
+    <img id="image2" src="img/Snip_Artwork.jpg" alt="">
+    <div id="smalldiv">
+        <div id="artistNameDiv">
+            <p id="artist">@Model.Artist</p>
+            <p id="artistShadow"> </p>
+        </div>
+        <br>
+        <div id="songNameDiv">
+            <p id="song"> </p>
+            <p id="songShadow"> </p>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/site.js"></script>
+<script src="~/js/chat.js"></script>

@@ -3,58 +3,58 @@ const MESSAGE_EXPIRATION_TIME = 15000; // Message expiration time in millisecond
 var removingMessages = [];
 
 function addMessage(username, message, userColor, flags, extra) {
-    const chatContainers = document.getElementsByClassName('chat-messages');
+    const chatContainers = document.getElementsByClassName("chat-messages");
 
     for (let i = 0; i < chatContainers.length; i++) {
-        let messageElement = document.createElement('div');
-        messageElement.classList.add('message');
+        let messageElement = document.createElement("div");
+        messageElement.classList.add("message");
         if (flags.highlighted) {
-            messageElement.classList.add('highlighted');
+            messageElement.classList.add("highlighted");
             messageElement.style.borderColor = userColor;
             var rgb = hexToRgb(userColor);
             messageElement.style.background = "linear-gradient(-60deg, rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",0.5) 0%, rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",0.2) 100%)";
         }
         if (flags.broadcaster) {
-            let badgeElement = document.createElement('span');
-            badgeElement.classList.add('badge');
-            badgeElement.classList.add('broadcaster');
+            let badgeElement = document.createElement("span");
+            badgeElement.classList.add("badge");
+            badgeElement.classList.add("broadcaster");
             messageElement.appendChild(badgeElement);
         }
         if (flags.mod) {
-            let badgeElement = document.createElement('span');
-            badgeElement.classList.add('badge');
-            badgeElement.classList.add('moderator');
+            let badgeElement = document.createElement("span");
+            badgeElement.classList.add("badge");
+            badgeElement.classList.add("moderator");
             messageElement.appendChild(badgeElement);
         }
         if (flags.vip) {
-            let badgeElement = document.createElement('span');
-            badgeElement.classList.add('badge');
-            badgeElement.classList.add('vip');
+            let badgeElement = document.createElement("span");
+            badgeElement.classList.add("badge");
+            badgeElement.classList.add("vip");
             messageElement.appendChild(badgeElement);
         }
         if (flags.subscriber) {
-            let badgeElement = document.createElement('span');
-            badgeElement.classList.add('badge');
-            badgeElement.classList.add('subscriber');
+            let badgeElement = document.createElement("span");
+            badgeElement.classList.add("badge");
+            badgeElement.classList.add("subscriber");
             messageElement.appendChild(badgeElement);
         }
         if (flags.founder) {
-            let badgeElement = document.createElement('span');
-            badgeElement.classList.add('badge');
-            badgeElement.classList.add('founder');
+            let badgeElement = document.createElement("span");
+            badgeElement.classList.add("badge");
+            badgeElement.classList.add("founder");
             messageElement.appendChild(badgeElement);
         }
-        messageElement.setAttribute('data-time', Date.now());
+        messageElement.setAttribute("data-time", Date.now());
 
-        let usernameElement = document.createElement('span');
-        usernameElement.classList.add('chatUser');
+        let usernameElement = document.createElement("span");
+        usernameElement.classList.add("chatUser");
         usernameElement.style.background = "linear-gradient(-60deg, " + userColor + " -50%, #ffffff 200%)";
         usernameElement.style.webkitTextFillColor = "transparent";
         usernameElement.style.webkitBackgroundClip = "text";
         usernameElement.textContent = `${username}`;
         messageElement.appendChild(usernameElement);
 
-        let messageTextElement = document.createElement('span');
+        let messageTextElement = document.createElement("span");
         messageTextElement.innerHTML = twemoji.parse(message);
         messageElement.appendChild(messageTextElement);
 
@@ -66,22 +66,22 @@ function addMessage(username, message, userColor, flags, extra) {
 }
 
 function removeExpiredMessages() {
-    const chatContainers = document.getElementsByClassName('chat-messages');
+    const chatContainers = document.getElementsByClassName("chat-messages");
 
     // Remove expired messages
     const currentTime = Date.now();
     for (let i = 0; i < chatContainers.length; i++) {
         let container = chatContainers[i];
-        const messages = container.getElementsByClassName('message');
+        const messages = container.getElementsByClassName("message");
         for (let i = 0; i < messages.length; i++) {
-            const messageTime = parseInt(messages[i].getAttribute('data-time'), 10);
+            const messageTime = parseInt(messages[i].getAttribute("data-time"), 10);
             if (currentTime - messageTime > MESSAGE_EXPIRATION_TIME) {
                 if (removingMessages.length > 0 && removingMessages.includes(messages[i])) {
                     continue;
                 }
                 removingMessages.push(messages[i]);
-                messages[i].style.animationName = 'slide-up';
-                messages[i].addEventListener('animationend', function () {
+                messages[i].style.animationName = "slide-up";
+                messages[i].addEventListener("animationend", function () {
                     // Remove message from index
                     removingMessages.splice(removingMessages.indexOf(messages[i]), 1);
                     container.removeChild(messages[i]);
