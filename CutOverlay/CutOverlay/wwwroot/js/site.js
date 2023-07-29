@@ -19,8 +19,8 @@ function hideText() {
 function updateText() {
     document.getElementById("artist").innerHTML = newArtist;
     document.getElementById("artistShadow").innerHTML = newArtist;
-    document.getElementById("song").innerHTML = newSong.substring(1, newSong.length - 1);
-    document.getElementById("songShadow").innerHTML = newSong.substring(1, newSong.length - 1);
+    document.getElementById("song").innerHTML = newSong;
+    document.getElementById("songShadow").innerHTML = newSong;
 }
 
 var progressData;
@@ -57,36 +57,35 @@ const RGBToHSL = (r, g, b) => {
 };
 
 function checkUpdate() {
-
-    $.get("../Snip_Artist.txt", function (art) {
-        newArtist = art.replace(/&/g, "&amp;");
-    }).then(
-        $.get("../Snip_Track.txt", function (sng) {
-            newSong = sng.replace(/&/g, "&amp;");
-        })).then(
-            $.get("../Snip_Color.txt", function (sng) {
-                color = sng.replace(/&/g, "&amp;");
-                if (color == "")
-                    color = "255, 255, 255, 0";
-            })).then(displayData);
-
-    $.get("../Snip_Progress.txt", function (data) {
-        try {
-            // Example JSON data
-            progressData = JSON.parse(data);
-        }
-        catch (ex) {
-            progressData = null;
-            return;
-        }
-    });
-
+    try {
+        const response = fetch("/spotify/status", { method: "GET" });
+        response.then((res) => {
+            if (res.ok) {
+                res.json().then((status) => {
+                    newArtist = status.Song.Artist;
+                    newSong = status.Song.Name;
+                    color = `${status.Song.Color.Red * 255}, ${status.Song.Color.Green * 255}, ${status.Song.Color.Blue * 255}, 255`;
+                    progressData = status.Status;
+                    displayData();
+                });
+            } else {
+                console.error("Failed to fetch configuration");
+            }
+        });
+    } catch (error) {
+        console.error("An error occurred while saving the configuration");
+    }
+    
     setTimeout(checkUpdate, 2000);
 }
 
 // Handle the music progress bar
 setInterval(function () {
     if (progressData == null)
+        return;
+
+    const progressBar = document.getElementById("progress");
+    if (progressBar == null)
         return;
 
     const jsonData = progressData;
@@ -121,14 +120,13 @@ setInterval(function () {
     const progressText = progressString + " / " + totalString;
 
     // Update the progress bar width
-    const progressBar = document.getElementById("progress");
     progressBar.style.width = ((elapsedMilliseconds / jsonData.Total) * 100) + "%";
 
     // Update the progress text
     const progressTextElement = document.getElementById("progressText");
     progressTextElement.innerHTML = progressText;
-    const progressTextSghadowElement = document.getElementById("progressTextShadow");
-    progressTextSghadowElement.innerHTML = progressText;
+    const progressTextShadowElement = document.getElementById("progressTextShadow");
+    progressTextShadowElement.innerHTML = progressText;
 
     // Update the progress header text
     document.getElementById("progressHeader").innerHTML = "Track progress";
@@ -136,7 +134,7 @@ setInterval(function () {
 }, 100);
 
 function displayData() {
-    if ((newSong == "" && newSong != document.getElementById("song").innerHTML) || newSong.substring(1, newSong.length - 1) != document.getElementById("song").innerHTML) {
+    if ((newSong === "" && newSong !== document.getElementById("song").innerHTML) || newSong !== document.getElementById("song").innerHTML) {
         if (newSong.length > 1 && !shown) {
             $("#bigdiv").animate({
                 marginLeft: "0px",
@@ -149,16 +147,16 @@ function displayData() {
             }, 500)
             shown = false;
         }
-        console.log("New song, old song: " + document.getElementById("song").innerHTML + " new song: " + newSong);
+
         hideText();
         setTimeout(updateText, 300);
         setTimeout(showText, 400);
-        var imgpath = "../Snip_Artwork.jpg?t=" + newSong + newArtist;
+        /*var imgpath = "../Snip_Artwork.jpg?t=" + newSong + newArtist;
         document.getElementById("image").setAttribute("src", imgpath);
         $("#image2").fadeOut(500, function () {
             document.getElementById("image2").setAttribute("src", imgpath);
             $("#image2").show();
-        });
+        });*/
 
         if (newSong == "") {
             color = "130, 180, 255, 50";

@@ -2,9 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using CutOverlay.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace CutOverlay;
 
@@ -31,7 +29,7 @@ public class ConfigurationController : ControllerBase
         return appDataPath;
     }
 
-    private static string GetConfigFilePath()
+    public static string GetConfigFilePath()
     {
         string appDataPath = GetAppDataPath();
         return Path.Combine(appDataPath, "config.json");
@@ -86,6 +84,7 @@ public class ConfigurationController : ControllerBase
         try
         {
             EncryptAndSaveConfig(config);
+            DecryptAndReadConfig();
             return Ok();
         }
         catch (Exception ex)

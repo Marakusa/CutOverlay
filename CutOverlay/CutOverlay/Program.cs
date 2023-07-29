@@ -46,8 +46,8 @@ public class Program
         // Open the Electron-Window here
         await Electron.WindowManager.CreateWindowAsync(options, "http://localhost:8001/");
 
-        //CutOverlayApp overlay = new();
-        //overlay.StartAsync();
+        CutOverlayApp overlay = new();
+        overlay.StartAsync();
 
         await app.WaitForShutdownAsync();
 

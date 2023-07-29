@@ -13,7 +13,6 @@ public class CutOverlayApp
             {
                 Artist = "Test artist",
                 Name = "Song",
-                Length = 120,
                 Color = new OverlayStateSongColor
                 {
                     Red = 0.8,
@@ -23,9 +22,10 @@ public class CutOverlayApp
             },
             Status = new OverlayStateStatus
             {
-                SongPlayTimestamp = DateTimeOffset.Now.ToUnixTimeSeconds(),
-                SongPaused = true,
-                SongPauseProgress = 10
+                FetchTime = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                Paused = true,
+                Progress = 10000,
+                Total = 120000
             }
         };
 

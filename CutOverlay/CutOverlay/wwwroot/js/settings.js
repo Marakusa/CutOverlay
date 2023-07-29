@@ -6,7 +6,6 @@ function saveConfig() {
         const input = settingsFields[i].childNodes[3];
         config[input.id] = input.value;
     }
-    console.log(config);
 
     try {
         const response = fetch("/configuration",
@@ -19,13 +18,17 @@ function saveConfig() {
             });
         response.then((res) => {
             if (res.ok) {
-                console.log("Configuration saved successfully.");
+                const saveStatus = document.getElementById("saveStatus");
+                saveStatus.innerText = "\u2714 Saved successfully";
+                saveStatus.style.animation = "none";
+                void (saveStatus.offsetHeight);
+                saveStatus.style.animation = null; 
             } else {
-                console.error("Failed to save configuration.");
+                console.error("Failed to save configuration");
             }
         });
     } catch (error) {
-        console.error("An error occurred while saving the configuration.");
+        console.error("An error occurred while saving the configuration");
     }
 }
 
@@ -46,11 +49,11 @@ function loadConfig() {
                     }
                 });
             } else {
-                console.error("Failed to fetch configuration.");
+                console.error("Failed to fetch configuration");
             }
         });
     } catch (error) {
-        console.error("An error occurred while saving the configuration.");
+        console.error("An error occurred while saving the configuration");
     }
 }
 
@@ -64,8 +67,18 @@ function pulsoidDashboard() {
 
 function copyToClipboard(id) {
     const inputElement = document.getElementById(id);
-    inputElement.select();
-    document.execCommand("copy");
+    if (!navigator.clipboard) {
+        inputElement.select();
+        document.execCommand("copy");
+    } else {
+        navigator.clipboard.writeText(inputElement.value).then(
+                function () {
+                })
+            .catch(
+                function () {
+                    console.error("Copying to clipboard failed");
+                });
+    }   
 }
 
 loadConfig();

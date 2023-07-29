@@ -17,9 +17,10 @@ public class OverlayStateSong
 
 public class OverlayStateStatus
 {
-    public long SongPlayTimestamp { get; set; }
-    public bool SongPaused { get; set; }
-    public int SongPauseProgress { get; set; }
+    public long FetchTime { get; set; }
+    public long Total { get; set; }
+    public int Progress { get; set; }
+    public bool Paused { get; set; }
 }
 
 public class OverlayState

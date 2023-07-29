@@ -8,7 +8,7 @@
 }
 
 body {
-	background-color: black;
+	background-color: #181818;
 	font-family: 'Geologica', sans-serif;
 }
 
@@ -132,14 +132,15 @@ hr {
 	margin-bottom: 20px;
 }
 
-.settingsInput {
+.settingsInput, .settingsInputNoSave {
 	margin-bottom: 10px;
 }
-	.settingsInput .label {
+	.settingsInput .label, .settingsInputNoSave .label {
 		color: white;
 		font-weight: normal;
 	}
-	.settingsInput input[type="text"], .settingsInput input[type="password"] {
+	.settingsInput input[type="text"], .settingsInput input[type="password"],
+	.settingsInputNoSave input[type="text"], .settingsInputNoSave input[type="password"] {
 		width: calc(100% - 10px);
 		font-size: 16px;
 		padding: 4px;
@@ -151,7 +152,8 @@ hr {
 		border-color: var(--background2-border-color);
 		transition: 0.2s;
 	}
-		.settingsInput input[type="text"]:focus, .settingsInput input[type="password"]:focus {
+		.settingsInput input[type="text"]:focus, .settingsInput input[type="password"]:focus,
+		.settingsInputNoSave input[type="text"]:focus, .settingsInputNoSave input[type="password"]:focus {
 			outline-color: var(--accent-alternative-color);
 		}
 
@@ -210,6 +212,37 @@ input[type="submit"] {
 	}
 
 
-.overlayDiv:nth-child(even) {
-	background-color: #ffffff08;
+.overlayDiv {
+	border-bottom: solid;
+	border-width: 1px;
+	border-color: #ffffff1a;
+}
+	.overlayDiv:nth-child(even) {
+		background-color: #ffffff08;
+	}
+
+.draggableWindowFooter .button {
+	float: right;
+}
+
+.draggableWindowFooter span {
+	color: var(--accent-alternative-color);
+	display: inherit;
+	height: 100%;
+	float: right;
+	line-height: 30px;
+	margin-right: 20px;
+}
+
+.saveStatus {
+	animation-name: saveStatusAnimation;
+	animation-duration: 3s;
+	animation-iteration-count: 1;
+	animation-fill-mode: forwards;
+}
+
+@keyframes saveStatusAnimation {
+	0% {opacity: 1;}
+	90% {opacity: 1;}
+	100% {opacity: 0;}
 }

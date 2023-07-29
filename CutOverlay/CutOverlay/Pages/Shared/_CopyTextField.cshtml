@@ -1,6 +1,6 @@
 ﻿@model CutOverlay.Models.InputModel
 
-<div class="settingsInput textField copyField">
+<div class="settingsInputNoSave textField copyField">
     <span class="label">@Model.Label</span>
     <input onclick="copyToClipboard('@Model.Id')" type="text" id="@Model.Id" value="@Model.Value" readonly>
     <span onclick="copyToClipboard('@Model.Id')" class="copyIcon"></span>
