@@ -71,7 +71,7 @@ function removeExpiredMessages() {
     // Remove expired messages
     const currentTime = Date.now();
     for (let i = 0; i < chatContainers.length; i++) {
-        let container = chatContainers[i];
+        const container = chatContainers[i];
         const messages = container.getElementsByClassName("message");
         for (let i = 0; i < messages.length; i++) {
             const messageTime = parseInt(messages[i].getAttribute("data-time"), 10);
@@ -158,7 +158,7 @@ function dummyMessages() {
 
 function replaceEmotes(message, emotes) {
     var emoteList = [];
-    var emoteCodes = Object.keys(emotes);
+    const emoteCodes = Object.keys(emotes);
 
     emoteCodes.forEach(function (emoteCode) {
         emotes[emoteCode].forEach(function (emotePosition) {
@@ -173,13 +173,13 @@ function replaceEmotes(message, emotes) {
 
     var output = "";
 
-    for (var i = 0; i < message.length; i++) {
+    for (let i = 0; i < message.length; i++) {
         let emoji = false;
         // Check if theres any emojis in this index point, if there is then add it to the output and skip to the end of the range
-        for (var j = 0; j < emoteList.length; j++) {
-            var [emoteCode, [start, end]] = emoteList[j];
+        for (let j = 0; j < emoteList.length; j++) {
+            const [emoteCode, [start, end]] = emoteList[j];
             if (i == start) {
-                var emoteImage = `<img src="https://static-cdn.jtvnw.net/emoticons/v2/${emoteCode}/default/dark/1.0" alt="${emoteCode}" />`;
+                const emoteImage = `<img src="https://static-cdn.jtvnw.net/emoticons/v2/${emoteCode}/default/dark/1.0" alt="${emoteCode}" />`;
                 output += emoteImage;
                 i = end;
                 emoji = true;
@@ -191,7 +191,7 @@ function replaceEmotes(message, emotes) {
             continue;
         }
 
-        var char = message[i];
+        const char = message[i];
         output += char;
     }
 

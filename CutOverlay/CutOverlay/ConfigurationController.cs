@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using CutOverlay.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace CutOverlay;
 
@@ -12,10 +13,13 @@ namespace CutOverlay;
 public class ConfigurationController : ControllerBase
 {
     private readonly IConfiguration _configuration;
+    public static Dictionary<string, string>? Configurations;
 
     public ConfigurationController(IConfiguration configuration)
     {
         _configuration = configuration;
+        Configurations = new Dictionary<string, string>();
+        DecryptAndReadConfig();
     }
 
     private static string GetAppDataPath()
@@ -72,7 +76,8 @@ public class ConfigurationController : ControllerBase
         using StreamReader streamReader = new(cryptoStream);
         string decryptedConfigText = streamReader.ReadToEnd();
 
-        return JsonSerializer.Deserialize<Dictionary<string, string>>(decryptedConfigText);
+        Configurations = JsonSerializer.Deserialize<Dictionary<string, string>>(decryptedConfigText);
+        return Configurations;
     }
 
     [HttpPost]

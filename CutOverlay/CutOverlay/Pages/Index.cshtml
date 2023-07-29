@@ -8,11 +8,14 @@
 
 <script src="~/js/settings.js"></script>
 
-<div id="settingsPanel">
-    <div id="settingsContent">
+<div id="settingsPanel" class="draggableWindow" style="width: 580px; height: 600px; top: 20px; left: 20px;">
+    <div id="settingsPanelHeader" class="draggableWindowHeader">
+        <span>Options</span>
+    </div>
+    <div id="settingsContent" class="draggableWindowContent">
         <div class="settingsSection">
 
-            
+
             @await Html.PartialAsync("_Header", new TextModel
                    {
                        Text = "Spotify"
@@ -45,7 +48,8 @@
             @await Html.PartialAsync("_CopyTextField", new InputModel
                    {
                        Id = "spotifyCallbackCopy",
-                       Value = "http://localhost:8001/configuration/SpotifyCallback"
+                       Value = "http://localhost:8001/configuration/SpotifyCallback",
+                       Label = "Click below to copy!"
                    })
             @await Html.PartialAsync("_Button", new InputModel
                    {
@@ -54,8 +58,8 @@
                        OnClick = "spotifyDashboard()"
                    })
 
-            <hr />
-            
+            <hr/>
+
 
             @await Html.PartialAsync("_Header", new TextModel
                    {
@@ -75,7 +79,7 @@
                    })
         </div>
     </div>
-    <div id="settingsBottomBar">
+    <div id="settingsBottomBar" class="draggableWindowFooter">
         @await Html.PartialAsync("_Button", new InputModel
                {
                    Id = "saveSettings",
@@ -84,3 +88,37 @@
                })
     </div>
 </div>
+
+<div id="overlaysPanel" class="draggableWindow" style="width: 340px; height: 400px; top: 20px; left: 620px;">
+    <div id="overlaysPanelHeader" class="draggableWindowHeader">
+        <span>Overlays</span>
+    </div>
+    <div id="overlaysPanelContent" class="draggableWindowContent" style="padding: 0; width: 100%;">
+        <div class="overlayDiv">
+            @await Html.PartialAsync("_CopyTextField", new InputModel
+                   {
+                       Id = "overlay1Copy",
+                       Value = "http://localhost:8001/OverlayStarting",
+                       Label = "Starting soon"
+                   })
+        </div>
+        <div class="overlayDiv">
+            @await Html.PartialAsync("_CopyTextField", new InputModel
+                   {
+                       Id = "overlay2Copy",
+                       Value = "http://localhost:8001/OverlayChat",
+                       Label = "Chat"
+                   })
+        </div>
+        <div class="overlayDiv">
+            @await Html.PartialAsync("_CopyTextField", new InputModel
+                   {
+                       Id = "overlay3Copy",
+                       Value = "http://localhost:8001/OverlayGame1",
+                       Label = "Game 1"
+                   })
+        </div>
+    </div>
+</div>
+
+<script src="~/js/settingsWindowDrag.js"></script>

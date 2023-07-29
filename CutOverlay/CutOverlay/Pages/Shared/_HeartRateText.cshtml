@@ -4,9 +4,13 @@
            Text = "",
            StyleId = "heartRateText"
        })
+       
+@model HeartRateModel
 
 <script>
-    const pulsoidApiToken = "REDACTED";
+    const pulsoidApiToken = "@Model.PulsoidToken";
+    console.log("@Model.PulsoidToken");
+    console.log(pulsoidApiToken);
     const heartRateElement = document.getElementById('heartRateText');
     const heartRateElementShadow = document.getElementById('heartRateTextShadow');
     let socket;

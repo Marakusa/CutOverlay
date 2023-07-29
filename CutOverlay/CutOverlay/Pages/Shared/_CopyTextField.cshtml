@@ -1,15 +1,7 @@
 ﻿@model CutOverlay.Models.InputModel
 
 <div class="settingsInput textField copyField">
-    <span class="label">Click below to copy!</span>
-    <input onclick="copyToClipboard()" type="text" id="@Model.Id" value="@Model.Value" readonly>
-    <span onclick="copyToClipboard()" class="copyIcon"></span>
+    <span class="label">@Model.Label</span>
+    <input onclick="copyToClipboard('@Model.Id')" type="text" id="@Model.Id" value="@Model.Value" readonly>
+    <span onclick="copyToClipboard('@Model.Id')" class="copyIcon"></span>
 </div>
-
-<script>
-    function copyToClipboard() {
-        var inputElement = document.getElementById("@Model.Id");
-        inputElement.select();
-        document.execCommand("copy");
-    }
-</script>

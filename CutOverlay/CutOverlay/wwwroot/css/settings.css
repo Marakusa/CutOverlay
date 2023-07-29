@@ -38,81 +38,111 @@ hr {
 
 
 /* IDs and class references */
-#settingsPanel {
+.draggableWindow {
 	position: absolute;
-	transform: translate(20px, 20px);
-	width: 700px;
-	height: 650px;
 	background-color: var(--background-color);
 	border: solid;
 	border-width: 1px;
 	border-color: var(--background-border-color);
 	border-radius: 10px;
-	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	align-items: stretch;
+	padding: 0;
+	resize: both;
+	overflow: auto;
+	box-shadow: 0 0 20px #00000096;
 }
 
-#settingsContent {
-	padding: 10px;
-	overflow-y: scroll;
-	width: 680px;
-	height: 560px;
+.draggableWindowContent {
+	padding: 10px 20px;
+	overflow-y: auto;
+	width: calc(100% - 40px);
+	height: inherit;
+	display: flex;
+	flex-direction: column;
 }
 
-	#settingsContent::-webkit-scrollbar {
+	.draggableWindowContent::-webkit-scrollbar {
 		width: 5px;
 	}
 
-	#settingsContent::-webkit-scrollbar-track {
+	.draggableWindowContent::-webkit-scrollbar-track {
 		background: none;
+		margin-top: 10px;
 		margin-bottom: 10px;
 	}
 
-	#settingsContent::-webkit-scrollbar-thumb {
+	.draggableWindowContent::-webkit-scrollbar-thumb {
 		background: #eee1;
 		border-radius: 2.5px;
 	}
 
-		#settingsContent::-webkit-scrollbar-thumb:hover {
+		.draggableWindowContent::-webkit-scrollbar-thumb:hover {
 			background: #eee5;
 		}
 
-#settingsBottomBar {
-	position: absolute;
+.draggableWindowHeader {
+	padding: 5px;
+	width: calc(100% - 10px);
+	height: 20px;
+	border-bottom: solid;
+	border-width: 1px;
+	border-color: var(--background-border-color);
+	box-shadow: 0px 5px 10px #00000029;
+	clip-path: inset(0px 0px -30px 0px);
+	max-height: 20px;
+}
+	.draggableWindowHeader span {
+		color: white;
+		user-select: none;
+	}
+
+.draggableWindowFooter {
 	padding: 20px;
 	width: calc(100% - 40px);
-	height: 40px;
-	bottom: 0;
-	left: 0;
+	height: 32px;
+	max-height: 32px;
 	border-top: solid;
 	border-width: 1px;
 	border-color: var(--background-border-color);
 	box-shadow: 0px -5px 20px #0000005e;
 	clip-path: inset(-30px 0px 0px 0px);
+	text-align-last: right;
 }
 
 .label {
-	color: white;
+	color: #a7a7a7;
 	width: 100%;
 	display: block;
 	user-select: none;
 	padding-bottom: 10px;
+	font-weight: 200;
 }
 
 .header {
+	color: var(--accent-alternative-color);
 	font-size: 28px;
 	font-weight: bold;
 }
 
 .settingsSection {
+	margin-top: 15px;
 	margin-bottom: 20px;
 }
 
 .settingsInput {
 	margin-bottom: 10px;
 }
+	.settingsInput .label {
+		color: white;
+		font-weight: normal;
+	}
 	.settingsInput input[type="text"], .settingsInput input[type="password"] {
-		width: 100%;
-		font-size: 20px;
+		width: calc(100% - 10px);
+		font-size: 16px;
+		padding: 4px;
 		background-color: var(--background2-color);
 		color: white;
 		border: solid;
@@ -128,10 +158,17 @@ hr {
 .copyField {
 	padding: 10px;
 }
-	.copyField input[type="text"]:hover {
+	.copyField input[type="text"] {
 		background-color: var(--background2-color);
 		border-color: var(--accent-alternative-color);
+		width: calc(100% - 36px);
+		padding-right: 30px;
+		text-overflow: ellipsis;
 	}
+		.copyField input[type="text"]:hover {
+			background-color: var(--background2-color);
+			border-color: var(--accent-alternative-color);
+		}
 	.copyField .copyIcon {
 		display: block;
 		width: 22px;
@@ -139,7 +176,7 @@ hr {
 		position: sticky;
 		float: right;
 		margin-top: -27px;
-		margin-right: -3px;
+		margin-right: 3px;
 		background-image: url(../img/clipboard-regular.svg);
 		background-position: center;
 		background-repeat: no-repeat;
@@ -158,8 +195,8 @@ hr {
 		}
 
 input[type="submit"] {
-	padding: 5px 20px;
-	font-size: 20px;
+	padding: 5px 10px;
+	font-size: 16px;
 	background-color: var(--accent-color);
 	color: white;
 	border: solid;
@@ -171,3 +208,8 @@ input[type="submit"] {
 	input[type="submit"]:hover {
 		background-color: var(--accent-alternative-color);
 	}
+
+
+.overlayDiv:nth-child(even) {
+	background-color: #ffffff08;
+}

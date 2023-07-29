@@ -36,8 +36,8 @@ public class Program
             AlwaysOnTop = false,
             AutoHideMenuBar = true,
             Center = false,
-            Width = 1000,
-            Height = 740,
+            Width = 1700,
+            Height = 800,
             MinWidth = 750,
             MinHeight = 650,
             Resizable = true

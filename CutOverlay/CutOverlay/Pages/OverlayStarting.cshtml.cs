@@ -4,11 +4,11 @@ using TimeZoneNames;
 
 namespace CutOverlay.Pages;
 
-public class BottomPanelModel : PageModel
+public class OverlayStartingModel : PageModel
 {
-    private readonly ILogger<BottomPanelModel> _logger;
+    private readonly ILogger<OverlayStartingModel> _logger;
 
-    public BottomPanelModel(ILogger<BottomPanelModel> logger)
+    public OverlayStartingModel(ILogger<OverlayStartingModel> logger)
     {
         _logger = logger;
     }

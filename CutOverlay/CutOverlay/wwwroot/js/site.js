@@ -89,14 +89,14 @@ setInterval(function () {
     if (progressData == null)
         return;
 
-    var jsonData = progressData;
+    const jsonData = progressData;
 
     // Get the current timestamp
-    var currentTime = Math.floor(Date.now() / 1000);
+    const currentTime = Math.floor(Date.now() / 1000);
 
     // Calculate the elapsed time since FetchTime
-    var elapsedSeconds = (jsonData.Progress / 1000) + currentTime - jsonData.FetchTime;
-    var elapsedMilliseconds = jsonData.Progress + Date.now() - (jsonData.FetchTime * 1000);
+    const elapsedSeconds = (jsonData.Progress / 1000) + currentTime - jsonData.FetchTime;
+    const elapsedMilliseconds = jsonData.Progress + Date.now() - (jsonData.FetchTime * 1000);
 
     // Calculate the progress based on elapsed time
     var progressPercentage = ((elapsedSeconds * 1000) / jsonData.Total);
@@ -106,28 +106,28 @@ setInterval(function () {
         progressPercentage = 0;
 
     // Convert progress percentage to 0:00 format
-    var adjustedProgress = Math.floor(progressPercentage * (jsonData.Total / 1000));
+    const adjustedProgress = Math.floor(progressPercentage * (jsonData.Total / 1000));
 
     // Convert total to 0:00 format
-    var totalMinutes = Math.floor(jsonData.Total / 60000);
-    var totalSeconds = Math.floor((jsonData.Total - totalMinutes * 60000) / 1000);
-    var totalString = totalMinutes + ":" + (totalSeconds < 10 ? "0" + totalSeconds : totalSeconds);
+    const totalMinutes = Math.floor(jsonData.Total / 60000);
+    const totalSeconds = Math.floor((jsonData.Total - totalMinutes * 60000) / 1000);
+    const totalString = totalMinutes + ":" + (totalSeconds < 10 ? "0" + totalSeconds : totalSeconds);
 
     // Convert progress to 0:00 format
-    var progressMinutes = Math.floor((adjustedProgress) / 60);
-    var progressSeconds = Math.floor(((adjustedProgress) - progressMinutes * 60));
-    var progressString = progressMinutes + ":" + (progressSeconds < 10 ? "0" + progressSeconds : progressSeconds);
+    const progressMinutes = Math.floor((adjustedProgress) / 60);
+    const progressSeconds = Math.floor(((adjustedProgress) - progressMinutes * 60));
+    const progressString = progressMinutes + ":" + (progressSeconds < 10 ? "0" + progressSeconds : progressSeconds);
 
-    var progressText = progressString + " / " + totalString;
+    const progressText = progressString + " / " + totalString;
 
     // Update the progress bar width
-    var progressBar = document.getElementById("progress");
+    const progressBar = document.getElementById("progress");
     progressBar.style.width = ((elapsedMilliseconds / jsonData.Total) * 100) + "%";
 
     // Update the progress text
-    var progressTextElement = document.getElementById("progressText");
+    const progressTextElement = document.getElementById("progressText");
     progressTextElement.innerHTML = progressText;
-    var progressTextSghadowElement = document.getElementById("progressTextShadow");
+    const progressTextSghadowElement = document.getElementById("progressTextShadow");
     progressTextSghadowElement.innerHTML = progressText;
 
     // Update the progress header text
@@ -249,7 +249,7 @@ function displayData() {
 }
 
 function hexToRgb(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
         r: parseInt(result[1], 16),
         g: parseInt(result[2], 16),
