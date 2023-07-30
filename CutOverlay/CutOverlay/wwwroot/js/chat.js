@@ -12,7 +12,9 @@ function addMessage(username, message, userColor, flags, extra) {
             messageElement.classList.add("highlighted");
             messageElement.style.borderColor = userColor;
             var rgb = hexToRgb(userColor);
-            messageElement.style.background = "linear-gradient(-60deg, rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",0.5) 0%, rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",0.2) 100%)";
+            messageElement.style.background =
+                `linear-gradient(-60deg, rgba(${rgb.r},${rgb.g},${rgb.b},0.5) 0%, rgba(${rgb.r},${rgb.g},${rgb.b
+                },0.2) 100%)`;
         }
         if (flags.broadcaster) {
             let badgeElement = document.createElement("span");
@@ -48,7 +50,7 @@ function addMessage(username, message, userColor, flags, extra) {
 
         let usernameElement = document.createElement("span");
         usernameElement.classList.add("chatUser");
-        usernameElement.style.background = "linear-gradient(-60deg, " + userColor + " -50%, #ffffff 200%)";
+        usernameElement.style.background = `linear-gradient(-60deg, ${userColor} -50%, #ffffff 200%)`;
         usernameElement.style.webkitTextFillColor = "transparent";
         usernameElement.style.webkitBackgroundClip = "text";
         usernameElement.textContent = `${username}`;
@@ -56,6 +58,9 @@ function addMessage(username, message, userColor, flags, extra) {
 
         let messageTextElement = document.createElement("span");
         messageTextElement.innerHTML = twemoji.parse(message);
+        messageTextElement.style.background = "linear-gradient(-60deg, #9b9b9b 0%, #ffffff 50%)";
+        messageTextElement.style.webkitTextFillColor = "transparent";
+        messageTextElement.style.webkitBackgroundClip = "text";
         messageElement.appendChild(messageTextElement);
 
         chatContainers[i].appendChild(messageElement);
@@ -81,11 +86,12 @@ function removeExpiredMessages() {
                 }
                 removingMessages.push(messages[i]);
                 messages[i].style.animationName = "slide-up";
-                messages[i].addEventListener("animationend", function () {
-                    // Remove message from index
-                    removingMessages.splice(removingMessages.indexOf(messages[i]), 1);
-                    container.removeChild(messages[i]);
-                });
+                messages[i].addEventListener("animationend",
+                    function() {
+                        // Remove message from index
+                        removingMessages.splice(removingMessages.indexOf(messages[i]), 1);
+                        container.removeChild(messages[i]);
+                    });
             }
         }
     }
@@ -96,78 +102,20 @@ ComfyJS.onChat = (user, message, flags, self, extra) => {
     var emotes = extra.messageEmotes || {};
     var messageWithEmotes = replaceEmotes(message, emotes);
     addMessage(extra.displayName, messageWithEmotes, extra.userColor, flags, extra);
-}
-
-function dummyMessages() {
-    setTimeout(function () {
-        addMessage("inigowo", "Hiiii :3", "#00ff00", {
-            broadcaster: false,
-            customReward: false,
-            founder: false,
-            highlighted: false,
-            mod: false,
-            subscriber: true,
-            vip: false
-        }, { displayName: "inigowo", userColor: "#00ff00", userState: { "first-msg": false } })
-    }, 200);
-    setTimeout(function () {
-        addMessage("blumbus", "I love your streams, keep going!", "#a400a4", {
-            broadcaster: false,
-            customReward: false,
-            founder: false,
-            highlighted: true,
-            mod: false,
-            subscriber: false,
-            vip: false
-        }, { displayName: "blumbus", userColor: "#a400a4", userState: { "first-msg": false } })
-    }, 1000);
-    setTimeout(function () {
-        addMessage("Marakusa", "Hello!!!", "#a400a4", {
-            broadcaster: true,
-            customReward: false,
-            founder: false,
-            highlighted: false,
-            mod: false,
-            subscriber: true,
-            vip: false
-        }, { displayName: "Marakusa", userColor: "#a400a4", userState: { "first-msg": false } })
-    }, 2000);
-    setTimeout(function () {
-        addMessage("Trufffie", "Hiiii!", "#0000ff", {
-            broadcaster: false,
-            customReward: false,
-            founder: true,
-            highlighted: false,
-            mod: true,
-            subscriber: true,
-            vip: false
-        }, { displayName: "Trufffie", userColor: "#0000ff", userState: { "first-msg": false } })
-    }, 2200);
-    setTimeout(function () {
-        addMessage("someone", "Hows it going?", "#ff00ff", {
-            broadcaster: false,
-            customReward: false,
-            founder: false,
-            highlighted: false,
-            mod: true,
-            subscriber: true,
-            vip: true
-        }, { displayName: "someone", userColor: "#ff00ff", userState: { "first-msg": true } })
-    }, 2500);
-}
+};
 
 function replaceEmotes(message, emotes) {
     var emoteList = [];
     const emoteCodes = Object.keys(emotes);
 
-    emoteCodes.forEach(function (emoteCode) {
-        emotes[emoteCode].forEach(function (emotePosition) {
+    emoteCodes.forEach(function(emoteCode) {
+        emotes[emoteCode].forEach(function(emotePosition) {
             emoteList.push([emoteCode, emotePosition.split("-")]);
         });
     });
 
     // Sort emote list by position in descending order
-    emoteList.sort(function (a, b) {
+    emoteList.sort(function(a, b) {
         return b[1][0] - a[1][0];
     });
 
@@ -179,7 +127,9 @@ function replaceEmotes(message, emotes) {
         for (let j = 0; j < emoteList.length; j++) {
             const [emoteCode, [start, end]] = emoteList[j];
             if (i == start) {
-                const emoteImage = `<img src="https://static-cdn.jtvnw.net/emoticons/v2/${emoteCode}/default/dark/1.0" alt="${emoteCode}" />`;
+                const emoteImage =
+                    `<img src="https://static-cdn.jtvnw.net/emoticons/v2/${emoteCode}/default/dark/1.0" alt="${emoteCode
+                        }" />`;
                 output += emoteImage;
                 i = end;
                 emoji = true;
@@ -198,11 +148,22 @@ function replaceEmotes(message, emotes) {
     return output;
 }
 
-ComfyJS.Init("marakusa");
+try {
+    const response = fetch("/configuration", { method: "GET" });
+    response.then((res) => {
+        if (res.ok) {
+            res.json().then((configurations) => {
+                ComfyJS.Init(configurations["twitchUsername"]);
+            });
+        } else {
+            console.error("Failed to fetch configuration");
+        }
+    });
+} catch (error) {
+    console.error("An error occurred while fetching the configuration");
+}
 
 // Run the removeExpiredMessages function every second (100 milliseconds)
 setInterval(removeExpiredMessages, 1000);
 
 $(document).ready(checkUpdate);
-
-//dummyMessages();

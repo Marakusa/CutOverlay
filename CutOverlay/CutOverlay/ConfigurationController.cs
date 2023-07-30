@@ -10,8 +10,8 @@ namespace CutOverlay;
 [ApiController]
 public class ConfigurationController : ControllerBase
 {
-    private readonly IConfiguration _configuration;
     public static Dictionary<string, string>? Configurations;
+    private readonly IConfiguration _configuration;
 
     public ConfigurationController(IConfiguration configuration)
     {
@@ -22,7 +22,8 @@ public class ConfigurationController : ControllerBase
 
     private static string GetAppDataPath()
     {
-        string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CutOverlay");
+        string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "CutOverlay");
         if (!Directory.Exists(appDataPath))
             Directory.CreateDirectory(appDataPath);
 

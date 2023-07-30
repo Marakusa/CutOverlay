@@ -1,11 +1,11 @@
-﻿@using CutOverlay.Models
-@await Html.PartialAsync("_StylizedText", new TextModel
+﻿@await Html.PartialAsync("_StylizedText", new TextModel
        {
            Text = "",
            StyleId = "heartRateText"
        })
-       
-@model HeartRateModel
+
+@using CutOverlay.Models
+@model CutOverlay.Models.HeartRateModel
 
 <script>
     const pulsoidApiToken = "@Model.PulsoidToken";
@@ -26,7 +26,7 @@
     }
 
     function setupWebSocket() {
-        const url = 'wss://dev.pulsoid.net/api/v1/data/real_time?access_token=' + pulsoidApiToken;
+        const url = `wss://dev.pulsoid.net/api/v1/data/real_time?access_token=${pulsoidApiToken}`;
         socket = new WebSocket(url);
 
         socket.onmessage = (event) => {

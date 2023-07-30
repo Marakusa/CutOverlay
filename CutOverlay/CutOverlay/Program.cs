@@ -24,8 +24,8 @@ public class Program
         app.MapRazorPages();
 
         app.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=Index}");
+            "default",
+            "{controller=Index}");
 
         await app.StartAsync();
 
@@ -37,13 +37,13 @@ public class Program
             AlwaysOnTop = false,
             AutoHideMenuBar = true,
             Center = false,
-            Width = 1700,
+            Width = 1100,
             Height = 800,
             MinWidth = 750,
             MinHeight = 650,
             Resizable = true
         };
-        
+
         string dataFolder = $"{AppContext.BaseDirectory}electron.manifest.json";
         string content = await File.ReadAllTextAsync(dataFolder);
         var manifest = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);

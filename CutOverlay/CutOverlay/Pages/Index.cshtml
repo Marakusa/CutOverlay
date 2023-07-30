@@ -8,13 +8,27 @@
 
 <script src="~/js/settings.js"></script>
 
-<div id="settingsPanel" class="draggableWindow" style="width: 553px;height: 664px;top: 93px;left: 010px;">
+<div id="settingsPanel" class="draggableWindow" style="height: 664px; left: 010px; top: 93px; width: 553px;">
     <div id="settingsPanelHeader" class="draggableWindowHeader">
         <span>Options</span>
         <span class="closeWindowButton" onclick="showWindow('settingsPanel', false)"></span>
     </div>
     <div id="settingsPanelContent" class="draggableWindowContent">
         <div class="settingsSection">
+            
+
+            @await Html.PartialAsync("_Header", new TextModel
+                   {
+                       Text = "Twitch Chat Integration"
+                   })
+            @await Html.PartialAsync("_TextField", new InputModel
+                   {
+                       Label = "Twitch Username",
+                       Id = "twitchUsername",
+                       Value = ""
+                   })
+
+            <hr/>
 
 
             @await Html.PartialAsync("_Header", new TextModel
@@ -91,7 +105,7 @@
     </div>
 </div>
 
-<div id="overlaysPanel" class="draggableWindow" style="width: 340px;height: 400px;top: 93px;left: 571px;">
+<div id="overlaysPanel" class="draggableWindow" style="height: 420px; left: 571px; top: 93px; width: 340px;">
     <div id="overlaysPanelHeader" class="draggableWindowHeader">
         <span>Overlays</span>
         <span class="closeWindowButton" onclick="showWindow('overlaysPanel', false)"></span>
@@ -117,14 +131,30 @@
             @await Html.PartialAsync("_CopyTextField", new InputModel
                    {
                        Id = "overlay3Copy",
+                       Value = $"http://localhost:{Globals.Port}/OverlayBrb",
+                       Label = "BRB"
+                   })
+        </div>
+        <div class="overlayDiv">
+            @await Html.PartialAsync("_CopyTextField", new InputModel
+                   {
+                       Id = "overlay4Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayGame1",
                        Label = "Game 1"
+                   })
+        </div>
+        <div class="overlayDiv">
+            @await Html.PartialAsync("_CopyTextField", new InputModel
+                   {
+                       Id = "overlay5Copy",
+                       Value = $"http://localhost:{Globals.Port}/OverlayGame2",
+                       Label = "Game 2"
                    })
         </div>
     </div>
 </div>
 
-<div id="toolbox" class="draggableWindow" style="width: 298px;height: 73px;top: 10px;left: 10px;min-height: 75px;">
+<div id="toolbox" class="draggableWindow" style="height: 73px; left: 10px; min-height: 75px; top: 10px; width: 298px;">
     <div id="toolboxHeader" class="draggableWindowHeader">
         <span>Toolbox</span>
     </div>
@@ -146,7 +176,7 @@
                    Id = "toolboxOverlays",
                    Value = "display-solid.svg",
                    OnClick = "showWindow('overlaysPanel', true)"
-        })
+               })
         @await Html.PartialAsync("_ToolboxButton", new InputModel
                {
                    Id = "toolboxInfo",
@@ -157,10 +187,7 @@
 </div>
 
 
-
-
-
-<div id="infoPanel" class="draggableWindow" style="width: 560px;height: 350px;top: 100px;left: 100px;">
+<div id="infoPanel" class="draggableWindow" style="height: 350px; left: 100px; top: 100px; width: 560px;">
     <div id="infoPanelHeader" class="draggableWindowHeader">
         <span>About CUT Overlay</span>
         <span class="closeWindowButton" onclick="showWindow('infoPanel', false)"></span>

@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CutOverlay.Pages;
 
@@ -16,7 +15,9 @@ public class IndexModel : PageModel
     public string CopyrightString => "CUT Overlay (c) 2023 Markus Kannisto";
 
     public string? Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString();
-    public string LicenseInformation => "This application is licensed under the GNU General Public License v3.0 (GPL-3.0)";
+
+    public string LicenseInformation =>
+        "This application is licensed under the GNU General Public License v3.0 (GPL-3.0)";
 
     public void OnGet()
     {

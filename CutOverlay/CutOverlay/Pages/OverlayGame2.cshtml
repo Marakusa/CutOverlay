@@ -1,15 +1,8 @@
 ﻿@page
 @using CutOverlay.Models
-@model CutOverlay.Pages.OverlayGame1Model
+@model CutOverlay.Pages.OverlayGame2Model
 @{
 }
-
-<div id="panelBottomGradient" style="display: none;"></div>
-<div id="panelBorders">
-    <div id="borderBottom"></div>
-    <!--<div id=borderRightChat></div>-->
-</div>
-<div id="panelBottomBackgroundAnimation"></div>
 
 <div class="chat-container" style="left: 20px; right: auto;">
     <div class="chat-messages"></div>
@@ -18,7 +11,7 @@
     <div class="chat-messages"></div>
 </div>
 
-<div id="panelBottom">
+<div id="panelBottom" class="panelBottomClean">
     <div class="panelItem" style="width: 170px;">
         @await Html.PartialAsync("_StylizedHeader", new TextModel
                {
@@ -50,8 +43,6 @@
                })
     </div>
 </div>
-
-<img id="imageDefault" src="img/cover-shadow.png" alt="">
 
 <div id="statusDiv">
     <img id="image" alt="">

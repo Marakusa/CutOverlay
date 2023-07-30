@@ -1,7 +1,4 @@
-﻿using CutOverlay.Models;
-using Newtonsoft.Json;
-
-namespace CutOverlay;
+﻿namespace CutOverlay;
 
 public class CutOverlayApp
 {

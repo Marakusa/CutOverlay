@@ -16,7 +16,7 @@ public class SpotifyController : ControllerBase
                 Spotify.Instance.AccessToken = accessToken;
                 _ = Spotify.Instance.UpdateAuthorizationAsync();
             }
-            
+
             return Ok("Authorization successful! This tab can now be closed.");
         }
         catch (Exception ex)
@@ -32,6 +32,20 @@ public class SpotifyController : ControllerBase
         {
             string configPath = $"{AppContext.BaseDirectory}data\\status.json";
             return Ok(System.IO.File.Exists(configPath) ? System.IO.File.ReadAllText(configPath) : "{}");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("image")]
+    public IActionResult Image()
+    {
+        try
+        {
+            string artworkPath = $"{AppContext.BaseDirectory}data\\cover.jpg";
+            return File(System.IO.File.ReadAllBytes(artworkPath), "image/jpeg");
         }
         catch (Exception ex)
         {

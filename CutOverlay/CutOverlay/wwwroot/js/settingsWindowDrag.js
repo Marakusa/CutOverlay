@@ -59,7 +59,7 @@ function windowMouseDown(e) {
     }
 
     setWindowTop(parent);
-    
+
     windowsList.splice(windowsList.indexOf(parent), 1);
     windowsList.push(parent);
 
@@ -87,4 +87,25 @@ function setWindowTop(window) {
 function showWindow(id, show) {
     document.getElementById(id).style.display = show ? null : "none";
     setWindowTop(document.getElementById(id));
+    if (id === "infoPanel" && !show) {
+        config["infoClosed"] = "true";
+        saveConfig();
+    }
+}
+
+try {
+    const response = fetch("/configuration", { method: "GET" });
+    response.then((res) => {
+        if (res.ok) {
+            res.json().then((configurations) => {
+                if (configurations["infoClosed"] === "true") {
+                    showWindow("infoPanel", false);
+                }
+            });
+        } else {
+            console.error("Failed to fetch configuration");
+        }
+    });
+} catch (error) {
+    console.error("An error occurred while fetching the configuration");
 }

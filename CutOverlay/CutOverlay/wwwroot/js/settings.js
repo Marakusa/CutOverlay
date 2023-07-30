@@ -1,6 +1,6 @@
-function saveConfig() {
-    const config = {};
+const config = {};
 
+function saveConfig() {
     const settingsFields = document.getElementsByClassName("settingsInput");
     for (let i = 0; i < settingsFields.length; i++) {
         const input = settingsFields[i].childNodes[3];
@@ -8,6 +8,7 @@ function saveConfig() {
     }
 
     try {
+        console.log(config);
         const response = fetch("/configuration",
             {
                 method: "POST",
@@ -22,7 +23,7 @@ function saveConfig() {
                 saveStatus.innerText = "\u2714 Saved successfully";
                 saveStatus.style.animation = "none";
                 void (saveStatus.offsetHeight);
-                saveStatus.style.animation = null; 
+                saveStatus.style.animation = null;
             } else {
                 console.error("Failed to save configuration");
             }
@@ -45,6 +46,7 @@ function loadConfig() {
                             if (input) {
                                 input.value = fieldValue;
                             }
+                            config[fieldName] = fieldValue;
                         }
                     }
                 });
@@ -53,7 +55,7 @@ function loadConfig() {
             }
         });
     } catch (error) {
-        console.error("An error occurred while saving the configuration");
+        console.error("An error occurred while fetching the configuration");
     }
 }
 
@@ -72,13 +74,13 @@ function copyToClipboard(id) {
         document.execCommand("copy");
     } else {
         navigator.clipboard.writeText(inputElement.value).then(
-                function () {
+                function() {
                 })
             .catch(
-                function () {
+                function() {
                     console.error("Copying to clipboard failed");
                 });
-    }   
+    }
 }
 
 loadConfig();

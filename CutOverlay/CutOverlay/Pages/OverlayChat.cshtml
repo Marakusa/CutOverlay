@@ -1,8 +1,11 @@
 ﻿@page
 @using CutOverlay.Models
-@model CutOverlay.Pages.OverlayGame1Model
+@model CutOverlay.Pages.OverlayChatModel
 @{
 }
+
+<div id=panelOverColor></div>
+<div id=panelOverColorGradient></div>
 
 <div id="panelBottomGradient" style="display: none;"></div>
 <div id="panelBorders">
@@ -27,7 +30,7 @@
                })
         @await Html.PartialAsync("_ClockText")
     </div>
-    
+
     <div class="panelItem" style="display: none; width: 120px;">
         @await Html.PartialAsync("_StylizedHeader", new TextModel
                {
