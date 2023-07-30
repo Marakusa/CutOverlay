@@ -12,14 +12,13 @@ public class OverlayStateSong
     public string? Artist { get; set; }
     public string? Name { get; set; }
     public OverlayStateSongColor? Color { get; set; }
-    public int Length { get; set; }
 }
 
 public class OverlayStateStatus
 {
     public long FetchTime { get; set; }
     public long Total { get; set; }
-    public int Progress { get; set; }
+    public long Progress { get; set; }
     public bool Paused { get; set; }
 }
 

@@ -1,5 +1,6 @@
 using ElectronNET.API;
 using ElectronNET.API.Entities;
+using Newtonsoft.Json;
 
 namespace CutOverlay;
 
@@ -14,7 +15,7 @@ public class Program
         builder.Services.AddRazorPages();
 
         WebApplication app = builder.Build();
-        
+
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
@@ -42,12 +43,17 @@ public class Program
             MinHeight = 650,
             Resizable = true
         };
+        
+        string dataFolder = $"{AppContext.BaseDirectory}electron.manifest.json";
+        string content = await File.ReadAllTextAsync(dataFolder);
+        var manifest = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+        Globals.Port = int.Parse(manifest?["aspCoreBackendPort"].ToString() ?? "0");
 
         // Open the Electron-Window here
-        await Electron.WindowManager.CreateWindowAsync(options, "http://localhost:8001/");
+        await Electron.WindowManager.CreateWindowAsync(options, $"http://localhost:{Globals.Port}/");
 
-        CutOverlayApp overlay = new();
-        overlay.StartAsync();
+        CutOverlayApp cutOverlay = new();
+        cutOverlay.Start();
 
         await app.WaitForShutdownAsync();
 

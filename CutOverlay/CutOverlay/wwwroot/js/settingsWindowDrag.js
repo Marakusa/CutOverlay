@@ -1,3 +1,5 @@
+const draggableWindows = document.getElementsByClassName("draggableWindow");
+
 function dragElement(element) {
     const header = document.getElementById(element.id + "Header");
 
@@ -5,6 +7,8 @@ function dragElement(element) {
     header.onmousedown = dragMouseDown;
 
     function dragMouseDown(e) {
+        if (e.srcElement.className === "closeWindowButton")
+            return;
         e = e || window.event;
         e.preventDefault();
         // get the mouse cursor position at startup:
@@ -41,7 +45,46 @@ function dragElement(element) {
     }
 }
 
-let draggableWindows = document.getElementsByClassName("draggableWindow");
+var windowsList = [];
+
+function windowMouseDown(e) {
+    let parent = e.srcElement;
+    let found = false;
+    while (!found && parent.parentElement != null) {
+        if (parent.className === "draggableWindow") {
+            found = true;
+            continue;
+        }
+        parent = parent.parentElement;
+    }
+
+    setWindowTop(parent);
+    
+    windowsList.splice(windowsList.indexOf(parent), 1);
+    windowsList.push(parent);
+
+    for (let i = 0; i < windowsList.length; i++) {
+        windowsList[i].style.zIndex = i + 11;
+    }
+}
+
 for (let i = 0; i < draggableWindows.length; i++) {
+    draggableWindows[i].style.zIndex = i + 11;
     dragElement(draggableWindows[i]);
+    windowsList.push(draggableWindows[i]);
+    draggableWindows[i].onmousedown = windowMouseDown;
+}
+
+function setWindowTop(window) {
+    windowsList.splice(windowsList.indexOf(window), 1);
+    windowsList.push(window);
+
+    for (let i = 0; i < windowsList.length; i++) {
+        windowsList[i].style.zIndex = i + 11;
+    }
+}
+
+function showWindow(id, show) {
+    document.getElementById(id).style.display = show ? null : "none";
+    setWindowTop(document.getElementById(id));
 }
