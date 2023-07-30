@@ -21,11 +21,17 @@
                    {
                        Text = "Twitch Chat Integration"
                    })
+            @await Html.PartialAsync("_Checkbox", new InputModel
+                   {
+                       Label = "Use Twitch Chat",
+                       Id = "twitchChat",
+                       Value = "false"
+                   })
             @await Html.PartialAsync("_TextField", new InputModel
                    {
                        Label = "Twitch Username",
                        Id = "twitchUsername",
-                       Value = ""
+                       Value = "marakusa"
                    })
 
             <hr/>

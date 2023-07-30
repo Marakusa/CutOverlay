@@ -3,8 +3,13 @@ const config = {};
 function saveConfig() {
     const settingsFields = document.getElementsByClassName("settingsInput");
     for (let i = 0; i < settingsFields.length; i++) {
-        const input = settingsFields[i].childNodes[3];
-        config[input.id] = input.value;
+        if (settingsFields[i].classList.contains("checkboxInput")) {
+            const input = settingsFields[i].childNodes[1];
+            config[input.id] = input.checked.toString();
+        } else {
+            const input = settingsFields[i].childNodes[3];
+            config[input.id] = input.value.toString();
+        }
     }
 
     try {
@@ -44,7 +49,10 @@ function loadConfig() {
                             const fieldValue = configurations[fieldName];
                             const input = document.getElementById(fieldName);
                             if (input) {
-                                input.value = fieldValue;
+                                if (input.parentElement.classList.contains("checkboxInput"))
+                                    input.checked = fieldValue === "true" ? "checked" : null;
+                                else
+                                    input.value = fieldValue;
                             }
                             config[fieldName] = fieldValue;
                         }

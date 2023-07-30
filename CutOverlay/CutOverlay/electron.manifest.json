@@ -3,7 +3,7 @@
 	"splashscreen": {
 		"imageFile": ""
 	},
-	"name": "CUT Overlay",
+	"name": "CUTOverlay",
 	"author": "Markus Kannisto",
 	"singleInstance": false,
 	"aspCoreBackendPort": 37100,

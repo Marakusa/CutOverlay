@@ -18,6 +18,8 @@ public class Spotify
     private const string Scopes = "user-read-playback-state user-read-currently-playing user-modify-playback-state";
     private const string ResponseType = "code";
     internal static Spotify? Instance;
+    private Timer? _authorizationTimer;
+    private Timer? _statusTimer;
 
     // http://garethrees.org/2007/11/14/pngcrush/
     private readonly byte[] _blankImage =
@@ -40,21 +42,40 @@ public class Spotify
 
     public Spotify()
     {
+        _authorizationTimer = null;
+        _statusTimer = null;
         _httpClient = new HttpClient();
         Instance = this;
     }
 
     public async Task Start()
     {
+        string dataFolder = $"{Globals.GetAppDataPath()}data\\";
+
+        if (!Directory.Exists(dataFolder)) Directory.CreateDirectory(dataFolder);
+
+        string statusFile = $"{dataFolder}status.json";
+        string artworkPath = $"{dataFolder}cover.jpg";
+
+        await File.WriteAllTextAsync(statusFile, "{}");
+        await SaveEmptyCoverAsync(artworkPath);
+
         Dictionary<string, string?>? configurations = await FetchConfigurationsAsync();
 
-        Timer authorizationTimer = new() { Interval = 200000 };
-        authorizationTimer.Elapsed += async (_, _) => { await UpdateAuthorizationAsync(); };
-        authorizationTimer.Start();
+        if (configurations == null || 
+            !configurations.ContainsKey("spotifyClientId") || !configurations.ContainsKey("spotifyClientSecret") || 
+            string.IsNullOrEmpty(configurations["spotifyClientId"]) || string.IsNullOrEmpty(configurations["spotifyClientSecret"]))
+            return;
 
-        Timer statusTimer = new() { Interval = 2000 };
-        statusTimer.Elapsed += async (_, _) => { await FetchStatusAsync(); };
-        statusTimer.Start();
+        _authorizationTimer?.Stop();
+        _authorizationTimer = new Timer { Interval = 200000 };
+        _authorizationTimer.Elapsed += async (_, _) => { await UpdateAuthorizationAsync(); };
+        _authorizationTimer.Start();
+
+        _statusTimer?.Stop();
+        _statusTimer = new Timer { Interval = 2000 };
+        _statusTimer.Elapsed += async (_, _) => { await FetchStatusAsync(); };
+        _statusTimer.Start();
 
         Process.Start(new ProcessStartInfo
         {
@@ -171,7 +192,10 @@ public class Spotify
 
     private async Task SaveStateAsync(SpotifyPlaybackState? playbackState)
     {
-        string dataFolder = $"{AppContext.BaseDirectory}data\\";
+        string dataFolder = $"{Globals.GetAppDataPath()}data\\";
+
+        if (!Directory.Exists(dataFolder)) Directory.CreateDirectory(dataFolder);
+
         string statusFile = $"{dataFolder}status.json";
         string artworkPath = $"{dataFolder}cover.jpg";
         Color dominantColor = Color.Black;
@@ -232,7 +256,6 @@ public class Spotify
 
         string stateString = JsonConvert.SerializeObject(state);
 
-        if (!Directory.Exists(dataFolder)) Directory.CreateDirectory(dataFolder);
         await File.WriteAllTextAsync(statusFile, stateString);
     }
 

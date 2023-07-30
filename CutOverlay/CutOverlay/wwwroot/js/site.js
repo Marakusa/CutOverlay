@@ -68,7 +68,11 @@ function checkUpdate() {
             if (res.ok) {
                 res.json().then((status) => {
 
-                    if (status.Status.Paused) {
+                    if (status == null || status.Status == null || status.Status.Paused) {
+                        status = {};
+                        status.Song = {};
+                        status.Song.Color = {};
+                        status.Status = {};
                         status.Song.Artist = "";
                         status.Song.Name = "";
                         status.Song.Color.Red = 0;
@@ -99,7 +103,7 @@ function checkUpdate() {
     }
 
     const heartRateText = document.getElementById("heartRateText");
-    if (heartRateText.innerText === "") {
+    if (heartRateText.innerText === "" || heartRateText.innerText === "WebSocket connection error") {
         heartRateText.parentElement.parentElement.style.display = "none";
     } else {
         heartRateText.parentElement.parentElement.style.display = null;
@@ -189,7 +193,7 @@ function displayData() {
         setTimeout(updateText, 300);
         setTimeout(showText, 400);
 
-        var imgPath = `/spotify/image?a=${encodeURI(newArtist)}&${encodeURI(newSong)}`;
+        var imgPath = `/spotify/image?a=${encodeURI(newArtist)}&s=${encodeURI(newSong)}`;
         document.getElementById("image").setAttribute("src", imgPath);
         $("#image2").fadeOut(500,
             function() {
@@ -287,14 +291,14 @@ function displayData() {
         for (let i = 0; i < styledTexts.length; i++) {
             let h = styledTexts[i];
             var hsl = RGBToHSL(colors[0], colors[1], colors[2]);
-            h.style.background = `linear-gradient(to top, #cccccc 0%, #ffffff 80%)`;
+            h.style.background = `linear-gradient(to top, rgb(104, 104, 104) 0%, #ffffff 60%)`;
             h.style.webkitTextFillColor = "transparent";
             h.style.webkitBackgroundClip = "text";
         }
 
         let songText = document.getElementById("song");
         if (songText != null) {
-            songText.style.background = `linear-gradient(to top, #cccccc 0%, #ffffff 80%)`;
+            songText.style.background = `linear-gradient(to top, rgb(104, 104, 104) 0%, #ffffff 60%)`;
             songText.style.webkitTextFillColor = "transparent";
             songText.style.webkitBackgroundClip = "text";
         }

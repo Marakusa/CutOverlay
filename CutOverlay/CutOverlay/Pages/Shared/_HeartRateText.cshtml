@@ -43,7 +43,7 @@
 
         socket.onerror = (error) => {
             console.error('WebSocket error:', error);
-            heartRateElement.innerText = 'WebSocket connection error';
+            heartRateElement.innerText = '';
             // Attempt reconnection after a certain interval
             setTimeout(setupWebSocket, reconnectInterval);
             // Increase the reconnect interval for the next attempt

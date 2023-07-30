@@ -153,7 +153,9 @@ try {
     response.then((res) => {
         if (res.ok) {
             res.json().then((configurations) => {
-                ComfyJS.Init(configurations["twitchUsername"]);
+                if (configurations["twitchChat"] === "true") {
+                    ComfyJS.Init(configurations["twitchUsername"]);
+                }
             });
         } else {
             console.error("Failed to fetch configuration");

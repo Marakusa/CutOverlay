@@ -30,7 +30,7 @@ public class SpotifyController : ControllerBase
     {
         try
         {
-            string configPath = $"{AppContext.BaseDirectory}data\\status.json";
+            string configPath = $"{Globals.GetAppDataPath()}data\\status.json";
             return Ok(System.IO.File.Exists(configPath) ? System.IO.File.ReadAllText(configPath) : "{}");
         }
         catch (Exception ex)
@@ -44,7 +44,7 @@ public class SpotifyController : ControllerBase
     {
         try
         {
-            string artworkPath = $"{AppContext.BaseDirectory}data\\cover.jpg";
+            string artworkPath = $"{Globals.GetAppDataPath()}data\\cover.jpg";
             return File(System.IO.File.ReadAllBytes(artworkPath), "image/jpeg");
         }
         catch (Exception ex)

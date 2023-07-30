@@ -20,19 +20,9 @@ public class ConfigurationController : ControllerBase
         DecryptAndReadConfig();
     }
 
-    private static string GetAppDataPath()
-    {
-        string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "CutOverlay");
-        if (!Directory.Exists(appDataPath))
-            Directory.CreateDirectory(appDataPath);
-
-        return appDataPath;
-    }
-
     public static string GetConfigFilePath()
     {
-        string appDataPath = GetAppDataPath();
+        string appDataPath = Globals.GetAppDataPath();
         return Path.Combine(appDataPath, "config.json");
     }
 
@@ -84,8 +74,16 @@ public class ConfigurationController : ControllerBase
     {
         try
         {
+            bool spotifySettingsRefresh = false;
+            if (Configurations != null && config.ContainsKey("spotifyClientId") && Configurations.TryGetValue("spotifyClientId", out string? configuration))
+                spotifySettingsRefresh = config["spotifyClientId"] != configuration;
+            if (Configurations != null && config.ContainsKey("spotifyClientSecret") && Configurations.TryGetValue("spotifyClientSecret", out string? configuration1))
+                spotifySettingsRefresh = config["spotifyClientSecret"] != configuration1;
+
             EncryptAndSaveConfig(config);
             DecryptAndReadConfig();
+            if (spotifySettingsRefresh)
+                Spotify.Instance?.Start();
             return Ok();
         }
         catch (Exception ex)

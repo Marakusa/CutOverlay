@@ -2,5 +2,13 @@
 
 public class HeartRateModel
 {
-    public string? PulsoidToken => ConfigurationController.Configurations?["pulsoidAccessToken"];
+    public string PulsoidToken
+    {
+        get
+        {
+            if (ConfigurationController.Configurations != null && ConfigurationController.Configurations.TryGetValue("pulsoidAccessToken", out string? token))
+                return token;
+            return "";
+        }
+    }
 }
