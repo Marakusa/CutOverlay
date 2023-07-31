@@ -90,7 +90,7 @@ internal class CMap
 
     public Color FromRgb(int red, int green, int blue)
     {
-        Color color = new Color
+        Color color = new()
         {
             A = 255,
             R = (byte)red,

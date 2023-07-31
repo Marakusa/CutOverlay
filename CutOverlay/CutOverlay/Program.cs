@@ -1,3 +1,4 @@
+using CutOverlay.App;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
 using Newtonsoft.Json;
@@ -50,10 +51,26 @@ public class Program
         Globals.Port = int.Parse(manifest?["aspCoreBackendPort"].ToString() ?? "0");
 
         // Open the Electron-Window here
-        await Electron.WindowManager.CreateWindowAsync(options, $"http://localhost:{Globals.Port}/");
+        BrowserWindow? window =
+            await Electron.WindowManager.CreateWindowAsync(options, $"http://localhost:{Globals.Port}/");
 
-        CutOverlayApp cutOverlay = new();
-        cutOverlay.Start();
+        App.CutOverlayApp cutOverlay = new();
+        _ = cutOverlay.Start();
+
+        window.OnClose += () =>
+        {
+            if (Spotify.Instance != null)
+            {
+                Spotify.Instance.Unload();
+                Spotify.Instance = null;
+            }
+
+            if (Pulsoid.Instance != null)
+            {
+                Pulsoid.Instance.Unload();
+                Pulsoid.Instance = null;
+            }
+        };
 
         await app.WaitForShutdownAsync();
 

@@ -4,11 +4,11 @@
 @{
 }
 
-<div id=panelOverColor></div>
-<div id=panelOverColorGradient></div>
-<div id=startingHeaderDiv>
-    <p id=startingHeader>Starting soon<br>By soon I mean no specific time, but when everything is set up</p>
-    <p id=startingHeaderShadow>Starting soon<br>By soon I mean no specific time, but when everything is set up</p>
+<div id="panelOverColor"></div>
+<div id="panelOverColorGradient"></div>
+<div id="startingHeaderDiv">
+    <p id="startingHeader">Starting soon<br>By soon I mean no specific time, but when everything is set up</p>
+    <p id="startingHeaderShadow">Starting soon<br>By soon I mean no specific time, but when everything is set up</p>
 </div>
 
 <div id="panelBottomGradient" style="display: none;"></div>
@@ -41,7 +41,7 @@
                    Text = "HEART",
                    StyleId = "heartRate"
                })
-        @await Html.PartialAsync("_HeartRateText", new HeartRateModel())
+        @await Html.PartialAsync("_HeartRateText")
     </div>
 
     <div class="panelItem" style="width: 250px;">

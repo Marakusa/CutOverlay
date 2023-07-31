@@ -1,7 +1,12 @@
-﻿var newSong;
-var newArtist;
-var color;
+﻿var newSong = "";
+var newArtist = "";
+var color = `0, 0, 0, 255`;
 var shown = false;
+
+// Set statusDiv hidden on left
+const statusDiv = document.getElementById("statusDiv");
+if (statusDiv != null)
+    statusDiv.style.marginLeft = "-500px";
 
 function hideText() {
     $("#artistNameDiv").animate({
@@ -62,6 +67,20 @@ const RGBToHSL = (r, g, b) => {
 };
 
 function checkUpdate() {
+    // Hide heart rate text if empty
+    const heartRateText = document.getElementById("heartRateText");
+    if (heartRateText.innerText === "") {
+        heartRateText.parentElement.parentElement.style.display = "none";
+    } else {
+        heartRateText.parentElement.parentElement.style.display = null;
+    }
+
+    // Hide song progress text if no song playing
+    const progressText = document.getElementById("progressText");
+    if (newSong === "") {
+        progressText.parentElement.parentElement.style.display = "none";
+    }
+
     try {
         const response = fetch("/spotify/status", { method: "GET" });
         response.then((res) => {
@@ -69,59 +88,48 @@ function checkUpdate() {
                 res.json().then((status) => {
 
                     if (status == null || status.Status == null || status.Status.Paused) {
-                        status = {};
-                        status.Song = {};
-                        status.Song.Color = {};
-                        status.Status = {};
-                        status.Song.Artist = "";
-                        status.Song.Name = "";
-                        status.Song.Color.Red = 0;
-                        status.Song.Color.Green = 0;
-                        status.Song.Color.Blue = 0;
-                        status.Status.Progress = 0;
-                        status.Status.Total = 0;
-                        status.Status.FetchTime = 0;
+                        emptyConfig();
+                    } else {
+                        const artistsArray = status.Song.Artist.split(";").map(artist => artist.trim());
+                        const uniqueArtistsArray = [...new Set(artistsArray)];
+                        newArtist = uniqueArtistsArray.join("; ");
+                        newSong = status.Song.Name;
+                        color =
+                            `${status.Song.Color.Red * 255}, ${status.Song.Color.Green * 255}, ${
+                            status.Song.Color.Blue *
+                            255}, 255`;
+                        progressData = status.Status;
                     }
-
-                    const artistsArray = status.Song.Artist.split(";").map(artist => artist.trim());
-                    const uniqueArtistsArray = [...new Set(artistsArray)];
-                    newArtist = uniqueArtistsArray.join("; ");
-                    newSong = status.Song.Name;
-                    color =
-                        `${status.Song.Color.Red * 255}, ${status.Song.Color.Green * 255}, ${status.Song.Color.Blue *
-                        255}, 255`;
-                    progressData = status.Status;
                     displayData();
-
                 });
             } else {
-                console.error("Failed to fetch configuration");
+                console.error("An error occurred while fetching Spotify status");
+                emptyConfig();
+                displayData();
             }
         });
     } catch (error) {
-        console.error("An error occurred while saving the configuration");
-    }
-
-    const heartRateText = document.getElementById("heartRateText");
-    if (heartRateText.innerText === "" || heartRateText.innerText === "WebSocket connection error") {
-        heartRateText.parentElement.parentElement.style.display = "none";
-    } else {
-        heartRateText.parentElement.parentElement.style.display = null;
-    }
-
-    const progressText = document.getElementById("progressText");
-    if (newSong === "") {
-        progressText.parentElement.parentElement.style.display = "none";
-    } else {
-        progressText.parentElement.parentElement.style.display = null;
+        console.error("An error occurred while fetching Spotify status");
+        emptyConfig();
+        displayData();
     }
 
     setTimeout(checkUpdate, 500);
 }
 
+function emptyConfig() {
+    newArtist = "";
+    newSong = "";
+    color = `0, 0, 0, 255`;
+    progressData = null;
+
+    const progressText = document.getElementById("progressText");
+    progressText.parentElement.parentElement.style.display = "none";
+}
+
 // Handle the music progress bar
 setInterval(function() {
-        if (progressData == null)
+        if (progressData == null || newSong === "")
             return;
 
         // Get the current timestamp
@@ -168,10 +176,16 @@ setInterval(function() {
         // Update the progress header text
         document.getElementById("progressHeader").innerHTML = "Track progress";
         document.getElementById("progressHeaderShadow").innerHTML = "Track progress";
+
+        // Show progress text element
+        progressTextElement.parentElement.parentElement.style.display = null;
     },
     100);
 
 function displayData() {
+    if (newSong == null) newSong = "";
+    if (newArtist == null) newArtist = "";
+    if (color == null) color = `0, 0, 0, 255`;
     if ((newSong === "" && newSong !== document.getElementById("song").innerHTML) ||
         newSong !== document.getElementById("song").innerHTML) {
         if (newSong.length > 1 && !shown) {
@@ -315,3 +329,38 @@ function hexToRgb(hex) {
         }
         : null;
 }
+
+
+setInterval(() => {
+        const heartRateElement = document.getElementById("heartRateText");
+        const heartRateElementShadow = document.getElementById("heartRateTextShadow");
+
+        if (heartRateElement == null || heartRateElementShadow == null)
+            return;
+
+        try {
+            const response = fetch("/pulsoid/status", { method: "GET" });
+            response.then((res) => {
+                if (res.ok) {
+                    res.json().then((status) => {
+                        if (status == null || status === "") {
+                            heartRateElement.innerText = "";
+                            heartRateElementShadow.innerText = "";
+                        } else {
+                            heartRateElement.innerText = status;
+                            heartRateElementShadow.innerText = status;
+                        }
+                    });
+                } else {
+                    console.error("An error occurred while fetching Spotify status");
+                    heartRateElement.innerText = "";
+                    heartRateElementShadow.innerText = "";
+                }
+            });
+        } catch (error) {
+            console.error("An error occurred while fetching Spotify status");
+            heartRateElement.innerText = "";
+            heartRateElementShadow.innerText = "";
+        }
+    },
+    500);

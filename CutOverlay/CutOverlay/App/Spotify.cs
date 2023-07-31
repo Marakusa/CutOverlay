@@ -10,16 +10,14 @@ using SkiaSharp;
 using Color = System.Drawing.Color;
 using Timer = System.Timers.Timer;
 
-namespace CutOverlay;
+namespace CutOverlay.App;
 
-public class Spotify
+public class Spotify : OverlayApp
 {
     private const string AuthorizationAddress = "https://accounts.spotify.com/authorize";
     private const string Scopes = "user-read-playback-state user-read-currently-playing user-modify-playback-state";
     private const string ResponseType = "code";
     internal static Spotify? Instance;
-    private Timer? _authorizationTimer;
-    private Timer? _statusTimer;
 
     // http://garethrees.org/2007/11/14/pngcrush/
     private readonly byte[] _blankImage =
@@ -36,20 +34,29 @@ public class Spotify
     };
 
     private readonly string _callbackAddress = $"http://localhost:{Globals.Port}/spotify/callback";
-    private readonly HttpClient? _httpClient;
+    private Timer? _authorizationTimer;
     private string? _refreshToken;
+    private Timer? _statusTimer;
     public string? AccessToken;
 
     public Spotify()
     {
+        if (Instance != null)
+        {
+            Dispose();
+            return;
+        }
+
+        Instance = this;
+
         _authorizationTimer = null;
         _statusTimer = null;
-        _httpClient = new HttpClient();
-        Instance = this;
     }
 
-    public async Task Start()
+    public override async Task Start(Dictionary<string, string?>? configurations)
     {
+        Console.WriteLine("Spotify app starting...");
+
         string dataFolder = $"{Globals.GetAppDataPath()}data\\";
 
         if (!Directory.Exists(dataFolder)) Directory.CreateDirectory(dataFolder);
@@ -58,13 +65,12 @@ public class Spotify
         string artworkPath = $"{dataFolder}cover.jpg";
 
         await File.WriteAllTextAsync(statusFile, "{}");
-        await SaveEmptyCoverAsync(artworkPath);
+        SaveEmptyCover(artworkPath);
 
-        Dictionary<string, string?>? configurations = await FetchConfigurationsAsync();
-
-        if (configurations == null || 
-            !configurations.ContainsKey("spotifyClientId") || !configurations.ContainsKey("spotifyClientSecret") || 
-            string.IsNullOrEmpty(configurations["spotifyClientId"]) || string.IsNullOrEmpty(configurations["spotifyClientSecret"]))
+        if (configurations == null ||
+            !configurations.ContainsKey("spotifyClientId") || !configurations.ContainsKey("spotifyClientSecret") ||
+            string.IsNullOrEmpty(configurations["spotifyClientId"]) ||
+            string.IsNullOrEmpty(configurations["spotifyClientSecret"]))
             return;
 
         _authorizationTimer?.Stop();
@@ -83,13 +89,15 @@ public class Spotify
                 CultureInfo.InvariantCulture,
                 "{0}?client_id={1}&response_type={2}&redirect_uri={3}&scope={4}",
                 AuthorizationAddress,
-                configurations?["spotifyClientId"],
+                configurations["spotifyClientId"],
                 ResponseType,
                 _callbackAddress,
                 Scopes
             ),
             UseShellExecute = true
         });
+
+        Console.WriteLine("Spotify app started!");
     }
 
     public async Task UpdateAuthorizationAsync()
@@ -138,7 +146,7 @@ public class Spotify
                             $"{configurations?["spotifyClientId"]}:{configurations?["spotifyClientSecret"]}")));
             }
 
-            HttpResponseMessage response = await _httpClient!.SendAsync(request);
+            HttpResponseMessage response = await HttpClient!.SendAsync(request);
             string content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -171,7 +179,7 @@ public class Spotify
             HttpRequestMessage request = new(HttpMethod.Get, playbackStateUrl);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
 
-            HttpResponseMessage response = await _httpClient!.SendAsync(request);
+            HttpResponseMessage response = await HttpClient!.SendAsync(request);
             string content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -202,14 +210,28 @@ public class Spotify
 
         File.Delete(artworkPath);
 
-        if (playbackState?.Item is { IsLocal: false })
+        // Set empty if not playing
+        if (playbackState is { IsPlaying: false })
+        {
+            await File.WriteAllTextAsync(statusFile, "{}");
+            SaveEmptyCover(artworkPath);
+            return;
+        }
+
+        // Local image empty
+        if (playbackState?.Item is { IsLocal: true })
+        {
+            SaveEmptyCover(artworkPath);
+        }
+        // Download cover
+        else
         {
             string? coverUrl = playbackState?.Item?.Album?.Images?.First().Url;
 
             if (!string.IsNullOrEmpty(coverUrl))
                 try
                 {
-                    byte[] imageBytes = await _httpClient?.GetByteArrayAsync(coverUrl)!;
+                    byte[] imageBytes = await HttpClient?.GetByteArrayAsync(coverUrl)!;
                     await File.WriteAllBytesAsync(artworkPath, imageBytes);
 
                     SKImage? image = SKImage.FromEncodedData(artworkPath);
@@ -219,13 +241,11 @@ public class Spotify
                 }
                 catch
                 {
-                    await SaveEmptyCoverAsync(artworkPath);
+                    SaveEmptyCover(artworkPath);
                 }
             else
-                await SaveEmptyCoverAsync(artworkPath);
+                SaveEmptyCover(artworkPath);
         }
-        else
-            await SaveEmptyCoverAsync(artworkPath);
 
         double r = dominantColor.R / 255.0;
         double g = dominantColor.G / 255.0;
@@ -259,9 +279,9 @@ public class Spotify
         await File.WriteAllTextAsync(statusFile, stateString);
     }
 
-    private async Task SaveEmptyCoverAsync(string artworkPath)
+    private void SaveEmptyCover(string artworkPath)
     {
-        await File.WriteAllBytesAsync(artworkPath, _blankImage);
+        File.WriteAllBytes(artworkPath, _blankImage);
     }
 
     private static string JoinArtists(IEnumerable<Artist>? artists)
@@ -271,21 +291,34 @@ public class Spotify
         return output[..^1];
     }
 
-    private async Task<Dictionary<string, string?>?> FetchConfigurationsAsync()
-    {
-        HttpResponseMessage configurationResponse =
-            await _httpClient!.GetAsync($"http://localhost:{Globals.Port}/configuration");
-        string configurationJson = await configurationResponse.Content.ReadAsStringAsync();
-        if (configurationResponse.IsSuccessStatusCode)
-            return JsonConvert.DeserializeObject<Dictionary<string, string?>>(configurationJson);
-        Console.WriteLine($"ERROR: {configurationJson}");
-        return new Dictionary<string, string?>();
-    }
-
     private static Color GetMostUsedColor(SKBitmap bitMap)
     {
         ColorThief.ColorThief colorThief = new();
         QuantizedColor color = colorThief.GetColor(bitMap);
         return Color.FromArgb(color.Color.R, color.Color.G, color.Color.B);
+    }
+
+    public override void Unload()
+    {
+        try
+        {
+            string dataFolder = $"{Globals.GetAppDataPath()}data\\";
+
+            if (!Directory.Exists(dataFolder)) Directory.CreateDirectory(dataFolder);
+
+            string statusFile = $"{dataFolder}status.json";
+            string artworkPath = $"{dataFolder}cover.jpg";
+
+            File.WriteAllText(statusFile, "{}");
+            SaveEmptyCover(artworkPath);
+        }
+        catch
+        {
+            // ignored
+        }
+
+        _authorizationTimer?.Dispose();
+        _statusTimer?.Dispose();
+        HttpClient?.Dispose();
     }
 }

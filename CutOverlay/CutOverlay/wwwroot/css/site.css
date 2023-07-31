@@ -24,10 +24,10 @@ body {
 }
 
 #startingHeader, #startingHeaderShadow {
-	background-clip: text;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background: linear-gradient(to top, #ff0000 0%, #ffffff 100%);
+	background-clip: text;
 	display: inline-block;
 	font-family: 'Geologica', sans-serif;
 	font-size: 38px;
@@ -169,9 +169,7 @@ body {
 	z-index: 1;
 }
 
-.panelBottomClean {
-	background: linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 70%) !important;
-}
+.panelBottomClean { background: linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 70%) !important; }
 
 #panelBottom .panelItem {
 	display: flex;
@@ -325,10 +323,10 @@ body {
 }
 
 #artist, #artistShadow, #mapper, #mapperShadow {
-	background-clip: text;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background: linear-gradient(to top, #cccccc 0%, #ffffff 80%);
+	background-clip: text;
 	color: #ffffff;
 	display: inline-block;
 	font-family: 'Geologica', sans-serif;
@@ -362,10 +360,10 @@ body {
 }
 
 #song, #songShadow {
-	background-clip: text;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+	background-clip: text;
 	color: #ffffff;
 	display: inline-block;
 	font-family: 'Geologica', sans-serif;
@@ -390,22 +388,22 @@ body {
 	z-index: 2;
 }
 
-	.pDiv p:nth-child(1), .pDiv p:nth-child(2) {
-		background-clip: text;
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background: linear-gradient(to top, #444444 0%, #ffffff 50%);
-		color: #ffffff;
-		display: inline-block;
-		font-family: 'Geologica', sans-serif;
-		font-size: 30px;
-		font-weight: 700;
-		margin: 0;
-		padding: 0 5px;
-		position: absolute;
-		transition: 0.4s;
-		z-index: 3;
-	}
+.pDiv p:nth-child(1), .pDiv p:nth-child(2) {
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+	background-clip: text;
+	color: #ffffff;
+	display: inline-block;
+	font-family: 'Geologica', sans-serif;
+	font-size: 30px;
+	font-weight: 700;
+	margin: 0;
+	padding: 0 5px;
+	position: absolute;
+	transition: 0.4s;
+	z-index: 3;
+}
 
 .pDiv p:nth-child(2) {
 	background: none;
@@ -443,10 +441,10 @@ p { white-space: nowrap; }
 }
 
 .chatUser {
-	background-clip: text;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background: linear-gradient(-60deg, #cccccc 0%, #ffffff 50%);
+	background-clip: text;
 	font-weight: 800;
 	padding-right: 15px;
 }
@@ -467,12 +465,12 @@ p { white-space: nowrap; }
 	padding: 0;
 }
 
-	.message span:last-child {
-		background-clip: text;
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background: linear-gradient(-60deg, #9b9b9b 0%, #ffffff 50%);
-	}
+.message span:last-child {
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background: linear-gradient(-60deg, #9b9b9b 0%, #ffffff 50%);
+	background-clip: text;
+}
 
 .message span:last-child img {
 	-webkit-text-fill-color: initial;
@@ -529,32 +527,32 @@ p { white-space: nowrap; }
 	z-index: 2;
 }
 
-	.styledHeaderDiv .styledHeaderText, .styledHeaderDiv .styledHeaderTextShadow {
-		background-clip: text;
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background: linear-gradient(to top, #444444 0%, #ffffff 50%);
-		bottom: 0;
-		display: inline-block;
-		font-family: 'Geologica', sans-serif;
-		font-size: 20px;
-		font-weight: 500;
-		margin: 0;
-		padding: 0 5px;
-		position: relative;
-		text-align: right;
-		text-transform: uppercase;
-		transition: 0.4s;
-		z-index: 3;
-	}
+.styledHeaderDiv .styledHeaderText, .styledHeaderDiv .styledHeaderTextShadow {
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+	background-clip: text;
+	bottom: 0;
+	display: inline-block;
+	font-family: 'Geologica', sans-serif;
+	font-size: 20px;
+	font-weight: 500;
+	margin: 0;
+	padding: 0 5px;
+	position: relative;
+	text-align: right;
+	text-transform: uppercase;
+	transition: 0.4s;
+	z-index: 3;
+}
 
-	.styledHeaderDiv .styledHeaderTextShadow {
-		background: none;
-		text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
-		z-index: 2;
-		position: absolute;
-		margin-bottom: 56px;
-	}
+.styledHeaderDiv .styledHeaderTextShadow {
+	background: none;
+	margin-bottom: 56px;
+	position: absolute;
+	text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
+	z-index: 2;
+}
 
 .styledTextDiv {
 	align-items: end;
@@ -565,41 +563,37 @@ p { white-space: nowrap; }
 	z-index: 2;
 }
 
-	.styledTextDiv .styledText, .styledTextDiv .styledTextShadow {
-		background-clip: text;
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background: linear-gradient(to top, #444444 0%, #ffffff 50%);
-		background-clip: border-box;
-		bottom: 0;
-		display: inline-block;
-		font-family: 'Geologica', sans-serif;
-		font-size: 30px;
-		font-weight: 800;
-		margin: 0;
-		padding: 0 5px;
-		position: relative;
-		text-align: right;
-		transition: 0.4s;
-		z-index: 3;
-	}
-
-	.styledTextDiv .styledTextShadow {
-		background: none;
-		text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
-		z-index: 2;
-		position: absolute;
-		margin-bottom: 12px;
-	}
-
-
-#panelOverColor {
-	opacity: 0.8;
+.styledTextDiv .styledText, .styledTextDiv .styledTextShadow {
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+	background-clip: text;
+	background-clip: border-box;
+	bottom: 0;
+	display: inline-block;
+	font-family: 'Geologica', sans-serif;
+	font-size: 30px;
+	font-weight: 800;
+	margin: 0;
+	padding: 0 5px;
+	position: relative;
+	text-align: right;
+	transition: 0.4s;
+	z-index: 3;
 }
 
-#panelBorders, #panelBottom, #panelChat {
-	opacity: 0.9;
+.styledTextDiv .styledTextShadow {
+	background: none;
+	margin-bottom: 12px;
+	position: absolute;
+	text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
+	z-index: 2;
 }
+
+
+#panelOverColor { opacity: 0.8; }
+
+#panelBorders, #panelBottom, #panelChat { opacity: 0.9; }
 
 
 @keyframes slide-up {

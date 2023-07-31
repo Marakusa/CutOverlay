@@ -289,7 +289,7 @@ internal static class Mmcq
         pq.Reverse();
 
         // calculate the actual colors
-        CMap cmap = new CMap();
+        CMap cmap = new();
         foreach (VBox vb in pq) cmap.Push(vb);
 
         return cmap;

@@ -2,21 +2,22 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using CutOverlay.App;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CutOverlay;
+namespace CutOverlay.Controllers;
 
 [Route("configuration")]
 [ApiController]
 public class ConfigurationController : ControllerBase
 {
-    public static Dictionary<string, string>? Configurations;
+    public static Dictionary<string, string?>? Configurations;
     private readonly IConfiguration _configuration;
 
     public ConfigurationController(IConfiguration configuration)
     {
         _configuration = configuration;
-        Configurations = new Dictionary<string, string>();
+        Configurations = new Dictionary<string, string?>();
         DecryptAndReadConfig();
     }
 
@@ -26,7 +27,7 @@ public class ConfigurationController : ControllerBase
         return Path.Combine(appDataPath, "config.json");
     }
 
-    private void EncryptAndSaveConfig(Dictionary<string, string> config)
+    private void EncryptAndSaveConfig(Dictionary<string, string?> config)
     {
         string configText = JsonSerializer.Serialize(config);
         byte[] salt = Encoding.UTF8.GetBytes(_configuration["EncryptionSalt"]);
@@ -46,10 +47,10 @@ public class ConfigurationController : ControllerBase
         System.IO.File.WriteAllBytes(GetConfigFilePath(), memoryStream.ToArray());
     }
 
-    private Dictionary<string, string>? DecryptAndReadConfig()
+    private Dictionary<string, string?>? DecryptAndReadConfig()
     {
         if (!System.IO.File.Exists(GetConfigFilePath()))
-            return new Dictionary<string, string>();
+            return new Dictionary<string, string?>();
 
         byte[] salt = Encoding.UTF8.GetBytes(_configuration["EncryptionSalt"]);
         byte[] key = new Rfc2898DeriveBytes(_configuration["EncryptionKey"], salt, 10000).GetBytes(32);
@@ -65,25 +66,31 @@ public class ConfigurationController : ControllerBase
         using StreamReader streamReader = new(cryptoStream);
         string decryptedConfigText = streamReader.ReadToEnd();
 
-        Configurations = JsonSerializer.Deserialize<Dictionary<string, string>>(decryptedConfigText);
+        Configurations = JsonSerializer.Deserialize<Dictionary<string, string?>>(decryptedConfigText);
         return Configurations;
     }
 
     [HttpPost]
-    public IActionResult SaveConfig([FromBody] Dictionary<string, string> config)
+    public async Task<IActionResult> SaveConfig([FromBody] Dictionary<string, string?> config)
     {
         try
         {
             bool spotifySettingsRefresh = false;
-            if (Configurations != null && config.ContainsKey("spotifyClientId") && Configurations.TryGetValue("spotifyClientId", out string? configuration))
+
+            if (Configurations != null && config.ContainsKey("spotifyClientId") &&
+                Configurations.TryGetValue("spotifyClientId", out string? configuration))
                 spotifySettingsRefresh = config["spotifyClientId"] != configuration;
-            if (Configurations != null && config.ContainsKey("spotifyClientSecret") && Configurations.TryGetValue("spotifyClientSecret", out string? configuration1))
-                spotifySettingsRefresh = config["spotifyClientSecret"] != configuration1;
+
+            if (!spotifySettingsRefresh)
+                if (Configurations != null && config.ContainsKey("spotifyClientSecret") &&
+                    Configurations.TryGetValue("spotifyClientSecret", out string? configuration1))
+                    spotifySettingsRefresh = config["spotifyClientSecret"] != configuration1;
 
             EncryptAndSaveConfig(config);
             DecryptAndReadConfig();
-            if (spotifySettingsRefresh)
-                Spotify.Instance?.Start();
+
+            if (spotifySettingsRefresh) await Spotify.Instance?.Start(Configurations)!;
+
             return Ok();
         }
         catch (Exception ex)
@@ -97,7 +104,7 @@ public class ConfigurationController : ControllerBase
     {
         try
         {
-            Dictionary<string, string>? config = DecryptAndReadConfig();
+            Dictionary<string, string?>? config = DecryptAndReadConfig();
             return Ok(config);
         }
         catch (Exception ex)

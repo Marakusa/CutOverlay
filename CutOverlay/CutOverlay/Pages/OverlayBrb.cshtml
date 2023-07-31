@@ -4,11 +4,11 @@
 @{
 }
 
-<div id=panelOverColor></div>
-<div id=panelOverColorGradient></div>
-<div id=startingHeaderDiv>
-    <p id=startingHeader style="font-size: 110px; top: -20px;">Be right back!</p>
-    <p id=startingHeaderShadow style="font-size: 110px; top: -20px;">Be right back!</p>
+<div id="panelOverColor"></div>
+<div id="panelOverColorGradient"></div>
+<div id="startingHeaderDiv">
+    <p id="startingHeader" style="font-size: 110px; top: -20px;">Be right back!</p>
+    <p id="startingHeaderShadow" style="font-size: 110px; top: -20px;">Be right back!</p>
 </div>
 
 <div id="panelBottomGradient" style="display: none;"></div>
@@ -41,7 +41,7 @@
                    Text = "HEART",
                    StyleId = "heartRate"
                })
-        @await Html.PartialAsync("_HeartRateText", new HeartRateModel())
+        @await Html.PartialAsync("_HeartRateText")
     </div>
 
     <div class="panelItem" style="width: 250px;">

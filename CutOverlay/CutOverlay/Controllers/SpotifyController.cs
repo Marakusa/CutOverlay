@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CutOverlay.App;
+using Microsoft.AspNetCore.Mvc;
 
-namespace CutOverlay;
+namespace CutOverlay.Controllers;
 
 [Route("spotify")]
 [ApiController]
