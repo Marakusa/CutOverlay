@@ -128,58 +128,58 @@ function emptyConfig() {
 }
 
 // Handle the music progress bar
-setInterval(function() {
-        if (progressData == null || newSong === "")
-            return;
+setInterval(function () {
+    if (progressData == null || newSong === "" || progressData.Progress === 0 || progressData.Total === 0)
+        return;
 
-        // Get the current timestamp
-        const currentTime = Math.floor(Date.now() / 1000);
+    // Get the current timestamp
+    const currentTime = Math.floor(Date.now() / 1000);
 
-        // Calculate the elapsed time since FetchTime
-        const elapsedSeconds = (progressData.Progress / 1000) + currentTime - progressData.FetchTime;
-        const elapsedMilliseconds = progressData.Progress + Date.now() - (progressData.FetchTime * 1000);
+    // Calculate the elapsed time since FetchTime
+    const elapsedSeconds = (progressData.Progress / 1000) + currentTime - progressData.FetchTime;
+    const elapsedMilliseconds = progressData.Progress + Date.now() - (progressData.FetchTime * 1000);
 
-        // Calculate the progress based on elapsed time
-        var progressPercentage = ((elapsedSeconds * 1000.0) / progressData.Total);
-        if (progressPercentage > 1.0)
-            progressPercentage = 1.0;
-        else if (progressPercentage < 0.0)
-            progressPercentage = 0.0;
+    // Calculate the progress based on elapsed time
+    var progressPercentage = ((elapsedSeconds * 1000.0) / progressData.Total);
+    if (progressPercentage > 1.0)
+        progressPercentage = 1.0;
+    else if (progressPercentage < 0.0)
+        progressPercentage = 0.0;
 
-        // Convert progress percentage to seconds
-        const adjustedProgress = Math.floor(progressPercentage * (progressData.Total / 1000));
+    // Convert progress percentage to seconds
+    const adjustedProgress = Math.floor(progressPercentage * (progressData.Total / 1000));
 
-        // Convert total to 0:00 format
-        const totalMinutes = Math.floor(progressData.Total / 60000);
-        const totalSeconds = Math.floor((progressData.Total - totalMinutes * 60000) / 1000);
-        const totalString = totalMinutes + ":" + (totalSeconds < 10 ? `0${totalSeconds}` : totalSeconds);
+    // Convert total to 0:00 format
+    const totalMinutes = Math.floor(progressData.Total / 60000);
+    const totalSeconds = Math.floor((progressData.Total - totalMinutes * 60000) / 1000);
+    const totalString = totalMinutes + ":" + (totalSeconds < 10 ? `0${totalSeconds}` : totalSeconds);
 
-        // Convert progress to 0:00 format
-        const progressMinutes = Math.floor((adjustedProgress) / 60);
-        const progressSeconds = Math.floor(((adjustedProgress) - progressMinutes * 60));
-        const progressString = progressMinutes + ":" + (progressSeconds < 10 ? `0${progressSeconds}` : progressSeconds);
+    // Convert progress to 0:00 format
+    const progressMinutes = Math.floor((adjustedProgress) / 60);
+    const progressSeconds = Math.floor(((adjustedProgress) - progressMinutes * 60));
+    const progressString = progressMinutes + ":" + (progressSeconds < 10 ? `0${progressSeconds}` : progressSeconds);
 
-        const progressText = progressString + " / " + totalString;
+    const progressText = progressString + " / " + totalString;
 
-        const progressBar = document.getElementById("progress");
-        if (progressBar != null) {
-            // Update the progress bar width
-            progressBar.style.width = ((elapsedMilliseconds / progressData.Total) * 100) + "%";
-        }
+    const progressBar = document.getElementById("progress");
+    if (progressBar != null) {
+        // Update the progress bar width
+        progressBar.style.width = ((elapsedMilliseconds / progressData.Total) * 100) + "%";
+    }
 
-        // Update the progress text
-        const progressTextElement = document.getElementById("progressText");
-        progressTextElement.innerHTML = progressText;
-        const progressTextShadowElement = document.getElementById("progressTextShadow");
-        progressTextShadowElement.innerHTML = progressText;
+    // Update the progress text
+    const progressTextElement = document.getElementById("progressText");
+    progressTextElement.innerHTML = progressText;
+    const progressTextShadowElement = document.getElementById("progressTextShadow");
+    progressTextShadowElement.innerHTML = progressText;
 
-        // Update the progress header text
-        document.getElementById("progressHeader").innerHTML = "Track progress";
-        document.getElementById("progressHeaderShadow").innerHTML = "Track progress";
+    // Update the progress header text
+    document.getElementById("progressHeader").innerHTML = "Track progress";
+    document.getElementById("progressHeaderShadow").innerHTML = "Track progress";
 
-        // Show progress text element
-        progressTextElement.parentElement.parentElement.style.display = null;
-    },
+    // Show progress text element
+    progressTextElement.parentElement.parentElement.style.display = null;
+},
     100);
 
 function displayData() {

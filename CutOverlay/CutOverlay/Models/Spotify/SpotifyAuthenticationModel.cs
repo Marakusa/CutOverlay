@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace CutOverlay.Models;
+namespace CutOverlay.Models.Spotify;
 
 public class SpotifyAuthenticationModel
 {

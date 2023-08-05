@@ -3,35 +3,20 @@ using System.Globalization;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
-using ColorThief;
 using CutOverlay.Models;
+using CutOverlay.Models.Spotify;
 using Newtonsoft.Json;
-using SkiaSharp;
-using Color = System.Drawing.Color;
 using Timer = System.Timers.Timer;
 
 namespace CutOverlay.App;
 
+[Overlay]
 public class Spotify : OverlayApp
 {
     private const string AuthorizationAddress = "https://accounts.spotify.com/authorize";
     private const string Scopes = "user-read-playback-state user-read-currently-playing user-modify-playback-state";
     private const string ResponseType = "code";
     internal static Spotify? Instance;
-
-    // http://garethrees.org/2007/11/14/pngcrush/
-    private readonly byte[] _blankImage =
-    {
-        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-        0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-        0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-        0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
-        0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
-        0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-        0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
-        0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
-        0x42, 0x60, 0x82
-    };
 
     private readonly string _callbackAddress = $"http://localhost:{Globals.Port}/spotify/callback";
     private Timer? _authorizationTimer;
@@ -49,29 +34,21 @@ public class Spotify : OverlayApp
 
         Instance = this;
 
+        HttpClient = new HttpClient();
+
         _authorizationTimer = null;
         _statusTimer = null;
     }
-
-    public override async Task Start(Dictionary<string, string?>? configurations)
+    
+    public override Task Start(Dictionary<string, string?>? configurations)
     {
         Console.WriteLine("Spotify app starting...");
-
-        string dataFolder = $"{Globals.GetAppDataPath()}data\\";
-
-        if (!Directory.Exists(dataFolder)) Directory.CreateDirectory(dataFolder);
-
-        string statusFile = $"{dataFolder}status.json";
-        string artworkPath = $"{dataFolder}cover.jpg";
-
-        await File.WriteAllTextAsync(statusFile, "{}");
-        SaveEmptyCover(artworkPath);
-
+        
         if (configurations == null ||
             !configurations.ContainsKey("spotifyClientId") || !configurations.ContainsKey("spotifyClientSecret") ||
             string.IsNullOrEmpty(configurations["spotifyClientId"]) ||
             string.IsNullOrEmpty(configurations["spotifyClientSecret"]))
-            return;
+            return Task.CompletedTask;
 
         _authorizationTimer?.Stop();
         _authorizationTimer = new Timer { Interval = 200000 };
@@ -98,6 +75,7 @@ public class Spotify : OverlayApp
         });
 
         Console.WriteLine("Spotify app started!");
+        return Task.CompletedTask;
     }
 
     public async Task UpdateAuthorizationAsync()
@@ -188,9 +166,9 @@ public class Spotify : OverlayApp
                 return;
             }
 
-            SpotifyPlaybackState? playbackState = JsonConvert.DeserializeObject<SpotifyPlaybackState>(content);
+            PlaybackState? playbackState = JsonConvert.DeserializeObject<PlaybackState>(content);
 
-            await SaveStateAsync(playbackState);
+            await StatusApp.Instance?.SaveStateAsync<Spotify>(playbackState, playbackState is not { IsPlaying: true } ? -1 : 5)!;
         }
         catch (Exception ex)
         {
@@ -198,119 +176,11 @@ public class Spotify : OverlayApp
         }
     }
 
-    private async Task SaveStateAsync(SpotifyPlaybackState? playbackState)
-    {
-        string dataFolder = $"{Globals.GetAppDataPath()}data\\";
-
-        if (!Directory.Exists(dataFolder)) Directory.CreateDirectory(dataFolder);
-
-        string statusFile = $"{dataFolder}status.json";
-        string artworkPath = $"{dataFolder}cover.jpg";
-        Color dominantColor = Color.Black;
-
-        File.Delete(artworkPath);
-
-        // Set empty if not playing
-        if (playbackState is { IsPlaying: false })
-        {
-            await File.WriteAllTextAsync(statusFile, "{}");
-            SaveEmptyCover(artworkPath);
-            return;
-        }
-
-        // Local image empty
-        if (playbackState?.Item is { IsLocal: true })
-        {
-            SaveEmptyCover(artworkPath);
-        }
-        // Download cover
-        else
-        {
-            string? coverUrl = playbackState?.Item?.Album?.Images?.First().Url;
-
-            if (!string.IsNullOrEmpty(coverUrl))
-                try
-                {
-                    byte[] imageBytes = await HttpClient?.GetByteArrayAsync(coverUrl)!;
-                    await File.WriteAllBytesAsync(artworkPath, imageBytes);
-
-                    SKImage? image = SKImage.FromEncodedData(artworkPath);
-                    SKBitmap? map = SKBitmap.FromImage(image);
-                    dominantColor = GetMostUsedColor(map);
-                    map.Dispose();
-                }
-                catch
-                {
-                    SaveEmptyCover(artworkPath);
-                }
-            else
-                SaveEmptyCover(artworkPath);
-        }
-
-        double r = dominantColor.R / 255.0;
-        double g = dominantColor.G / 255.0;
-        double b = dominantColor.B / 255.0;
-
-        OverlayState state = new()
-        {
-            Song = new OverlayStateSong
-            {
-                Artist = JoinArtists(playbackState?.Item?.Artists),
-                Name = playbackState?.Item?.Name,
-                Color = new OverlayStateSongColor
-                {
-                    Red = r,
-                    Green = g,
-                    Blue = b
-                }
-            },
-            Status = new OverlayStateStatus
-            {
-                FetchTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                //FetchTime = playbackState!.Timestamp / 1000,
-                Paused = !playbackState?.IsPlaying ?? false,
-                Progress = playbackState?.ProgressMs ?? 0,
-                Total = playbackState?.Item?.DurationMs ?? 0
-            }
-        };
-
-        string stateString = JsonConvert.SerializeObject(state);
-
-        await File.WriteAllTextAsync(statusFile, stateString);
-    }
-
-    private void SaveEmptyCover(string artworkPath)
-    {
-        File.WriteAllBytes(artworkPath, _blankImage);
-    }
-
-    private static string JoinArtists(IEnumerable<Artist>? artists)
-    {
-        if (artists == null) return "";
-        string output = artists.Aggregate("", (current, artist) => current + artist.Name + ";");
-        return output[..^1];
-    }
-
-    private static Color GetMostUsedColor(SKBitmap bitMap)
-    {
-        ColorThief.ColorThief colorThief = new();
-        QuantizedColor color = colorThief.GetColor(bitMap);
-        return Color.FromArgb(color.Color.R, color.Color.G, color.Color.B);
-    }
-
     public override void Unload()
     {
         try
         {
-            string dataFolder = $"{Globals.GetAppDataPath()}data\\";
-
-            if (!Directory.Exists(dataFolder)) Directory.CreateDirectory(dataFolder);
-
-            string statusFile = $"{dataFolder}status.json";
-            string artworkPath = $"{dataFolder}cover.jpg";
-
-            File.WriteAllText(statusFile, "{}");
-            SaveEmptyCover(artworkPath);
+            StatusApp.Instance?.ClearStatusFiles();
         }
         catch
         {

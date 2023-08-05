@@ -15,10 +15,6 @@ public class Artist
 public class Image
 {
     [JsonProperty("url")] public string? Url { get; set; }
-
-    [JsonProperty("height")] public int Height { get; set; }
-
-    [JsonProperty("width")] public int Width { get; set; }
 }
 
 public class Item
@@ -34,7 +30,7 @@ public class Item
     [JsonProperty("duration_ms")] public long DurationMs { get; set; }
 }
 
-public class SpotifyPlaybackState
+public class PlaybackState
 {
     [JsonProperty("timestamp")] public long Timestamp { get; set; }
 

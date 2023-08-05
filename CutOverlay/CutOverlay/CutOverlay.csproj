@@ -19,6 +19,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Models\BeatSaberPlus\BeatSaver\" />
     <Folder Include="public\icons\ico\" />
     <Folder Include="wwwroot\img\" />
   </ItemGroup>

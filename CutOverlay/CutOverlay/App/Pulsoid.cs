@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 
 namespace CutOverlay.App;
 
+[Overlay]
 public class Pulsoid : OverlayApp
 {
     internal static Pulsoid? Instance;
@@ -23,6 +24,8 @@ public class Pulsoid : OverlayApp
         }
 
         Instance = this;
+
+        HttpClient = new HttpClient();
 
         _socket = null;
     }

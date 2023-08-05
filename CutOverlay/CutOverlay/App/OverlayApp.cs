@@ -2,24 +2,16 @@
 
 namespace CutOverlay.App;
 
-public class OverlayApp : IDisposable
+public abstract class OverlayApp : IDisposable
 {
-    private protected readonly HttpClient? HttpClient;
-
-    public OverlayApp()
-    {
-        HttpClient = new HttpClient();
-    }
+    private protected HttpClient? HttpClient = null;
 
     public void Dispose()
     {
         Unload();
     }
-
-    public virtual Task Start(Dictionary<string, string?>? configurations)
-    {
-        return Task.CompletedTask;
-    }
+    
+    public abstract Task Start(Dictionary<string, string?>? configurations);
 
     private protected async Task<Dictionary<string, string?>?> FetchConfigurationsAsync()
     {

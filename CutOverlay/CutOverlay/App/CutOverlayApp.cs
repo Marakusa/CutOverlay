@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Reflection;
 
 namespace CutOverlay.App;
 
@@ -6,12 +7,20 @@ public class CutOverlayApp
 {
     public async Task Start()
     {
+        _ = new StatusApp();
+
         Dictionary<string, string?>? configurations = await FetchConfigurationsAsync();
 
-        Spotify spotify = new();
-        await spotify.Start(configurations);
-        Pulsoid pulsoid = new();
-        await pulsoid.Start(configurations);
+        // Get all classes with the Overlay attribute
+        IEnumerable<Type> overlays = Assembly.GetExecutingAssembly().GetTypes()
+            .Where(type => type.GetCustomAttributes(typeof(OverlayAttribute), true).Length > 0);
+
+        // Start the overlay apps
+        foreach (Type overlay in overlays)
+        {
+            OverlayApp instance = (OverlayApp)Activator.CreateInstance(overlay)!;
+            _ = instance.Start(configurations);
+        }
     }
 
     private static async Task<Dictionary<string, string?>?> FetchConfigurationsAsync()
