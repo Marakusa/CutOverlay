@@ -1,6 +1,6 @@
 ﻿@page
 @using CutOverlay.Models
-@model CutOverlay.Pages.IndexModel
+@model IndexModel
 @{
 }
 
@@ -19,19 +19,19 @@
 
             @await Html.PartialAsync("_Header", new TextModel
                    {
-                       Text = "Twitch Chat Integration"
-                   })
-            @await Html.PartialAsync("_Checkbox", new InputModel
-                   {
-                       Label = "Use Twitch Chat",
-                       Id = "twitchChat",
-                       Value = "false"
+                       Text = "Twitch"
                    })
             @await Html.PartialAsync("_TextField", new InputModel
                    {
                        Label = "Twitch Username",
                        Id = "twitchUsername",
                        Value = "marakusa"
+                   })
+            @await Html.PartialAsync("_Checkbox", new InputModel
+                   {
+                       Label = "Use Twitch Chat",
+                       Id = "twitchChat",
+                       Value = "false"
                    })
 
             <hr/>

@@ -2,24 +2,21 @@
 using System.Text;
 using CutOverlay.Models;
 using CutOverlay.Models.BeatSaberPlus;
-using CutOverlay.Models.BeatSaberPlus.App;
 using CutOverlay.Models.BeatSaberPlus.BeatSaver;
 using Newtonsoft.Json;
-using Image = CutOverlay.Models.Image;
 
-namespace CutOverlay.App;
+namespace CutOverlay.App.Overlay;
 
 [Overlay]
 public class BeatSaberPlus : OverlayApp
 {
-    internal static BeatSaberPlus? Instance;
-
     private const int BufferSize = 4096;
-    private CancellationTokenSource? _cancellationTokenSource;
-    private int _reconnectInterval = 1000;
     private const string WebsocketAddress = "ws://localhost:2947/socket";
     private const string MapDataUrl = "https://api.beatsaver.com/maps/hash/{0}";
-    
+    private const int ReconnectInterval = 10000;
+    internal static BeatSaberPlus? Instance;
+    private CancellationTokenSource? _cancellationTokenSource;
+
     public BeatSaberPlus()
     {
         if (Instance != null)
@@ -33,48 +30,41 @@ public class BeatSaberPlus : OverlayApp
         HttpClient = new HttpClient();
     }
 
+    public override OverlayApp? GetInstance()
+    {
+        return Instance;
+    }
+
     public override async Task Start(Dictionary<string, string?>? configurations)
     {
         _cancellationTokenSource = new CancellationTokenSource();
-        
-        while (_cancellationTokenSource is { Token.IsCancellationRequested: false })
-        {
-            try
-            {
-                await SetupWebSocket();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"WebSocket error: {ex.Message}");
-                await Task.Delay(3000); // Wait for 3 seconds before attempting reconnection
-            }
-        }
+
+        Console.WriteLine("BSPlus web socket setting up...");
+
+        while (_cancellationTokenSource is { Token.IsCancellationRequested: false }) await SetupWebSocket();
     }
 
     private async Task SetupWebSocket()
     {
-        Console.WriteLine("BSPlus web socket setting up...");
-
         using ClientWebSocket webSocket = new();
         try
         {
             await webSocket.ConnectAsync(new Uri(WebsocketAddress), CancellationToken.None);
 
             if (webSocket.State == WebSocketState.Open)
-                Console.WriteLine("BeatSaberPlus app started!");
+                Console.WriteLine("BeatSaberPlus app started and connected!");
             else
                 throw new Exception("Failed to connect to web socket");
 
-            while (_cancellationTokenSource is { Token.IsCancellationRequested: false }) await ReceiveMessage(webSocket, _cancellationTokenSource);
+            while (_cancellationTokenSource is { Token.IsCancellationRequested: false })
+                await ReceiveMessage(webSocket, _cancellationTokenSource);
         }
         catch (Exception ex)
         {
-            Console.WriteLine("WebSocket error: " + ex.Message);
+            if (ex.Message != "Unable to connect to the remote server")
+                Console.WriteLine("WebSocket error: " + ex.Message);
             // Attempt reconnection after a certain interval
-            await Task.Delay(_reconnectInterval);
-            // Increase the reconnect interval for the next attempt
-            _reconnectInterval = Math.Min(_reconnectInterval * 2, 60000); // Max 1 minute
-            _ = SetupWebSocket();
+            await Task.Delay(ReconnectInterval);
         }
     }
 
@@ -90,8 +80,7 @@ public class BeatSaberPlus : OverlayApp
             if (buffer.Array == null) continue;
             string data = Encoding.UTF8.GetString(buffer.Array, 0, result.Count);
             receivedData.Append(data);
-        }
-        while (!result.EndOfMessage);
+        } while (!result.EndOfMessage);
 
         try
         {
@@ -105,19 +94,23 @@ public class BeatSaberPlus : OverlayApp
                     case "handshake":
                         break;
                     case "event":
-                        BeatSaberPlusWebHookEvent? eventData = JsonConvert.DeserializeObject<BeatSaberPlusWebHookEvent>(message);
+                        BeatSaberPlusWebHookEvent? eventData =
+                            JsonConvert.DeserializeObject<BeatSaberPlusWebHookEvent>(message);
                         switch (eventData?.Event)
                         {
                             case "gameState":
-                                BeatSaberPlusWebHookGameState? gameState = JsonConvert.DeserializeObject<BeatSaberPlusWebHookGameState>(message);
+                                BeatSaberPlusWebHookGameState? gameState =
+                                    JsonConvert.DeserializeObject<BeatSaberPlusWebHookGameState>(message);
                                 if (gameState?.GameStateChanged == "Menu")
                                 {
-                                    await StatusApp.Instance?.SaveStateAsync<BeatSaberPlus>(new PlaybackState(), -1)!;
-                                    StatusApp.Instance.SaveEmptyCover();
+                                    await Status.Instance?.SaveStateAsync<BeatSaberPlus>(new PlaybackState(), -1)!;
+                                    Status.Instance.SaveEmptyCover();
                                 }
+
                                 break;
                             case "mapInfo":
-                                BeatSaberPlusWebHookMapInfoChanged? mapInfo = JsonConvert.DeserializeObject<BeatSaberPlusWebHookMapInfoChanged>(message);
+                                BeatSaberPlusWebHookMapInfoChanged? mapInfo =
+                                    JsonConvert.DeserializeObject<BeatSaberPlusWebHookMapInfoChanged>(message);
                                 PlaybackState playbackState = new()
                                 {
                                     Timestamp = 0,
@@ -154,7 +147,8 @@ public class BeatSaberPlus : OverlayApp
 
                                 try
                                 {
-                                    HttpResponseMessage response = await HttpClient?.GetAsync(string.Format(MapDataUrl, id))!;
+                                    HttpResponseMessage response =
+                                        await HttpClient?.GetAsync(string.Format(MapDataUrl, id))!;
 
                                     if (!response.IsSuccessStatusCode)
                                     {
@@ -164,7 +158,7 @@ public class BeatSaberPlus : OverlayApp
 
                                     string json = await response.Content.ReadAsStringAsync();
                                     BeatSaverMapData? mapData = JsonConvert.DeserializeObject<BeatSaverMapData>(json);
-                                    
+
                                     if (mapData is { Versions.Count: > 0 })
                                     {
                                         string? cover = mapData.Versions[0].CoverUrl;
@@ -180,7 +174,7 @@ public class BeatSaberPlus : OverlayApp
                                     // ignore
                                 }
 
-                                await StatusApp.Instance?.SaveStateAsync<BeatSaberPlus>(playbackState, 10)!;
+                                await Status.Instance?.SaveStateAsync<BeatSaberPlus>(playbackState, 10)!;
                                 break;
                             case "score":
                                 /*BeatSaberPlusWebHookScoreEvent? scoreEvent = JsonConvert.DeserializeObject<BeatSaberPlusWebHookScoreEvent>(message);
@@ -196,6 +190,7 @@ public class BeatSaberPlus : OverlayApp
                                 await File.WriteAllTextAsync(@Application.StartupPath + @"\Snip_BSPlusScore.txt", JsonConvert.SerializeObject(_currentScore));*/
                                 break;
                         }
+
                         break;
                 }
             }
@@ -210,13 +205,15 @@ public class BeatSaberPlus : OverlayApp
     {
         try
         {
-            StatusApp.Instance?.ClearStatusFiles();
+            Status.Instance?.ClearStatusFiles();
         }
         catch
         {
             // ignored
         }
-        
+
         HttpClient?.Dispose();
+
+        Console.WriteLine("BeatSaberPlus app unloaded");
     }
 }

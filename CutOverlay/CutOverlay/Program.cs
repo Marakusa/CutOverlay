@@ -1,4 +1,4 @@
-using CutOverlay.App;
+using CutOverlay.App.Overlay;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
 using Newtonsoft.Json;
@@ -54,21 +54,15 @@ public class Program
         BrowserWindow? window =
             await Electron.WindowManager.CreateWindowAsync(options, $"http://localhost:{Globals.Port}/");
 
-        App.CutOverlayApp cutOverlay = new();
-        _ = cutOverlay.Start();
+        App.CutOverlay cutOverlay = new();
+        OverlayApp[] overlays = await cutOverlay.Start();
 
         window.OnClose += () =>
         {
-            if (Spotify.Instance != null)
+            foreach (OverlayApp overlay in overlays)
             {
-                Spotify.Instance.Unload();
-                Spotify.Instance = null;
-            }
-
-            if (Pulsoid.Instance != null)
-            {
-                Pulsoid.Instance.Unload();
-                Pulsoid.Instance = null;
+                OverlayApp? instance = overlay.GetInstance();
+                instance?.Unload();
             }
         };
 

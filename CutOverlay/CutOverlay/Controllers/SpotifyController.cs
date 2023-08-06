@@ -1,4 +1,4 @@
-﻿using CutOverlay.App;
+﻿using CutOverlay.App.Overlay;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CutOverlay.Controllers;
@@ -8,21 +8,31 @@ namespace CutOverlay.Controllers;
 public class SpotifyController : ControllerBase
 {
     [HttpGet("callback")]
-    public IActionResult SpotifyCallback([FromQuery(Name = "code")] string accessToken)
+    public IActionResult SpotifyCallback([FromQuery(Name = "code")] string accessToken,
+        [FromQuery(Name = "state")] string state)
     {
         try
         {
-            if (Spotify.Instance != null)
-            {
-                Spotify.Instance.AccessToken = accessToken;
-                _ = Spotify.Instance.UpdateAuthorizationAsync();
-            }
+            if (Spotify.Instance == null)
+                throw new Exception("Spotify app was not started");
 
-            return Ok("Authorization successful! This tab can now be closed.");
+            Spotify.Instance.AuthCallback(accessToken, state);
+
+            return new ContentResult
+            {
+                Content = "<div>Authorization successful! This tab can now be closed.</div><script>setTimeout(() => {close();},3000);</script>",
+                ContentType = "text/html",
+                StatusCode = 200
+            };
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return new ContentResult
+            {
+                Content = $"<div>{ex.Message}</div>",
+                ContentType = "text/html",
+                StatusCode = 400
+            };
         }
     }
 

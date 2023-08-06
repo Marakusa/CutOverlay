@@ -1,3 +1,4 @@
-﻿@model CutOverlay.Models.InputModel
+﻿@using InputModel = CutOverlay.Models.InputModel
+@model InputModel
 
 <span onclick="@Model.OnClick" id="@Model.Id" class="toolboxButton" style="background-image: url('../img/@Model.Value')"></span>

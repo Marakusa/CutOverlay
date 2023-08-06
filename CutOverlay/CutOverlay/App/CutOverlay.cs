@@ -1,13 +1,14 @@
-﻿using Newtonsoft.Json;
-using System.Reflection;
+﻿using System.Reflection;
+using CutOverlay.App.Overlay;
+using Newtonsoft.Json;
 
 namespace CutOverlay.App;
 
-public class CutOverlayApp
+public class CutOverlay
 {
-    public async Task Start()
+    public async Task<OverlayApp[]> Start()
     {
-        _ = new StatusApp();
+        _ = new Status();
 
         Dictionary<string, string?>? configurations = await FetchConfigurationsAsync();
 
@@ -15,12 +16,24 @@ public class CutOverlayApp
         IEnumerable<Type> overlays = Assembly.GetExecutingAssembly().GetTypes()
             .Where(type => type.GetCustomAttributes(typeof(OverlayAttribute), true).Length > 0);
 
+        List<OverlayApp> overlayApps = new();
+
         // Start the overlay apps
         foreach (Type overlay in overlays)
         {
-            OverlayApp instance = (OverlayApp)Activator.CreateInstance(overlay)!;
-            _ = instance.Start(configurations);
+            try
+            {
+                OverlayApp instance = (OverlayApp)Activator.CreateInstance(overlay)!;
+                _ = instance.Start(configurations);
+                overlayApps.Add(instance);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to start {overlay.FullName} app: {ex}");
+            }
         }
+
+        return overlayApps.ToArray();
     }
 
     private static async Task<Dictionary<string, string?>?> FetchConfigurationsAsync()

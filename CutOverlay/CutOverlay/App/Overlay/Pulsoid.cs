@@ -3,7 +3,7 @@ using System.Text;
 using CutOverlay.Models;
 using Newtonsoft.Json;
 
-namespace CutOverlay.App;
+namespace CutOverlay.App.Overlay;
 
 [Overlay]
 public class Pulsoid : OverlayApp
@@ -28,6 +28,11 @@ public class Pulsoid : OverlayApp
         HttpClient = new HttpClient();
 
         _socket = null;
+    }
+
+    public override OverlayApp? GetInstance()
+    {
+        return Instance;
     }
 
     public override Task Start(Dictionary<string, string?>? configurations)
@@ -112,5 +117,7 @@ public class Pulsoid : OverlayApp
 
         _socket?.Dispose();
         HttpClient?.Dispose();
+
+        Console.WriteLine("Pulsoid app unloaded");
     }
 }

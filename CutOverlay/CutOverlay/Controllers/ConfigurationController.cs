@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using CutOverlay.App;
+using CutOverlay.App.Overlay;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CutOverlay.Controllers;
@@ -86,10 +86,47 @@ public class ConfigurationController : ControllerBase
                     Configurations.TryGetValue("spotifyClientSecret", out string? configuration1))
                     spotifySettingsRefresh = config["spotifyClientSecret"] != configuration1;
 
+            bool twitchSettingsRefresh = false;
+
+            if (Configurations != null && config.ContainsKey("twitchUsername") &&
+                Configurations.TryGetValue("twitchUsername", out string? configuration2))
+                twitchSettingsRefresh = config["twitchUsername"] != configuration2;
+            
+            bool pulsoidSettingsRefresh = false;
+
+            if (Configurations != null && config.ContainsKey("pulsoid") &&
+                Configurations.TryGetValue("pulsoidAccessToken", out string? configuration3))
+                pulsoidSettingsRefresh = config["pulsoidAccessToken"] != configuration3;
+            
             EncryptAndSaveConfig(config);
             DecryptAndReadConfig();
 
-            if (spotifySettingsRefresh) await Spotify.Instance?.Start(Configurations)!;
+            if (spotifySettingsRefresh)
+            {
+                Spotify.Instance?.Unload();
+                Spotify.Instance?.Dispose();
+                Spotify.Instance = null;
+                _ = new Spotify();
+                await Spotify.Instance?.Start(Configurations)!;
+            }
+
+            if (twitchSettingsRefresh)
+            {
+                Twitch.Instance?.Unload();
+                Twitch.Instance?.Dispose();
+                Twitch.Instance = null;
+                _ = new Twitch();
+                await Twitch.Instance?.Start(Configurations)!;
+            }
+
+            if (pulsoidSettingsRefresh)
+            {
+                Pulsoid.Instance?.Unload();
+                Pulsoid.Instance?.Dispose();
+                Pulsoid.Instance = null;
+                _ = new Pulsoid();
+                await Pulsoid.Instance?.Start(Configurations)!;
+            }
 
             return Ok();
         }
