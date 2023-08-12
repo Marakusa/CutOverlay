@@ -9,6 +9,7 @@
 - 🎧 Real time Spotify status
   - 🎨 Dynamic color theme from album cover art
 - ❤️ Pulsoid heart rate integration
+- ⚔️ BeatSaberPlus status
 - 🕰️ Clock with timezone detection
 
 ## Building from the source
