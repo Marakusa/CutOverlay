@@ -49,6 +49,7 @@ public class Program
         string content = await File.ReadAllTextAsync(dataFolder);
         var manifest = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
         Globals.Port = int.Parse(manifest?["aspCoreBackendPort"].ToString() ?? "0");
+        Globals.ChatWebSocketPort = 37101;
 
         // Open the Electron-Window here
         BrowserWindow? window =

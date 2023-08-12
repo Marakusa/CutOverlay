@@ -3,6 +3,7 @@
 public static class Globals
 {
     public static int Port { get; set; }
+    public static int ChatWebSocketPort { get; set; }
 
     public static string GetAppDataPath()
     {

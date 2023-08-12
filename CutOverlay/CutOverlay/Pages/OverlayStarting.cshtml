@@ -58,6 +58,14 @@
     </div>
 </div>
 
+<div id="panel-message-content" class="panelMessage">
+    @await Html.PartialAsync("_StylizedText", new TextModel
+           {
+               Text = "",
+               StyleId = "panelMessageContentSpan"
+           })
+</div>
+
 <!--img id="imageDefault" src="img/cover-shadow.png" alt=""-->
 
 <div id="statusDiv">

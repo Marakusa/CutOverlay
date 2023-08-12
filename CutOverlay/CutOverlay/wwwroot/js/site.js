@@ -114,7 +114,7 @@ function checkUpdate() {
         displayData();
     }
 }
-setInterval(checkUpdate, 500);
+setInterval(checkUpdate, 2000);
 
 function fetchFollows() {
     try {
@@ -124,8 +124,11 @@ function fetchFollows() {
                 res.json().then((data) => {
                     const followers = data.Followers;
                     followersSince = data.FetchTime;
-                    for (let i = followers.length - 1; i >= 0; i--) {
-                        console.log(followers[i]);
+
+                    if (followers.length > 0) {
+                        for (let i = followers.length - 1; i >= 0; i--) {
+                            alertMessage(followers[i] + " has joined the foxxos!");
+                        }
                     }
                 });
             } else {
@@ -135,8 +138,92 @@ function fetchFollows() {
     } catch (error) {
         console.error("An error occurred while fetching new followers");
     }
+    setTimeout(() => {
+        fetchFollows();
+    }, 3000);
 }
-setInterval(fetchFollows, 3000);
+fetchFollows();
+
+var alerts = [];
+
+function alertLoop() {
+    try {
+        if (alerts.length > 0) {
+            const message = alerts[0];
+            showAlertMessage(message);
+        }
+    } catch (ex) {
+        // ignored
+    }
+
+    let removed = false;
+    if (alerts.length > 0) {
+        removed = true;
+        alerts.shift();
+    }
+
+    if (removed) {
+        setTimeout(() => {
+                alertLoop();
+            },
+            4500);
+    } else {
+        setTimeout(() => {
+                alertLoop();
+            },
+            500);
+    }
+}
+
+alertLoop();
+
+function alertMessage(message) {
+    alerts.push(message);
+}
+
+function showAlertMessage(message) {
+    const statusDiv = document.getElementById("statusDiv");
+    const panelItems = document.getElementsByClassName("panelItem");
+    const messagePanel = document.getElementById("panel-message-content");
+    const messageContentDiv = document.getElementById("panelMessageContentSpanDiv");
+    const messageContent = document.getElementById("panelMessageContentSpan");
+    const messageContentShadow = document.getElementById("panelMessageContentSpanShadow");
+
+    messageContent.textContent = message;
+    messageContentShadow.textContent = message;
+
+    messagePanel.style.display = "block";
+    messagePanel.style.opacity = "1";
+
+    // Slide in the message
+    messageContentDiv.style.animation = "slideInAlertMessage 0.5s ease-out forwards";
+
+    for (let i = 0; i < panelItems.length; i++) {
+        panelItems[i].style.opacity = "0";
+    }
+    statusDiv.style.opacity = "0";
+
+    setTimeout(() => {
+        // Slide out the message
+        messageContentDiv.style.left = "100%";
+        messageContentDiv.style.animation = "slideOutAlertMessage 0.5s ease-in forwards";
+
+        // Fade out the panel
+        messagePanel.style.opacity = "0";
+
+        setTimeout(() => {
+            // Reset styles and hide the panel
+            messagePanel.style.display = "none";
+            messageContentDiv.style.left = "-100%";
+            messageContentDiv.style.animation = "";
+
+            for (let i = 0; i < panelItems.length; i++) {
+                panelItems[i].style.opacity = "1";
+            }
+            statusDiv.style.opacity = "1";
+        }, 500);
+    }, 3500); // Stay for 3 seconds + slide in animation duration
+}
 
 function emptyConfig() {
     newArtist = "";
@@ -206,7 +293,7 @@ setInterval(function() {
             console.error(ex);
         }
     },
-    100);
+    500);
 
 function displayData() {
     if (newSong == null) newSong = "";
@@ -368,7 +455,7 @@ setInterval(() => {
             const response = fetch("/pulsoid/status", { method: "GET" });
             response.then((res) => {
                 if (res.ok) {
-                    res.json().then((status) => {
+                    res.text((status) => {
                         if (status == null || status === "") {
                             heartRateElement.innerText = "";
                             heartRateElementShadow.innerText = "";
@@ -378,7 +465,6 @@ setInterval(() => {
                         }
                     });
                 } else {
-                    console.error("An error occurred while fetching Spotify status");
                     heartRateElement.innerText = "";
                     heartRateElementShadow.innerText = "";
                 }
@@ -389,4 +475,4 @@ setInterval(() => {
             heartRateElementShadow.innerText = "";
         }
     },
-    500);
+    5000);

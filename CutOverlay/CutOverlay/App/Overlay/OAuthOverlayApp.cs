@@ -113,7 +113,7 @@ public abstract class OAuthOverlayApp : OverlayApp
                         Encoding.UTF8.GetBytes(
                             $"{_clientId}:{_clientSecret}")));
             }
-            
+
             HttpResponseMessage response = await HttpClient!.SendAsync(request);
             string content = await response.Content.ReadAsStringAsync();
 

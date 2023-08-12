@@ -5,7 +5,7 @@ namespace CutOverlay.App.Overlay;
 public abstract class OverlayApp : IDisposable
 {
     private protected HttpClient? HttpClient = null;
-    
+
     public void Dispose()
     {
         Unload();

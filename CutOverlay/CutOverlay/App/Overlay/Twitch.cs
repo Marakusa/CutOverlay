@@ -1,13 +1,12 @@
-﻿using ElectronNET.API;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using CutOverlay.Models.Twitch;
 using Newtonsoft.Json;
 using TwitchLib.Api;
-using TwitchLib.Api.Auth;
 using TwitchLib.Api.Core.Enums;
 using TwitchLib.Api.Helix.Models.Channels.GetChannelFollowers;
-using TwitchLib.Api.Helix.Models.Users.GetUserFollows;
+using TwitchLib.Api.Helix.Models.Chat.Badges;
+using TwitchLib.Api.Helix.Models.Chat.Badges.GetChannelChatBadges;
 using TwitchLib.Api.Helix.Models.Users.GetUsers;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
@@ -16,7 +15,6 @@ using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Events;
-using Timer = System.Timers.Timer;
 
 namespace CutOverlay.App.Overlay;
 
@@ -24,14 +22,35 @@ namespace CutOverlay.App.Overlay;
 public class Twitch : OverlayApp
 {
     private const string ClientId = "nrlnctz147p5v5xwy2rhjlas2afh3s";
-    private string _stateToken = "";
 
     private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private const string AuthorizationAddress = "https://id.twitch.tv/oauth2/authorize";
+    private const string ResponseType = "token";
 
-    private static readonly Random Random = new(DateTime.Now.Second + DateTime.Now.DayOfYear + DateTime.Now.Year + DateTime.Now.Millisecond);
+    private const string Scopes =
+        "chat%3Aread+whispers%3Aread+moderation%3Aread+moderator%3Aread%3Afollowers+user%3Aread%3Aemail";
+
+    private static readonly Random Random =
+        new(DateTime.Now.Second + DateTime.Now.DayOfYear + DateTime.Now.Year + DateTime.Now.Millisecond);
 
     internal static Twitch? Instance;
-    
+
+    private static TwitchAPI? _twitchApi;
+    private static FollowerService? _followerService;
+
+    private readonly string _callbackAddress = $"http://localhost:{Globals.Port}/twitch/callback";
+
+    private readonly List<ChannelFollower> _followers = new();
+
+    private readonly TwitchChatWebSocket? _twitchChat;
+    private string? _accessToken;
+    private Dictionary<string, string?>? _configurations;
+    private DateTime _lastFetch = DateTime.UnixEpoch;
+    private string _stateToken = "";
+
+    private TwitchClient? _twitchBotClient;
+    private List<BadgeEmoteSet> _badges;
+
     public Twitch()
     {
         if (Instance != null)
@@ -43,27 +62,13 @@ public class Twitch : OverlayApp
         Instance = this;
 
         HttpClient = new HttpClient();
+        _twitchChat = new TwitchChatWebSocket();
 
         _accessToken = null;
         _twitchBotClient = null;
         _twitchApi = null;
         _followerService = null;
     }
-    
-    private readonly string _callbackAddress = $"http://localhost:{Globals.Port}/twitch/callback";
-    private const string AuthorizationAddress = "https://id.twitch.tv/oauth2/authorize";
-    private const string ResponseType = "token";
-    private const string Scopes = "chat%3Aread+whispers%3Aread+moderation%3Aread+moderator%3Aread%3Afollowers+user%3Aread%3Aemail";
-
-    private TwitchClient? _twitchBotClient;
-    private Dictionary<string, string?>? _configurations;
-
-    private static TwitchAPI? _twitchApi;
-    private static FollowerService? _followerService;
-    private string? _accessToken;
-
-    private readonly List<ChannelFollower> _followers = new();
-    private DateTime _lastFetch = DateTime.UnixEpoch;
 
     public override OverlayApp? GetInstance()
     {
@@ -78,7 +83,7 @@ public class Twitch : OverlayApp
 
         if (string.IsNullOrEmpty(_configurations?["twitchUsername"]))
             return Task.CompletedTask;
-        
+
         SetupOAuth(ClientId);
 
         Console.WriteLine("Twitch app started!");
@@ -129,6 +134,7 @@ public class Twitch : OverlayApp
         _twitchBotClient.OnJoinedChannel += OnJoinedChannel;
         _twitchBotClient.OnNewSubscriber += OnNewSubscriber;
         _twitchBotClient.OnRaidNotification += OnRaidNotification;
+        _twitchBotClient.OnMessageReceived += OnMessageReceived;
 
         _twitchBotClient.Connect();
 
@@ -147,22 +153,30 @@ public class Twitch : OverlayApp
             }
         };
 
-        _followerService = new FollowerService(_twitchApi, 5, invokeEventsOnStartup: true);
+        _followerService = new FollowerService(_twitchApi, 5, invokeEventsOnStartup: false);
         _followerService.OnNewFollowersDetected += OnNewFollowers;
         _followerService.OnServiceStarted += OnFollowerServiceStarted;
 
-        GetUsersResponse? users = await _twitchApi.Helix.Users.GetUsersAsync();
+        GetUsersResponse? users = await _twitchApi.Helix.Users.GetUsersAsync(logins: new List<string>
+        {
+            _configurations?["twitchUsername"] ?? ""
+        });
         _followerService.SetChannelsById(new List<string>
         {
             users.Users[0].Id
         });
+        _badges = (await _twitchApi.Helix.Chat.GetChannelChatBadgesAsync(users.Users[0].Id)).EmoteSet.ToList();
+        _badges.AddRange((await _twitchApi.Helix.Chat.GetGlobalChatBadgesAsync()).EmoteSet.ToList());
 
         _followerService.ClearCache();
         _followerService.Start();
+
+        _twitchChat?.Start(_configurations?["twitchUsername"], users.Users[0].Id);
     }
 
     public override void Unload()
     {
+        _twitchChat?.Stop();
         _twitchBotClient?.Disconnect();
         _followerService?.Stop();
 
@@ -174,6 +188,54 @@ public class Twitch : OverlayApp
         _followerService = null;
 
         Console.WriteLine("Twitch app unloaded");
+    }
+
+    private void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
+    {
+        UserChatMessage message = new()
+        {
+            Message = e.ChatMessage.Message,
+            DisplayName = e.ChatMessage.DisplayName,
+            UserColor = e.ChatMessage.ColorHex,
+            UserBadges = new List<string>(),
+            Flags = new Flags
+            {
+                Broadcaster = e.ChatMessage.IsBroadcaster,
+                Founder = false,
+                Highlighted = e.ChatMessage.IsHighlighted,
+                Mod = e.ChatMessage.IsModerator,
+                Subscriber = e.ChatMessage.IsSubscriber,
+                Vip = e.ChatMessage.IsVip
+            },
+            MessageEmotes = new List<EmoteData>()
+        };
+
+        // Set badges
+        foreach (BadgeVersion badgeVersion in from badge in e.ChatMessage.Badges
+                 let index = _badges.FindIndex(f => f.SetId == badge.Key)
+                 where index >= 0
+                 select _badges[index].Versions.FirstOrDefault(f => f.Id.ToString() == badge.Value, null)
+                 into badgeVersion
+                 where badgeVersion?.ImageUrl1x != null
+                 select badgeVersion)
+        {
+            message.UserBadges.Add(badgeVersion.ImageUrl4x);
+        }
+
+        // Set emotes
+        foreach (EmoteData emoteData in e.ChatMessage.EmoteSet.Emotes.Select(emote => new EmoteData
+                 {
+                     Url = emote.ImageUrl,
+                     StartIndex = emote.StartIndex,
+                     EndIndex = emote.EndIndex
+                 }))
+        {
+            emoteData.Url =
+                $"https://static-cdn.jtvnw.net/emoticons/v2/{emoteData.Url?.Split("/")[5]}/default/light/2.0";
+            message.MessageEmotes.Add(emoteData);
+        }
+
+        _ = _twitchChat?.SendMessageToAllAsync(JsonConvert.SerializeObject(message));
     }
 
     private void OnError(object? sender, OnErrorEventArgs e)
@@ -188,12 +250,14 @@ public class Twitch : OverlayApp
 
     private void OnNewSubscriber(object? sender, OnNewSubscriberArgs e)
     {
-        Console.WriteLine($"New subscriber alert! User: {e.Subscriber.DisplayName}, Sub Plan: {e.Subscriber.SubscriptionPlan}");
+        Console.WriteLine(
+            $"New subscriber alert! User: {e.Subscriber.DisplayName}, Sub Plan: {e.Subscriber.SubscriptionPlan}");
     }
 
     private void OnRaidNotification(object? sender, OnRaidNotificationArgs e)
     {
-        Console.WriteLine($"Raid alert! User: {e.RaidNotification.DisplayName}, Raid Count: {e.RaidNotification.MsgParamViewerCount}");
+        Console.WriteLine(
+            $"Raid alert! User: {e.RaidNotification.DisplayName}, Raid Count: {e.RaidNotification.MsgParamViewerCount}");
     }
 
     private void OnFollowerServiceStarted(object? sender, OnServiceStartedArgs e)
@@ -203,10 +267,7 @@ public class Twitch : OverlayApp
 
     private void OnNewFollowers(object? sender, OnNewFollowersDetectedArgs e)
     {
-        foreach (ChannelFollower follower in e.NewFollowers)
-        {
-            _followers.Add(follower);
-        }
+        foreach (ChannelFollower follower in e.NewFollowers) _followers.Add(follower);
 
         _lastFetch = DateTime.UtcNow;
     }
@@ -224,5 +285,59 @@ public class Twitch : OverlayApp
             Followers = list,
             FetchTime = _lastFetch.ToString("yyyy-MM-dd'T'HH.mm.ss'Z'")
         };
+    }
+
+    public class UserChatMessage
+    {
+        [JsonProperty("displayName")]
+        public string? DisplayName { get; set; }
+
+        [JsonProperty("message")]
+        public string? Message { get; set; }
+
+        [JsonProperty("messageEmotes")]
+        public List<EmoteData>? MessageEmotes { get; set; }
+
+        [JsonProperty("userColor")]
+        public string? UserColor { get; set; }
+
+        [JsonProperty("userBadges")]
+        public List<string>? UserBadges { get; set; }
+
+        [JsonProperty("flags")]
+        public Flags? Flags { get; set; }
+    }
+
+    public class EmoteData
+    {
+        [JsonProperty("url")]
+        public string? Url { get; set; }
+
+        [JsonProperty("startIndex")]
+        public int StartIndex { get; set; }
+
+        [JsonProperty("endIndex")]
+        public int EndIndex { get; set; }
+    }
+
+    public class Flags
+    {
+        [JsonProperty("highlighted")]
+        public bool Highlighted { get; set; }
+
+        [JsonProperty("broadcaster")]
+        public bool Broadcaster { get; set; }
+
+        [JsonProperty("mod")]
+        public bool Mod { get; set; }
+
+        [JsonProperty("vip")]
+        public bool Vip { get; set; }
+
+        [JsonProperty("subscriber")]
+        public bool Subscriber { get; set; }
+
+        [JsonProperty("founder")]
+        public bool Founder { get; set; }
     }
 }

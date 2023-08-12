@@ -2,11 +2,11 @@
 const MESSAGE_EXPIRATION_TIME = 15000; // Message expiration time in milliseconds
 var removingMessages = [];
 
-function addMessage(username, message, userColor, flags, extra) {
+function addMessage(username, message, userColor, flags, userBadges) {
     const chatContainers = document.getElementsByClassName("chat-messages");
 
     for (let i = 0; i < chatContainers.length; i++) {
-        let messageElement = document.createElement("div");
+        const messageElement = document.createElement("div");
         messageElement.classList.add("message");
         if (flags.highlighted) {
             messageElement.classList.add("highlighted");
@@ -16,36 +16,14 @@ function addMessage(username, message, userColor, flags, extra) {
                 `linear-gradient(-60deg, rgba(${rgb.r},${rgb.g},${rgb.b},0.5) 0%, rgba(${rgb.r},${rgb.g},${rgb.b
                 },0.2) 100%)`;
         }
-        if (flags.broadcaster) {
+
+        for (let j = 0; j < userBadges.length; j++) {
             let badgeElement = document.createElement("span");
             badgeElement.classList.add("badge");
-            badgeElement.classList.add("broadcaster");
+            badgeElement.style.content = "url(\"" + userBadges[j] + "\")";
             messageElement.appendChild(badgeElement);
         }
-        if (flags.mod) {
-            let badgeElement = document.createElement("span");
-            badgeElement.classList.add("badge");
-            badgeElement.classList.add("moderator");
-            messageElement.appendChild(badgeElement);
-        }
-        if (flags.vip) {
-            let badgeElement = document.createElement("span");
-            badgeElement.classList.add("badge");
-            badgeElement.classList.add("vip");
-            messageElement.appendChild(badgeElement);
-        }
-        if (flags.subscriber) {
-            let badgeElement = document.createElement("span");
-            badgeElement.classList.add("badge");
-            badgeElement.classList.add("subscriber");
-            messageElement.appendChild(badgeElement);
-        }
-        if (flags.founder) {
-            let badgeElement = document.createElement("span");
-            badgeElement.classList.add("badge");
-            badgeElement.classList.add("founder");
-            messageElement.appendChild(badgeElement);
-        }
+
         messageElement.setAttribute("data-time", Date.now());
 
         let usernameElement = document.createElement("span");
@@ -97,21 +75,39 @@ function removeExpiredMessages() {
     }
 }
 
-ComfyJS.onChat = (user, message, flags, self, extra) => {
+const socket = new WebSocket('ws://localhost:37101/');
+
+socket.onopen = event => {
+    console.log('Connected to WebSocket');
+};
+
+socket.onmessage = event => {
+    console.log(event.data);
+    const data = JSON.parse(event.data);
+    const displayName = data.displayName;
+    const message = data.message;
+    const emotes = data.messageEmotes || {};
+    const userColor = data.userColor;
+    const flags = data.flags;
+    const userBadges = data.userBadges;
     // Replace emote codes with emote images
-    var emotes = extra.messageEmotes || {};
     var messageWithEmotes = replaceEmotes(message, emotes);
-    addMessage(extra.displayName, messageWithEmotes, extra.userColor, flags, extra);
+    addMessage(displayName, messageWithEmotes, userColor, flags, userBadges);
+};
+
+socket.onclose = event => {
+    console.log('WebSocket closed:', event);
+};
+
+socket.onerror = error => {
+    console.error('WebSocket error:', error);
 };
 
 function replaceEmotes(message, emotes) {
     var emoteList = [];
-    const emoteCodes = Object.keys(emotes);
 
-    emoteCodes.forEach(function(emoteCode) {
-        emotes[emoteCode].forEach(function(emotePosition) {
-            emoteList.push([emoteCode, emotePosition.split("-")]);
-        });
+    emotes.forEach(function (emoteData) {
+        emoteList.push([emoteData.url, [emoteData.startIndex, emoteData.endIndex]]);
     });
 
     // Sort emote list by position in descending order
@@ -125,11 +121,10 @@ function replaceEmotes(message, emotes) {
         let emoji = false;
         // Check if theres any emojis in this index point, if there is then add it to the output and skip to the end of the range
         for (let j = 0; j < emoteList.length; j++) {
-            const [emoteCode, [start, end]] = emoteList[j];
-            if (i == start) {
+            const [url, [start, end]] = emoteList[j];
+            if (i === start) {
                 const emoteImage =
-                    `<img src="https://static-cdn.jtvnw.net/emoticons/v2/${emoteCode}/default/dark/1.0" alt="${emoteCode
-                        }" />`;
+                    `<img src="${url}" alt="" />`;
                 output += emoteImage;
                 i = end;
                 emoji = true;

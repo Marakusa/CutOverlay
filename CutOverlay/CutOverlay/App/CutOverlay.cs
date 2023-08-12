@@ -20,7 +20,6 @@ public class CutOverlay
 
         // Start the overlay apps
         foreach (Type overlay in overlays)
-        {
             try
             {
                 OverlayApp instance = (OverlayApp)Activator.CreateInstance(overlay)!;
@@ -31,7 +30,6 @@ public class CutOverlay
             {
                 Console.WriteLine($"Failed to start {overlay.FullName} app: {ex}");
             }
-        }
 
         return overlayApps.ToArray();
     }
