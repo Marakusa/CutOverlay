@@ -318,6 +318,26 @@ body {
 	z-index: 10;
 }
 
+.buttonLeft {
+	display: flex;
+	justify-content: left;
+}
+.buttonCenter {
+	display: flex;
+	justify-content: center;
+}
+.buttonRight {
+	display: flex;
+	justify-content: right;
+}
+.buttonStretch {
+	display: flex;
+	justify-content: center;
+}
+	.buttonStretch input {
+		width: 100%;
+	}
+
 
 body {
 	background-color: #ffffff;

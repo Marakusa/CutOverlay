@@ -123,21 +123,6 @@ public class Twitch : OverlayApp
 
         _accessToken = oAuth;
 
-        ConnectionCredentials credentials = new(_configurations?["twitchUsername"], $"oauth:{oAuth}");
-
-        _twitchBotClient?.Disconnect();
-
-        _twitchBotClient = new TwitchClient();
-        _twitchBotClient.Initialize(credentials, _configurations?["twitchUsername"]);
-
-        _twitchBotClient.OnError += OnError;
-        _twitchBotClient.OnJoinedChannel += OnJoinedChannel;
-        _twitchBotClient.OnNewSubscriber += OnNewSubscriber;
-        _twitchBotClient.OnRaidNotification += OnRaidNotification;
-        _twitchBotClient.OnMessageReceived += OnMessageReceived;
-
-        _twitchBotClient.Connect();
-
         _twitchApi = new TwitchAPI
         {
             Settings =
@@ -152,26 +137,39 @@ public class Twitch : OverlayApp
                 }
             }
         };
+        GetUsersResponse? users = await _twitchApi.Helix.Users.GetUsersAsync();
+        User? user = users.Users[0];
+
+        ConnectionCredentials credentials = new(user.Login, $"oauth:{oAuth}");
+
+        _twitchBotClient?.Disconnect();
+
+        _twitchBotClient = new TwitchClient();
+        _twitchBotClient.Initialize(credentials, _configurations?["twitchUsername"]);
+
+        _twitchBotClient.OnError += OnError;
+        _twitchBotClient.OnJoinedChannel += OnJoinedChannel;
+        _twitchBotClient.OnNewSubscriber += OnNewSubscriber;
+        _twitchBotClient.OnRaidNotification += OnRaidNotification;
+        _twitchBotClient.OnMessageReceived += OnMessageReceived;
+
+        _twitchBotClient.Connect();
 
         _followerService = new FollowerService(_twitchApi, 5, invokeEventsOnStartup: false);
         _followerService.OnNewFollowersDetected += OnNewFollowers;
         _followerService.OnServiceStarted += OnFollowerServiceStarted;
 
-        GetUsersResponse? users = await _twitchApi.Helix.Users.GetUsersAsync(logins: new List<string>
-        {
-            _configurations?["twitchUsername"] ?? ""
-        });
         _followerService.SetChannelsById(new List<string>
         {
-            users.Users[0].Id
+            user.Id
         });
-        _badges = (await _twitchApi.Helix.Chat.GetChannelChatBadgesAsync(users.Users[0].Id)).EmoteSet.ToList();
+        _badges = (await _twitchApi.Helix.Chat.GetChannelChatBadgesAsync(user.Id)).EmoteSet.ToList();
         _badges.AddRange((await _twitchApi.Helix.Chat.GetGlobalChatBadgesAsync()).EmoteSet.ToList());
 
         _followerService.ClearCache();
         _followerService.Start();
 
-        _twitchChat?.Start(_configurations?["twitchUsername"], users.Users[0].Id);
+        _twitchChat?.Start(user.Login, user.Id);
     }
 
     public override void Unload()

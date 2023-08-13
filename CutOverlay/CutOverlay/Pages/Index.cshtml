@@ -21,12 +21,6 @@
                    {
                        Text = "Twitch"
                    })
-            @await Html.PartialAsync("_TextField", new InputModel
-                   {
-                       Label = "Twitch Username",
-                       Id = "twitchUsername",
-                       Value = "marakusa"
-                   })
             @await Html.PartialAsync("_Checkbox", new InputModel
                    {
                        Label = "Use Twitch Chat",
@@ -105,7 +99,8 @@
                {
                    Id = "saveSettings",
                    Value = "Save",
-                   OnClick = "saveConfig()"
+                   OnClick = "saveConfig()",
+                   AlignContent = Align.None
                })
         <span id="saveStatus" class="saveStatus"></span>
     </div>
@@ -160,7 +155,45 @@
     </div>
 </div>
 
-<div id="toolbox" class="draggableWindow" style="height: 73px; left: 10px; min-height: 75px; top: 10px; width: 298px;">
+<div id="appsPanel" class="draggableWindow" style="height: 235px; left: 571px; top: 522px; width: 340px;">
+    <div id="appsPanelHeader" class="draggableWindowHeader">
+        <span>Overlays</span>
+        <span class="closeWindowButton" onclick="showWindow('appsPanel', false)"></span>
+    </div>
+    <div id="appsPanelContent" class="draggableWindowContent">
+        <div class="settingsSection">
+            @await Html.PartialAsync("_Button", new InputModel
+                   {
+                       Id = "twitchApp",
+                       Value = "Twitch Overlay Running",
+                       OnClick = "console.log('test')",
+                       AlignContent = Align.Stretch
+                   })
+
+            <hr />
+
+            @await Html.PartialAsync("_Button", new InputModel
+                   {
+                       Id = "spotifyApp",
+                       Value = "Spotify Overlay Running",
+                       OnClick = "console.log('test')",
+                       AlignContent = Align.Stretch
+                   })
+
+            <hr />
+
+            @await Html.PartialAsync("_Button", new InputModel
+                   {
+                       Id = "pulsoidApp",
+                       Value = "Pulsoid Overlay Running",
+                       OnClick = "console.log('test')",
+                       AlignContent = Align.Stretch
+                   })
+        </div>
+    </div>
+</div>
+
+<div id="toolbox" class="draggableWindow" style="height: 75px; left: 10px; min-height: 75px; top: 10px; width: 298px; min-width: 298px; max-height: 75px;">
     <div id="toolboxHeader" class="draggableWindowHeader">
         <span>Toolbox</span>
     </div>
@@ -182,6 +215,12 @@
                    Id = "toolboxOverlays",
                    Value = "display-solid.svg",
                    OnClick = "showWindow('overlaysPanel', true)"
+               })
+        @await Html.PartialAsync("_ToolboxButton", new InputModel
+               {
+                   Id = "toolboxInfo",
+                   Value = "apps-solid.svg",
+                   OnClick = "showWindow('appsPanel', true)"
                })
         @await Html.PartialAsync("_ToolboxButton", new InputModel
                {

@@ -3,7 +3,14 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <ApplicationIcon>public\icons\ico\favicon.ico</ApplicationIcon>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Version>0.1.3</Version>
+    <Company>Markus Kannisto</Company>
+    <Copyright>Copyright © 2023 Markus Kannisto</Copyright>
+    <Product>CUT Overlay</Product>
+    <Title>CUT Overlay</Title>
+    <Description>Overlay for OBS Studio</Description>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="favicon.ico" />
