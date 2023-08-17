@@ -155,7 +155,7 @@
     </div>
 </div>
 
-<div id="appsPanel" class="draggableWindow" style="height: 235px; left: 571px; top: 522px; width: 340px;">
+<!--<div id="appsPanel" class="draggableWindow" style="height: 235px; left: 571px; top: 522px; width: 340px;">
     <div id="appsPanelHeader" class="draggableWindowHeader">
         <span>Overlays</span>
         <span class="closeWindowButton" onclick="showWindow('appsPanel', false)"></span>
@@ -191,9 +191,9 @@
                    })
         </div>
     </div>
-</div>
+</div>-->
 
-<div id="toolbox" class="draggableWindow" style="height: 75px; left: 10px; min-height: 75px; top: 10px; width: 298px; min-width: 298px; max-height: 75px;">
+<div id="toolbox" class="draggableWindow" style="height: 67px; left: 10px; min-height: 67px; top: 10px; width: 298px; min-width: 298px; max-height: 67px;">
     <div id="toolboxHeader" class="draggableWindowHeader">
         <span>Toolbox</span>
     </div>
@@ -201,31 +201,31 @@
         @await Html.PartialAsync("_ToolboxButton", new InputModel
                {
                    Id = "toolboxSave",
-                   Value = "floppy-disk-solid.svg",
+                   Value = "icon-save.png",
                    OnClick = "saveConfig()"
                })
         @await Html.PartialAsync("_ToolboxButton", new InputModel
                {
                    Id = "toolboxOptions",
-                   Value = "wrench-solid.svg",
+                   Value = "icon-settings.png",
                    OnClick = "showWindow('settingsPanel', true)"
                })
         @await Html.PartialAsync("_ToolboxButton", new InputModel
                {
                    Id = "toolboxOverlays",
-                   Value = "display-solid.svg",
+                   Value = "icon-overlays.png",
                    OnClick = "showWindow('overlaysPanel', true)"
                })
-        @await Html.PartialAsync("_ToolboxButton", new InputModel
+        <!--@await Html.PartialAsync("_ToolboxButton", new InputModel
                {
                    Id = "toolboxInfo",
-                   Value = "apps-solid.svg",
+                   Value = "icon-apps.png",
                    OnClick = "showWindow('appsPanel', true)"
-               })
+               })-->
         @await Html.PartialAsync("_ToolboxButton", new InputModel
                {
                    Id = "toolboxInfo",
-                   Value = "circle-info-solid.svg",
+                   Value = "icon-info.png",
                    OnClick = "showWindow('infoPanel', true)"
                })
     </div>
