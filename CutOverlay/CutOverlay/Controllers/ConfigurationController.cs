@@ -2,7 +2,6 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using CutOverlay.App.Overlay;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CutOverlay.Controllers;
@@ -101,7 +100,7 @@ public class ConfigurationController : ControllerBase
             EncryptAndSaveConfig(config);
             DecryptAndReadConfig();
 
-            if (spotifySettingsRefresh)
+            /*if (spotifySettingsRefresh)
             {
                 Spotify.Instance?.Unload();
                 Spotify.Instance?.Dispose();
@@ -126,7 +125,7 @@ public class ConfigurationController : ControllerBase
                 Pulsoid.Instance = null;
                 _ = new Pulsoid();
                 await Pulsoid.Instance?.Start(Configurations)!;
-            }
+            }*/
 
             return Ok();
         }

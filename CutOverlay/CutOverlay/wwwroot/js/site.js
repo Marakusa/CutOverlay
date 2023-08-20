@@ -83,7 +83,7 @@ function checkUpdate() {
     }
 
     try {
-        const response = fetch("/spotify/status", { method: "GET" });
+        const response = fetch("/status/get", { method: "GET" });
         response.then((res) => {
             if (res.ok) {
                 res.json().then((status) => {
@@ -320,7 +320,7 @@ function displayData() {
         setTimeout(updateText, 300);
         setTimeout(showText, 400);
 
-        var imgPath = `/spotify/image?a=${encodeURI(newArtist)}&s=${encodeURI(newSong)}`;
+        var imgPath = `/status/image?a=${encodeURI(newArtist)}&s=${encodeURI(newSong)}`;
         document.getElementById("image").setAttribute("src", imgPath);
         $("#image2").fadeOut(500,
             function() {

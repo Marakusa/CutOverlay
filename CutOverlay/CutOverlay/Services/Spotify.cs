@@ -1,31 +1,28 @@
 ﻿using System.Net.Http.Headers;
+using CutOverlay.App;
 using CutOverlay.Models;
 using Newtonsoft.Json;
 using Timer = System.Timers.Timer;
 
-namespace CutOverlay.App.Overlay;
+namespace CutOverlay.Services;
 
-[Overlay]
 public class Spotify : OAuthOverlayApp
 {
-    internal static Spotify? Instance;
-
     private Timer? _statusTimer;
+    private readonly OverlayStatusService _overlayStatus;
 
-    public Spotify()
+    public Spotify(OverlayStatusService overlayStatus, ConfigurationService configurationService)
     {
-        if (Instance != null)
-        {
-            Dispose();
-            return;
-        }
-
-        Instance = this;
-
         HttpClient = new HttpClient();
+        _overlayStatus = overlayStatus;
 
         AuthorizationTimer = null;
         _statusTimer = null;
+
+        _ = Task.Run(async () =>
+        {
+            await Start(await configurationService.FetchConfigurationsAsync());
+        });
     }
 
     public override string AuthApiUri => "https://accounts.spotify.com/api/token";
@@ -33,12 +30,7 @@ public class Spotify : OAuthOverlayApp
     public override string AuthorizationAddress => "https://accounts.spotify.com/authorize";
     public override string Scopes => "user-read-playback-state user-read-currently-playing user-modify-playback-state";
 
-    public override OverlayApp? GetInstance()
-    {
-        return Instance;
-    }
-
-    public override Task Start(Dictionary<string, string?>? configurations)
+    public Task Start(Dictionary<string, string?>? configurations)
     {
         Console.WriteLine("Spotify app starting...");
 
@@ -82,8 +74,8 @@ public class Spotify : OAuthOverlayApp
 
             PlaybackState? playbackState = JsonConvert.DeserializeObject<PlaybackState>(content);
 
-            await Status.Instance?.SaveStateAsync<Spotify>(playbackState,
-                playbackState is not { IsPlaying: true } ? -1 : 5)!;
+            await _overlayStatus.SaveStateAsync<Spotify>(playbackState,
+                playbackState is not { IsPlaying: true } ? -1 : 5);
         }
         catch (Exception ex)
         {
@@ -95,7 +87,7 @@ public class Spotify : OAuthOverlayApp
     {
         try
         {
-            Status.Instance?.ClearStatusFiles();
+            _overlayStatus.ClearStatusFiles();
         }
         catch
         {

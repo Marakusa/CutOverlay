@@ -4,12 +4,10 @@ using Newtonsoft.Json;
 using SkiaSharp;
 using Color = System.Drawing.Color;
 
-namespace CutOverlay.App;
+namespace CutOverlay.Services;
 
-public class Status : IDisposable
+public class OverlayStatusService : IDisposable
 {
-    internal static Status? Instance;
-
     // http://garethrees.org/2007/11/14/pngcrush/
     private readonly byte[] _blankImage =
     {
@@ -27,16 +25,8 @@ public class Status : IDisposable
     private readonly Dictionary<Type, PlaybackStateQueue> _currentPlaybacks = new();
     private readonly HttpClient? _httpClient;
 
-    public Status()
+    public OverlayStatusService()
     {
-        if (Instance != null)
-        {
-            Dispose();
-            return;
-        }
-
-        Instance = this;
-
         _httpClient = new HttpClient();
     }
 

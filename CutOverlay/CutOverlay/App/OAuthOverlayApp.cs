@@ -7,7 +7,7 @@ using CutOverlay.Models.Spotify;
 using Newtonsoft.Json;
 using Timer = System.Timers.Timer;
 
-namespace CutOverlay.App.Overlay;
+namespace CutOverlay.App;
 
 public abstract class OAuthOverlayApp : OverlayApp
 {
@@ -143,10 +143,6 @@ public abstract class OAuthOverlayApp : OverlayApp
         AccessToken = code;
         _ = UpdateAuthorizationAsync();
     }
-
-    public abstract override OverlayApp? GetInstance();
-
-    public abstract override Task Start(Dictionary<string, string?>? configurations);
 
     public abstract override void Unload();
 }

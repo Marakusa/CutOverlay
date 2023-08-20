@@ -1,4 +1,4 @@
-using CutOverlay.App.Overlay;
+using CutOverlay.Services;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
 using Newtonsoft.Json;
@@ -14,6 +14,13 @@ public class Program
 
         builder.Services.AddElectron();
         builder.Services.AddRazorPages();
+
+        builder.Services.AddSingleton<ConfigurationService>();
+        builder.Services.AddSingleton<OverlayStatusService>(); 
+        builder.Services.AddSingleton<Spotify>();
+        builder.Services.AddSingleton<Twitch>();
+        builder.Services.AddSingleton<Pulsoid>();
+        builder.Services.AddSingleton<BeatSaberPlus>();
 
         WebApplication app = builder.Build();
 
@@ -52,21 +59,8 @@ public class Program
         Globals.ChatWebSocketPort = 37101;
 
         // Open the Electron-Window here
-        BrowserWindow? window =
-            await Electron.WindowManager.CreateWindowAsync(options, $"http://localhost:{Globals.Port}/");
-
-        App.CutOverlay cutOverlay = new();
-        OverlayApp[] overlays = await cutOverlay.Start();
-
-        window.OnClose += () =>
-        {
-            foreach (OverlayApp overlay in overlays)
-            {
-                OverlayApp? instance = overlay.GetInstance();
-                instance?.Unload();
-            }
-        };
-
+        await Electron.WindowManager.CreateWindowAsync(options, $"http://localhost:{Globals.Port}/");
+        
         await app.WaitForShutdownAsync();
 
         await app.DisposeAsync();

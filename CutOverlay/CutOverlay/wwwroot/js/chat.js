@@ -2,17 +2,25 @@
 const MESSAGE_EXPIRATION_TIME = 15000; // Message expiration time in milliseconds
 var removingMessages = [];
 
-function addMessage(username, message, userColor, flags, userBadges) {
+function addMessage(username, message, userColor, flags, userBadges, userProfileImageUrl) {
     const chatContainers = document.getElementsByClassName("chat-messages");
 
     for (let i = 0; i < chatContainers.length; i++) {
         const messageElement = document.createElement("div");
         messageElement.classList.add("message");
+        let profileElement = document.createElement("span");
+        profileElement.classList.add("badge");
+        profileElement.style.content = "url(\"" + userProfileImageUrl + "\")";
+        profileElement.style.width = "38px";
+        profileElement.style.height = "38px";
+        profileElement.style.margin = "2px 12px 2px 0";
+        messageElement.appendChild(profileElement);
+        const messageInnerElement = document.createElement("div");
         if (flags.highlighted) {
-            messageElement.classList.add("highlighted");
-            messageElement.style.borderColor = userColor;
+            messageInnerElement.classList.add("highlighted");
+            messageInnerElement.style.borderColor = userColor;
             var rgb = hexToRgb(userColor);
-            messageElement.style.background =
+            messageInnerElement.style.background =
                 `linear-gradient(-60deg, rgba(${rgb.r},${rgb.g},${rgb.b},0.5) 0%, rgba(${rgb.r},${rgb.g},${rgb.b
                 },0.2) 100%)`;
         }
@@ -21,7 +29,7 @@ function addMessage(username, message, userColor, flags, userBadges) {
             let badgeElement = document.createElement("span");
             badgeElement.classList.add("badge");
             badgeElement.style.content = "url(\"" + userBadges[j] + "\")";
-            messageElement.appendChild(badgeElement);
+            messageInnerElement.appendChild(badgeElement);
         }
 
         messageElement.setAttribute("data-time", Date.now());
@@ -32,15 +40,16 @@ function addMessage(username, message, userColor, flags, userBadges) {
         usernameElement.style.webkitTextFillColor = "transparent";
         usernameElement.style.webkitBackgroundClip = "text";
         usernameElement.textContent = `${username}`;
-        messageElement.appendChild(usernameElement);
+        messageInnerElement.appendChild(usernameElement);
 
         let messageTextElement = document.createElement("span");
         messageTextElement.innerHTML = twemoji.parse(message);
         messageTextElement.style.background = "linear-gradient(-60deg, #9b9b9b 0%, #ffffff 50%)";
         messageTextElement.style.webkitTextFillColor = "transparent";
         messageTextElement.style.webkitBackgroundClip = "text";
-        messageElement.appendChild(messageTextElement);
+        messageInnerElement.appendChild(messageTextElement);
 
+        messageElement.appendChild(messageInnerElement);
         chatContainers[i].appendChild(messageElement);
 
         // Scroll to the bottom of the chat container
@@ -90,9 +99,10 @@ socket.onmessage = event => {
     const userColor = data.userColor;
     const flags = data.flags;
     const userBadges = data.userBadges;
+    const userProfileImageUrl = data.userProfileImageUrl;
     // Replace emote codes with emote images
     var messageWithEmotes = replaceEmotes(message, emotes);
-    addMessage(displayName, messageWithEmotes, userColor, flags, userBadges);
+    addMessage(displayName, messageWithEmotes, userColor, flags, userBadges, userProfileImageUrl);
 };
 
 socket.onclose = event => {

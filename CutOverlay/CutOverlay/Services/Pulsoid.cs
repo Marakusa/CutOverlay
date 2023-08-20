@@ -1,41 +1,31 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
+using CutOverlay.App;
 using CutOverlay.Models;
 using Newtonsoft.Json;
 
-namespace CutOverlay.App.Overlay;
+namespace CutOverlay.Services;
 
-[Overlay]
 public class Pulsoid : OverlayApp
 {
-    internal static Pulsoid? Instance;
-
-    private readonly string _dataFolder = $"{Globals.GetAppDataPath()}data\\";
     private string? _pulsoidApiToken;
     private int _reconnectInterval = 1000;
     private ClientWebSocket? _socket;
+    private string? _heartBeat;
 
-    public Pulsoid()
+    public Pulsoid(ConfigurationService configurationService)
     {
-        if (Instance != null)
-        {
-            Dispose();
-            return;
-        }
-
-        Instance = this;
-
         HttpClient = new HttpClient();
 
         _socket = null;
+
+        _ = Task.Run(async () =>
+        {
+            await Start(await configurationService.FetchConfigurationsAsync());
+        });
     }
 
-    public override OverlayApp? GetInstance()
-    {
-        return Instance;
-    }
-
-    public override Task Start(Dictionary<string, string?>? configurations)
+    public virtual Task Start(Dictionary<string, string?>? configurations)
     {
         Console.WriteLine("Pulsoid app starting...");
 
@@ -95,29 +85,16 @@ public class Pulsoid : OverlayApp
     private void UpdateHeartRate(string data)
     {
         PulsoidResponse? response = JsonConvert.DeserializeObject<PulsoidResponse>(data);
-
-        if (!Directory.Exists(_dataFolder)) Directory.CreateDirectory(_dataFolder);
-        string statusFile = $"{_dataFolder}pulsoid.txt";
-
-        File.WriteAllText(statusFile, response == null ? "" : response.Data.HeartRate.ToString());
+        _heartBeat = response == null ? "" : response.Data.HeartRate.ToString();
     }
 
     public override void Unload()
     {
-        try
-        {
-            if (!Directory.Exists(_dataFolder)) Directory.CreateDirectory(_dataFolder);
-            string statusFile = $"{_dataFolder}pulsoid.txt";
-            File.WriteAllText(statusFile, "");
-        }
-        catch
-        {
-            // ignored
-        }
-
         _socket?.Dispose();
         HttpClient?.Dispose();
 
         Console.WriteLine("Pulsoid app unloaded");
     }
+
+    public string GetHeartBeat() => _heartBeat ?? "";
 }

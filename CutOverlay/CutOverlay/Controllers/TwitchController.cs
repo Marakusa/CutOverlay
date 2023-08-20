@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
-using CutOverlay.App.Overlay;
 using CutOverlay.Models.Twitch;
+using CutOverlay.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -10,6 +10,13 @@ namespace CutOverlay.Controllers;
 [ApiController]
 public class TwitchController : ControllerBase
 {
+    private readonly Twitch _twitch;
+
+    public TwitchController(Twitch twitch)
+    {
+        _twitch = twitch;
+    }
+
     [HttpGet("callback")]
     public IActionResult TwitchCallback()
     {
@@ -26,10 +33,7 @@ public class TwitchController : ControllerBase
     {
         try
         {
-            if (Twitch.Instance == null)
-                throw new Exception("Twitch app was not started");
-
-            await Twitch.Instance.SetOAuth(accessToken, state);
+            await _twitch.SetOAuth(accessToken, state);
 
             return new ContentResult
             {
@@ -54,10 +58,7 @@ public class TwitchController : ControllerBase
     {
         try
         {
-            if (Twitch.Instance == null)
-                throw new Exception("Twitch app was not started");
-
-            NewFollowerData followers = Twitch.Instance.GetFollowers(string.IsNullOrEmpty(since)
+            NewFollowerData followers = _twitch.GetFollowers(string.IsNullOrEmpty(since)
                 ? DateTime.UnixEpoch
                 : DateTime.ParseExact(since, "yyyy-MM-dd'T'HH.mm.ss'Z'", CultureInfo.InvariantCulture));
 

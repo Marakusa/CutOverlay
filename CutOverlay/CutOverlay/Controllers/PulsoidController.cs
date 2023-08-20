@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CutOverlay.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CutOverlay.Controllers;
 
@@ -6,13 +7,19 @@ namespace CutOverlay.Controllers;
 [ApiController]
 public class PulsoidController : ControllerBase
 {
+    private readonly Pulsoid _pulsoid;
+
+    public PulsoidController(Pulsoid pulsoid)
+    {
+        _pulsoid = pulsoid;
+    }
+
     [HttpGet("status")]
     public IActionResult Status()
     {
         try
         {
-            string path = $"{Globals.GetAppDataPath()}data\\pulsoid.txt";
-            return Ok(System.IO.File.Exists(path) ? System.IO.File.ReadAllText(path) : "");
+            return Ok(_pulsoid.GetHeartBeat());
         }
         catch (Exception ex)
         {

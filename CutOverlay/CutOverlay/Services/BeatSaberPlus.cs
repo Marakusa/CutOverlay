@@ -1,41 +1,34 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
+using CutOverlay.App;
 using CutOverlay.Models;
 using CutOverlay.Models.BeatSaberPlus;
 using CutOverlay.Models.BeatSaberPlus.BeatSaver;
 using Newtonsoft.Json;
 
-namespace CutOverlay.App.Overlay;
+namespace CutOverlay.Services;
 
-[Overlay]
 public class BeatSaberPlus : OverlayApp
 {
     private const int BufferSize = 4096;
     private const string WebsocketAddress = "ws://localhost:2947/socket";
     private const string MapDataUrl = "https://api.beatsaver.com/maps/hash/{0}";
     private const int ReconnectInterval = 10000;
-    internal static BeatSaberPlus? Instance;
     private CancellationTokenSource? _cancellationTokenSource;
+    private readonly OverlayStatusService _overlayStatus;
 
-    public BeatSaberPlus()
+    public BeatSaberPlus(OverlayStatusService overlayStatus, ConfigurationService configurationService)
     {
-        if (Instance != null)
-        {
-            Dispose();
-            return;
-        }
-
-        Instance = this;
-
         HttpClient = new HttpClient();
-    }
+        _overlayStatus = overlayStatus;
 
-    public override OverlayApp? GetInstance()
-    {
-        return Instance;
+        _ = Task.Run(async () =>
+        {
+            await Start(await configurationService.FetchConfigurationsAsync());
+        });
     }
-
-    public override async Task Start(Dictionary<string, string?>? configurations)
+    
+    public virtual async Task Start(Dictionary<string, string?>? configurations)
     {
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -103,8 +96,8 @@ public class BeatSaberPlus : OverlayApp
                                     JsonConvert.DeserializeObject<BeatSaberPlusWebHookGameState>(message);
                                 if (gameState?.GameStateChanged == "Menu")
                                 {
-                                    await Status.Instance?.SaveStateAsync<BeatSaberPlus>(new PlaybackState(), -1)!;
-                                    Status.Instance.SaveEmptyCover();
+                                    await _overlayStatus.SaveStateAsync<BeatSaberPlus>(new PlaybackState(), -1);
+                                    _overlayStatus.SaveEmptyCover();
                                 }
 
                                 break;
@@ -174,7 +167,7 @@ public class BeatSaberPlus : OverlayApp
                                     // ignore
                                 }
 
-                                await Status.Instance?.SaveStateAsync<BeatSaberPlus>(playbackState, 10)!;
+                                await _overlayStatus.SaveStateAsync<BeatSaberPlus>(playbackState, 10);
                                 break;
                             case "score":
                                 /*BeatSaberPlusWebHookScoreEvent? scoreEvent = JsonConvert.DeserializeObject<BeatSaberPlusWebHookScoreEvent>(message);
@@ -205,7 +198,7 @@ public class BeatSaberPlus : OverlayApp
     {
         try
         {
-            Status.Instance?.ClearStatusFiles();
+            _overlayStatus.ClearStatusFiles();
         }
         catch
         {
