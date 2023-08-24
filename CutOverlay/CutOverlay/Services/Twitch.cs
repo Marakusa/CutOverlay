@@ -54,6 +54,8 @@ public class Twitch : OverlayApp
 
     private readonly List<User?> _userCache = new();
 
+    private string? _broadcasterId;
+
     public Twitch(ConfigurationService configurationService)
     {
         HttpClient = new HttpClient();
@@ -165,6 +167,8 @@ public class Twitch : OverlayApp
 
         _followerService.ClearCache();
         _followerService.Start();
+
+        _broadcasterId = user.Id;
 
         _ = StartChatWebSocket();
     }
@@ -296,6 +300,14 @@ public class Twitch : OverlayApp
             Followers = list,
             FetchTime = _lastFetch.ToString("yyyy-MM-dd'T'HH.mm.ss'Z'")
         };
+    }
+
+    public async Task<string> GetLatestFollowerAsync()
+    {
+        GetChannelFollowersResponse? response = await _twitchApi?.Helix.Channels.GetChannelFollowersAsync(_broadcasterId, first: 1)!;
+        if (response?.Data == null || response.Data.Length == 0)
+            return "";
+        return response.Data.First().UserName;
     }
 
     private async Task StartChatWebSocket()

@@ -1,0 +1,60 @@
+﻿@using CutOverlay.Models
+
+<div id="panelBottom">
+    <div class="panelItem" style="width: 170px;">
+        @await Html.PartialAsync("_StylizedHeader", new TextModel
+               {
+                   Text = Model.TimeZoneString,
+                   StyleId = "timezoneText"
+               })
+        @await Html.PartialAsync("_ClockText")
+    </div>
+
+    <div class="panelItem" style="display: none; width: 120px;">
+        @await Html.PartialAsync("_StylizedHeader", new TextModel
+               {
+                   Text = "HEART",
+                   StyleId = "heartRate"
+               })
+        @await Html.PartialAsync("_HeartRateText")
+    </div>
+
+    <div class="panelItem" style="width: 250px;">
+        @await Html.PartialAsync("_StylizedHeader", new TextModel
+               {
+                   Text = "",
+                   StyleId = "progressHeader"
+               })
+        @await Html.PartialAsync("_StylizedText", new TextModel
+               {
+                   Text = "",
+                   StyleId = "progressText"
+               })
+    </div>
+
+    <div class="panelItem">
+        @await Html.PartialAsync("_StylizedHeader", new TextModel
+               {
+                   Text = "Latest Follow",
+                   StyleId = "lastFollowHeader"
+               })
+        @await Html.PartialAsync("_StylizedText", new TextModel
+               {
+                   Text = "",
+                   StyleId = "lastFollowText"
+               })
+    </div>
+    
+    <div class="panelItem" style="margin-left: 50px;">
+        @await Html.PartialAsync("_StylizedHeader", new TextModel
+               {
+                   Text = "Latest Sub",
+                   StyleId = "lastSubHeader"
+               })
+        @await Html.PartialAsync("_StylizedText", new TextModel
+               {
+                   Text = "",
+                   StyleId = "lastSubText"
+               })
+    </div>
+</div>

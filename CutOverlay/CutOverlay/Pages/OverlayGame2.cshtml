@@ -4,65 +4,11 @@
 @{
 }
 
-<div class="chat-container" style="left: 20px; right: auto;">
-    <div class="chat-messages"></div>
-</div>
-<div class="chat-container-shadow" style="left: 20px; right: auto;">
-    <div class="chat-messages"></div>
-</div>
+@await Html.PartialAsync("_BottomPanel")
 
-<div id="panelBottom" class="panelBottomClean">
-    <div class="panelItem" style="width: 170px;">
-        @await Html.PartialAsync("_StylizedHeader", new TextModel
-               {
-                   Text = Model.TimeZoneString,
-                   StyleId = "timezoneText"
-               })
-        @await Html.PartialAsync("_ClockText")
-    </div>
+@await Html.PartialAsync("_PanelAlert")
 
-    <div class="panelItem" style="display: none; width: 120px;">
-        @await Html.PartialAsync("_StylizedHeader", new TextModel
-               {
-                   Text = "HEART",
-                   StyleId = "heartRate"
-               })
-        @await Html.PartialAsync("_HeartRateText")
-    </div>
-
-    <div class="panelItem" style="width: 250px;">
-        @await Html.PartialAsync("_StylizedHeader", new TextModel
-               {
-                   Text = "",
-                   StyleId = "progressHeader"
-               })
-        @await Html.PartialAsync("_StylizedText", new TextModel
-               {
-                   Text = "",
-                   StyleId = "progressText"
-               })
-    </div>
-</div>
-
-<div id="panel-message-content" class="panelMessage">
-    <span id="panel-message-content-span"><!-- Message content will be inserted here dynamically --></span>
-</div>
-
-<div id="statusDiv">
-    <img id="image" alt="">
-    <img id="image2" src="img/Snip_Artwork.jpg" alt="">
-    <div id="smalldiv">
-        <div id="artistNameDiv">
-            <p id="artist"> </p>
-            <p id="artistShadow"> </p>
-        </div>
-        <br>
-        <div id="songNameDiv">
-            <p id="song"> </p>
-            <p id="songShadow"> </p>
-        </div>
-    </div>
-</div>
+@await Html.PartialAsync("_SongStatus")
 
 <script src="~/js/site.js"></script>
-<script src="~/js/chat.js"></script>
+<script src="~/js/songStatus.js"></script>

@@ -115,6 +115,14 @@
         <div class="overlayDiv">
             @await Html.PartialAsync("_CopyTextField", new InputModel
                    {
+                       Id = "overlay2Copy",
+                       Value = $"http://localhost:{Globals.Port}/Chat",
+                       Label = "Chat Box"
+                   })
+        </div>
+        <div class="overlayDiv">
+            @await Html.PartialAsync("_CopyTextField", new InputModel
+                   {
                        Id = "overlay1Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayStarting",
                        Label = "Starting soon"
@@ -125,7 +133,7 @@
                    {
                        Id = "overlay2Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayChat",
-                       Label = "Chat"
+                       Label = "Panel + Background"
                    })
         </div>
         <div class="overlayDiv">
@@ -133,7 +141,7 @@
                    {
                        Id = "overlay3Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayBrb",
-                       Label = "BRB"
+                       Label = "BRB Screen"
                    })
         </div>
         <div class="overlayDiv">
@@ -141,7 +149,7 @@
                    {
                        Id = "overlay4Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayGame1",
-                       Label = "Game 1"
+                       Label = "Panel"
                    })
         </div>
         <div class="overlayDiv">
@@ -149,7 +157,7 @@
                    {
                        Id = "overlay5Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayGame2",
-                       Label = "Game 2"
+                       Label = "No Panel"
                    })
         </div>
     </div>

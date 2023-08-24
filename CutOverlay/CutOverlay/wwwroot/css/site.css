@@ -11,6 +11,16 @@ body {
 	width: 100%;
 }
 
+.overlayMessage { filter: drop-shadow(1px 0 0 rgba(0, 0, 0, 0.4)) 
+                          drop-shadow(1px -1px 0 rgba(0, 0, 0, 0.4)) 
+                          drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.4)) 
+                          drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.4))
+                          drop-shadow(0 1px 0 rgba(0, 0, 0, 0.4)) 
+                          drop-shadow(-1px 0 0 rgba(0, 0, 0, 0.4)) 
+                          drop-shadow(-1px -1px 0 rgba(0, 0, 0, 0.4)) 
+                          drop-shadow(-1px 1px 0 rgba(0, 0, 0, 0.4)) 
+                          drop-shadow(0 1px 1px black);
+}
 #startingHeaderDiv {
 	height: 100%;
 	left: 0;
@@ -23,7 +33,7 @@ body {
 	z-index: 23;
 }
 
-#startingHeader, #startingHeaderShadow {
+.startingHeader {
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background: linear-gradient(to top, #ff0000 0%, #ffffff 100%);
@@ -35,16 +45,14 @@ body {
 	margin-left: 0;
 	margin-top: -20px;
 	padding: 0;
-	position: absolute;
-	transition: 0.4s;
 	z-index: 25;
+	position: absolute;
+	opacity: 0;
+	transition: opacity 1s ease-in-out;
 }
 
-#startingHeaderShadow {
-	background: none;
-	text-shadow: 0 0 8px #111111, 0 0 8px #111111;
-	transition: 0.4s;
-	z-index: 24;
+.startingHeader.active {
+	opacity: 1;
 }
 
 #panelBorders {
@@ -345,7 +353,7 @@ body {
 	padding: 0 !important;
 }
 
-#artist, #artistShadow, #mapper, #mapperShadow {
+#artist, #mapper {
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background: linear-gradient(to top, #cccccc 0%, #ffffff 80%);
@@ -364,12 +372,6 @@ body {
 	z-index: 3;
 }
 
-#artistShadow, #mapperShadow {
-	background: none;
-	text-shadow: 0 0 3px #111111a1, 0 0 3px #111111;
-	z-index: 2;
-}
-
 #songNameDiv {
 	height: 100%;
 	left: 0;
@@ -382,7 +384,7 @@ body {
 	z-index: 2;
 }
 
-#song, #songShadow {
+#song {
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background: linear-gradient(to top, #444444 0%, #ffffff 50%);
@@ -398,12 +400,6 @@ body {
 	position: absolute;
 	transition: 0.4s;
 	z-index: 3;
-}
-
-#songShadow {
-	background: none;
-	text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
-	z-index: 2;
 }
 
 .pDiv {
@@ -438,29 +434,23 @@ p { white-space: nowrap; }
 
 .scrolling { /*animation: slide 20s linear infinite;*/ }
 
-.chat-container, .chat-container-shadow {
+.chat-container {
 	background: none;
 	border-radius: 5px;
-	bottom: 120px;
-	height: 980px;
+	height: calc(100% - 40px);
 	overflow-x: hidden;
 	overflow-y: auto;
 	position: absolute;
-	right: 20px;
-	width: 500px;
+	width: calc(100% - 40px);
 	z-index: 20;
-}
-
-.chat-container-shadow {
-	filter: blur(3px) brightness(0);
-	z-index: 18;
+	padding: 20px;
 }
 
 .chat-messages {
-	bottom: 0;
 	overflow: hidden;
-	position: absolute;
 	width: 100%;
+	bottom: 20px;
+	position: absolute;
 }
 
 .chatUser {
@@ -486,6 +476,7 @@ p { white-space: nowrap; }
 	font-weight: 500;
 	margin-top: 10px; /* Adjusting margin top */
 	padding: 0;
+	width: calc(100% - 40px);
 }
 
 .message span:last-child {
@@ -550,7 +541,7 @@ p { white-space: nowrap; }
 	z-index: 2;
 }
 
-.styledHeaderDiv .styledHeaderText, .styledHeaderDiv .styledHeaderTextShadow {
+.styledHeaderDiv .styledHeaderText {
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background: linear-gradient(to top, #444444 0%, #ffffff 50%);
@@ -569,14 +560,6 @@ p { white-space: nowrap; }
 	z-index: 3;
 }
 
-.styledHeaderDiv .styledHeaderTextShadow {
-	background: none;
-	margin-bottom: 56px;
-	position: absolute;
-	text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
-	z-index: 2;
-}
-
 .styledTextDiv {
 	align-items: end;
 	display: flex;
@@ -586,7 +569,7 @@ p { white-space: nowrap; }
 	z-index: 2;
 }
 
-.styledTextDiv .styledText, .styledTextDiv .styledTextShadow {
+.styledTextDiv .styledText {
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background: linear-gradient(to top, #444444 0%, #ffffff 50%);
@@ -603,14 +586,6 @@ p { white-space: nowrap; }
 	text-align: right;
 	transition: 0.4s;
 	z-index: 3;
-}
-
-.styledTextDiv .styledTextShadow {
-	background: none;
-	margin-bottom: 12px;
-	position: absolute;
-	text-shadow: 0 0 8px #111111d0, 0 0 8px #111111d0;
-	z-index: 2;
 }
 
 
@@ -696,9 +671,6 @@ p { white-space: nowrap; }
 #panelMessageContentSpanDiv {
 	position: relative;
 }
-#panelMessageContentSpanShadow {
-	margin-bottom: 5px;
-}
 #panel-message-content .styledTextDiv {
 	align-items: center;
 	flex-flow: column;
@@ -723,4 +695,16 @@ p { white-space: nowrap; }
 	100% {
 		left: 100%;
 	}
+}
+
+.fa-triangle-exclamation {
+	background: linear-gradient(-20deg, rgb(176, 74, 0) 0%, rgb(255, 209, 30) 100%) padding-box text;
+}
+
+.fa-heart {
+	background: linear-gradient(-20deg, #cc237d 0%, #f059bb 100%) padding-box text;
+}
+
+.headerCommand {
+	background: linear-gradient(-20deg, #aaa 0%, #ffffff 100%) padding-box text;
 }

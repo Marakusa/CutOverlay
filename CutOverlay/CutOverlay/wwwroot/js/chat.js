@@ -10,6 +10,7 @@ function addMessage(username, message, userColor, flags, userBadges, userProfile
         messageElement.classList.add("message");
         let profileElement = document.createElement("span");
         profileElement.classList.add("badge");
+        profileElement.classList.add("overlayMessage");
         profileElement.style.content = "url(\"" + userProfileImageUrl + "\")";
         profileElement.style.width = "38px";
         profileElement.style.height = "38px";
@@ -18,6 +19,7 @@ function addMessage(username, message, userColor, flags, userBadges, userProfile
         const messageInnerElement = document.createElement("div");
         if (flags.highlighted) {
             messageInnerElement.classList.add("highlighted");
+            messageInnerElement.classList.add("overlayMessage");
             messageInnerElement.style.borderColor = userColor;
             var rgb = hexToRgb(userColor);
             messageInnerElement.style.background =
@@ -28,6 +30,7 @@ function addMessage(username, message, userColor, flags, userBadges, userProfile
         for (let j = 0; j < userBadges.length; j++) {
             let badgeElement = document.createElement("span");
             badgeElement.classList.add("badge");
+            badgeElement.classList.add("overlayMessage");
             badgeElement.style.content = "url(\"" + userBadges[j] + "\")";
             messageInnerElement.appendChild(badgeElement);
         }
@@ -36,6 +39,7 @@ function addMessage(username, message, userColor, flags, userBadges, userProfile
 
         let usernameElement = document.createElement("span");
         usernameElement.classList.add("chatUser");
+        usernameElement.classList.add("overlayMessage");
         usernameElement.style.background = `linear-gradient(-60deg, ${userColor} -50%, #ffffff 200%)`;
         usernameElement.style.webkitTextFillColor = "transparent";
         usernameElement.style.webkitBackgroundClip = "text";
@@ -43,6 +47,7 @@ function addMessage(username, message, userColor, flags, userBadges, userProfile
         messageInnerElement.appendChild(usernameElement);
 
         let messageTextElement = document.createElement("span");
+        messageTextElement.classList.add("overlayMessage");
         messageTextElement.innerHTML = twemoji.parse(message);
         messageTextElement.style.background = "linear-gradient(-60deg, #9b9b9b 0%, #ffffff 50%)";
         messageTextElement.style.webkitTextFillColor = "transparent";

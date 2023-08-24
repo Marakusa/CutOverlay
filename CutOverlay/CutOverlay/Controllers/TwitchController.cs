@@ -28,7 +28,7 @@ public class TwitchController : ControllerBase
     }
 
     [HttpGet("callback/query")]
-    public async Task<IActionResult> SpotifyCallback([FromQuery(Name = "access_token")] string? accessToken,
+    public async Task<IActionResult> TwitchCallbackQuery([FromQuery(Name = "access_token")] string? accessToken,
         [FromQuery(Name = "state")] string state)
     {
         try
@@ -54,7 +54,7 @@ public class TwitchController : ControllerBase
     }
 
     [HttpGet("followers")]
-    public IActionResult SpotifyCallback([FromQuery(Name = "since")] string? since)
+    public IActionResult FollowersCallback([FromQuery(Name = "since")] string? since)
     {
         try
         {
@@ -63,6 +63,19 @@ public class TwitchController : ControllerBase
                 : DateTime.ParseExact(since, "yyyy-MM-dd'T'HH.mm.ss'Z'", CultureInfo.InvariantCulture));
 
             return Ok(JsonConvert.SerializeObject(followers));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("latest/follow")]
+    public async Task<IActionResult> LatestFollowCallback()
+    {
+        try
+        {
+            return Ok(await _twitch.GetLatestFollowerAsync());
         }
         catch (Exception ex)
         {

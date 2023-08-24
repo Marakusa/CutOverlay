@@ -6,5 +6,4 @@ public class TextModel
     public string? StyleId { get; set; }
     public string StyleIdDiv => StyleId + "Div";
     public string? StyleIdText => StyleId;
-    public string StyleIdShadow => StyleId + "Shadow";
 }
