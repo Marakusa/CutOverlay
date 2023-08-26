@@ -6,6 +6,7 @@
 ## Features
 - ✔️ Multiple overlays for different uses (starting soon, chat only, etc.)
 - 💬 Twitch chat overlay
+  - 7TV Integration
 - 🎧 Real time Spotify status
   - 🎨 Dynamic color theme from album cover art
 - ❤️ Pulsoid heart rate integration
