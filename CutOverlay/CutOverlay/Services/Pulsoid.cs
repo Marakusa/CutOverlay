@@ -1,4 +1,5 @@
-﻿using System.Net.WebSockets;
+﻿using System.Net.Sockets;
+using System.Net.WebSockets;
 using System.Text;
 using CutOverlay.App;
 using CutOverlay.Models;
@@ -12,17 +13,27 @@ public class Pulsoid : OverlayApp
     private int _reconnectInterval = 1000;
     private ClientWebSocket? _socket;
     private string? _heartBeat;
+    private readonly ConfigurationService _configurationService;
 
     public Pulsoid(ConfigurationService configurationService)
     {
         HttpClient = new HttpClient();
+        _configurationService = configurationService;
 
         _socket = null;
 
         _ = Task.Run(async () =>
         {
-            await Start(await configurationService.FetchConfigurationsAsync());
+            await Start(await _configurationService.FetchConfigurationsAsync());
         });
+    }
+
+    public async Task RefreshConfigurationsAsync()
+    {
+        await _socket?.CloseAsync(WebSocketCloseStatus.NormalClosure, "Restarting the service", CancellationToken.None)!;
+        _socket.Dispose();
+        _socket = null;
+        await Start(await _configurationService.FetchConfigurationsAsync());
     }
 
     public virtual Task Start(Dictionary<string, string?>? configurations)

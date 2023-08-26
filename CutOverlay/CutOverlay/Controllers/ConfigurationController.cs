@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using CutOverlay.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CutOverlay.Controllers;
@@ -12,9 +13,15 @@ public class ConfigurationController : ControllerBase
 {
     public static Dictionary<string, string?>? Configurations;
     private readonly IConfiguration _configuration;
+    private readonly Spotify _spotify;
+    private readonly Twitch _twitch;
+    private readonly Pulsoid _pulsoid;
 
-    public ConfigurationController(IConfiguration configuration)
+    public ConfigurationController(IConfiguration configuration, Spotify spotify, Twitch twitch, Pulsoid pulsoid)
     {
+        _spotify = spotify;
+        _twitch = twitch;
+        _pulsoid = pulsoid;
         _configuration = configuration;
         Configurations = new Dictionary<string, string?>();
         DecryptAndReadConfig();
@@ -74,32 +81,12 @@ public class ConfigurationController : ControllerBase
     {
         try
         {
-            bool spotifySettingsRefresh = false;
-
-            if (Configurations != null && config.ContainsKey("spotifyClientId") &&
-                Configurations.TryGetValue("spotifyClientId", out string? configuration))
-                spotifySettingsRefresh = config["spotifyClientId"] != configuration;
-
-            if (!spotifySettingsRefresh)
-                if (Configurations != null && config.ContainsKey("spotifyClientSecret") &&
-                    Configurations.TryGetValue("spotifyClientSecret", out string? configuration1))
-                    spotifySettingsRefresh = config["spotifyClientSecret"] != configuration1;
-
-            bool twitchSettingsRefresh = false;
-
-            if (Configurations != null && config.ContainsKey("twitchUsername") &&
-                Configurations.TryGetValue("twitchUsername", out string? configuration2))
-                twitchSettingsRefresh = config["twitchUsername"] != configuration2;
-            
-            bool pulsoidSettingsRefresh = false;
-
-            if (Configurations != null && config.ContainsKey("pulsoid") &&
-                Configurations.TryGetValue("pulsoidAccessToken", out string? configuration3))
-                pulsoidSettingsRefresh = config["pulsoidAccessToken"] != configuration3;
-            
             EncryptAndSaveConfig(config);
             DecryptAndReadConfig();
 
+            await _spotify.RefreshConfigurationsAsync();
+            await _twitch.RefreshConfigurationsAsync();
+            await _pulsoid.RefreshConfigurationsAsync();
             /*if (spotifySettingsRefresh)
             {
                 Spotify.Instance?.Unload();

@@ -28,7 +28,7 @@ public abstract class OAuthOverlayApp : OverlayApp
     public abstract string CallbackAddress { get; }
     public abstract string AuthorizationAddress { get; }
     public abstract string Scopes { get; }
-
+    
     private string RegenerateStateToken()
     {
         _stateToken = new string(Enumerable.Repeat(Chars, 32).Select(s => s[Random.Next(s.Length)]).ToArray());
@@ -141,6 +141,7 @@ public abstract class OAuthOverlayApp : OverlayApp
             throw new Exception("Failed to verify the request");
 
         AccessToken = code;
+        
         _ = UpdateAuthorizationAsync();
     }
 

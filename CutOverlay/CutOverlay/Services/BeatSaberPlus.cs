@@ -172,7 +172,7 @@ public class BeatSaberPlus : OverlayApp
                                 await _overlayStatus.SaveStateAsync<BeatSaberPlus>(playbackState, 10);
                                 break;
                             case "score":
-                                BeatSaberPlusWebHookScoreEvent? scoreEvent = JsonConvert.DeserializeObject<BeatSaberPlusWebHookScoreEvent>(message);
+                                /*BeatSaberPlusWebHookScoreEvent? scoreEvent = JsonConvert.DeserializeObject<BeatSaberPlusWebHookScoreEvent>(message);
                                 BeatSaberAppScoreData? scoreData = null;
                                 if (scoreEvent is { ScoreEvent: not null })
                                     scoreData = new BeatSaberAppScoreData
@@ -186,7 +186,7 @@ public class BeatSaberPlus : OverlayApp
                                         Bpm = 0,
                                         Pp = 0
                                     };
-                                await _overlayStatus.SaveScoreStateAsync(scoreData);
+                                await _overlayStatus.SaveScoreStateAsync(scoreData);*/
                                 break;
                         }
 

@@ -478,18 +478,22 @@ p { white-space: nowrap; }
 	width: calc(100% - 40px);
 }
 
-.message span:last-child {
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background: linear-gradient(-60deg, #9b9b9b 0%, #ffffff 50%);
-	background-clip: text;
-}
+	.message span:last-child {
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background: linear-gradient(-60deg, #9b9b9b 0%, #ffffff 50%);
+		background-clip: text;
+	}
 
-.message span:last-child img {
-	-webkit-text-fill-color: initial;
-	margin: -3px 2px;
-	width: 26px;
-}
+		.message span:last-child img {
+			-webkit-text-fill-color: initial;
+			margin: -3px -6px -3px 2px;
+			width: 32px;
+			height: 32px;
+			grid-column: 1;
+			grid-row: 1;
+			object-fit: contain;
+		}
 
 .highlighted {
 	-webkit-background-clip: unset;

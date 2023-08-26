@@ -5,6 +5,7 @@ using System.Net.WebSockets;
 using System.Text;
 using CutOverlay.App;
 using CutOverlay.Models.Twitch;
+using CutOverlay.Models.Twitch.SevenTv;
 using Newtonsoft.Json;
 using TwitchLib.Api;
 using TwitchLib.Api.Core.Enums;
@@ -19,6 +20,7 @@ using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Events;
+using Emote = CutOverlay.Models.Twitch.SevenTv.Emote;
 
 namespace CutOverlay.Services;
 
@@ -59,7 +61,8 @@ public class Twitch : OverlayApp
     private static List<string> _subscribers = new();
     private SevenTvCosmetics? _cosmetics;
     private readonly ConfigurationService _configurationService;
-
+    private List<Emote> _sevenTvEmotes;
+    
     public Twitch(ConfigurationService configurationService)
     {
         HttpClient = new HttpClient();
@@ -72,6 +75,8 @@ public class Twitch : OverlayApp
 
         _subscribers = new List<string>();
 
+        _sevenTvEmotes = new List<Emote>();
+
         _userCache.Clear();
 
         _ = Task.Run(async () =>
@@ -79,7 +84,12 @@ public class Twitch : OverlayApp
             await Start(await configurationService.FetchConfigurationsAsync());
         });
     }
-    
+
+    public async Task RefreshConfigurationsAsync()
+    {
+        _configurations = await _configurationService.FetchConfigurationsAsync();
+    }
+
     public virtual Task Start(Dictionary<string, string?>? configurations)
     {
         Console.WriteLine("Twitch app starting...");
@@ -148,6 +158,11 @@ public class Twitch : OverlayApp
         _accessToken = oAuth;
 
         _cosmetics = await Get7TvCosmeticsAsync();
+        _sevenTvEmotes = await Get7TvGlobalEmotesAsync();
+
+        Console.WriteLine($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Badges.Count)} 7TV badges");
+        Console.WriteLine($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Paints.Count)} 7TV paints");
+        Console.WriteLine($"Loaded {_sevenTvEmotes.Count} 7TV emotes");
 
         _twitchApi = new TwitchAPI
         {
@@ -171,8 +186,6 @@ public class Twitch : OverlayApp
         User? user = users.Users.First();
 
         ConnectionCredentials credentials = new(user.Login, $"oauth:{oAuth}");
-
-        _twitchBotClient?.Disconnect();
 
         _twitchBotClient = new TwitchClient();
         _twitchBotClient.Initialize(credentials, _configurations?["twitchUsername"]);
@@ -200,7 +213,7 @@ public class Twitch : OverlayApp
         _followerService.Start();
 
         _broadcasterId = user.Id;
-
+        
         _ = StartChatWebSocket();
     }
 
@@ -236,8 +249,11 @@ public class Twitch : OverlayApp
             if (sevenTvUser?.Role.Color != null)
                 newUser.Color = Parse7TvColor(sevenTvUser.Role.Color);
 
-            newUser.Paint = Parse7TvPaint(newUser, sevenTvUser.TwitchId);
-            newUser.SevenTvBadges = Parse7TvBadges(newUser, sevenTvUser.TwitchId);
+            if (sevenTvUser?.TwitchId != null)
+            {
+                newUser.Paint = Parse7TvPaint(newUser, sevenTvUser.TwitchId);
+                newUser.SevenTvBadges = Parse7TvBadges(newUser, sevenTvUser.TwitchId);
+            }
         }
         catch (Exception ex)
         {
@@ -250,6 +266,50 @@ public class Twitch : OverlayApp
     #endregion
 
     #region 7TV
+
+    private async Task<SevenTvCosmetics?> Get7TvCosmeticsAsync()
+    {
+        try
+        {
+            const string cosmeticsApiUri = "https://7tv.io/v2/cosmetics?user_identifier=twitch_id";
+
+            HttpResponseMessage response = await HttpClient?.GetAsync(cosmeticsApiUri)!;
+
+            string content = await response.Content.ReadAsStringAsync();
+            SevenTvCosmetics? cosmetics = JsonConvert.DeserializeObject<SevenTvCosmetics>(content);
+
+            return cosmetics ?? null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to fetch 7TV cosmetics: {ex}");
+        }
+        return null;
+    }
+
+    private async Task<List<Emote>> Get7TvGlobalEmotesAsync()
+    {
+        try
+        {
+            const string emotesApiUri = "https://7tv.io/v3/emote-sets/global";
+
+            HttpResponseMessage response = await HttpClient?.GetAsync(emotesApiUri)!;
+
+            string content = await response.Content.ReadAsStringAsync();
+            SevenTvEmotes? globalEmotes = JsonConvert.DeserializeObject<SevenTvEmotes>(content);
+
+            if (globalEmotes != null)
+            {
+                return globalEmotes.Emotes;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to fetch 7TV cosmetics: {ex}");
+        }
+
+        return new List<Emote>();
+    }
 
     private TwitchUserPaint Parse7TvPaint(TwitchUser twitchUser, string twitchId)
     {
@@ -324,26 +384,6 @@ public class Twitch : OverlayApp
         return twitchUser.SevenTvBadges;
     }
 
-    private async Task<SevenTvCosmetics?> Get7TvCosmeticsAsync()
-    {
-        try
-        {
-            const string cosmeticsApiUri = "https://7tv.io/v2/cosmetics?user_identifier=twitch_id";
-
-            HttpResponseMessage response = await HttpClient?.GetAsync(cosmeticsApiUri)!;
-
-            string content = await response.Content.ReadAsStringAsync();
-            SevenTvCosmetics? cosmetics = JsonConvert.DeserializeObject<SevenTvCosmetics>(content);
-
-            return cosmetics ?? null;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to fetch 7TV cosmetics: {ex}");
-        }
-        return null;
-    }
-
     private static string Parse7TvColor(int color)
     {
         if (color == 0)
@@ -402,8 +442,6 @@ public class Twitch : OverlayApp
     {
         _ = Task.Run(async () =>
         {
-            _configurations = await _configurationService.FetchConfigurationsAsync();
-
             TwitchUser? user = _userCache.Find(f => f.DisplayName == e.ChatMessage.DisplayName);
             if (user == null)
             {
@@ -468,8 +506,70 @@ public class Twitch : OverlayApp
                 message.MessageEmotes.Add(emoteData);
             }
 
+            // Set 7TV emotes
+            if (_configurations?["use7TV"] == "true")
+            {
+                void AddEmote(int start, int end, string currentWord)
+                {
+                    int s = start;
+                    // Return if any emotes are already added at the start position
+                    if (message.MessageEmotes.Find(f => f.StartIndex == s) != null)
+                        return;
+
+                    // Find the 7TV emote from the word
+                    string word = currentWord;
+                    Emote? emote = _sevenTvEmotes.Find(f => f.Name == word || f.Data.Name == word);
+
+                    if (emote != null)
+                    {
+                        message.MessageEmotes.Add(new EmoteData
+                        {
+                            Url =
+                                $"https:{emote.Data.Host.Url}/{emote.Data.Host.Files.FindLast(f => f.Format.Equals("AVIF", StringComparison.InvariantCultureIgnoreCase))?.Name}",
+                            StartIndex = start,
+                            EndIndex = end,
+                            Overlay = IsOverlayEmote(emote.Data.Flags)
+                        });
+                    }
+                }
+
+                int i = 0;
+                int start = 0;
+                string currentWord = "";
+                while (i < e.ChatMessage.Message.Length)
+                {
+                    if (e.ChatMessage.Message[i] == ' ')
+                    {
+                        AddEmote(start, i - 1, currentWord);
+
+                        start = i + 1;
+                        currentWord = "";
+                    }
+                    else
+                    {
+                        currentWord += e.ChatMessage.Message[i];
+                    }
+                    i++;
+                }
+
+                AddEmote(start, i - 1, currentWord);
+            }
+
+            // Sort emotes
+            message.MessageEmotes = message.MessageEmotes.OrderBy(o => o.StartIndex).ToList();
+
             await SendMessageToAllAsync(JsonConvert.SerializeObject(message));
         });
+    }
+
+    private static bool IsOverlayEmote(int? flags, bool isLegacy = false)
+    {
+        return flags != null && HasFlag((int)flags, isLegacy ? 1 << 7 : 1 << 8);
+    }
+
+    private static bool HasFlag(int flags, int flag)
+    {
+        return (flags & flag) != 0;
     }
 
     #endregion
@@ -544,7 +644,7 @@ public class Twitch : OverlayApp
 
         listener.Start();
         Console.WriteLine("Listening for WebSocket connections...");
-
+        
         while (true)
         {
             HttpListenerContext context = await listener.GetContextAsync();

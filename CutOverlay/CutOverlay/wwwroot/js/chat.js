@@ -15,6 +15,7 @@ function addMessage(username, message, userColor, flags, userBadges, userProfile
         profileElement.style.width = "38px";
         profileElement.style.height = "38px";
         profileElement.style.margin = "2px 12px 2px 0";
+        profileElement.style.borderRadius = "10px";
         messageElement.appendChild(profileElement);
         const messageInnerElement = document.createElement("div");
         if (flags.highlighted) {
@@ -141,7 +142,7 @@ function replaceEmotes(message, emotes) {
     var emoteList = [];
 
     emotes.forEach(function (emoteData) {
-        emoteList.push([emoteData.url, [emoteData.startIndex, emoteData.endIndex]]);
+        emoteList.push([emoteData.url, [emoteData.startIndex, emoteData.endIndex], emoteData.overlay]);
     });
 
     // Sort emote list by position in descending order
@@ -155,10 +156,10 @@ function replaceEmotes(message, emotes) {
         let emoji = false;
         // Check if theres any emojis in this index point, if there is then add it to the output and skip to the end of the range
         for (let j = 0; j < emoteList.length; j++) {
-            const [url, [start, end]] = emoteList[j];
+            const [url, [start, end], overlay] = emoteList[j];
             if (i === start) {
                 const emoteImage =
-                    `<img src="${url}" alt="" />`;
+                    `<img src="${url}" alt="" ` + (overlay ? 'style="margin-left: -33px;"' : "") + ` />`;
                 output += emoteImage;
                 i = end;
                 emoji = true;

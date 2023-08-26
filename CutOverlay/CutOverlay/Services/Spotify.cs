@@ -10,10 +10,12 @@ public class Spotify : OAuthOverlayApp
 {
     private Timer? _statusTimer;
     private readonly OverlayStatusService _overlayStatus;
+    private readonly ConfigurationService _configurationService;
 
     public Spotify(OverlayStatusService overlayStatus, ConfigurationService configurationService)
     {
         HttpClient = new HttpClient();
+        _configurationService = configurationService;
         _overlayStatus = overlayStatus;
 
         AuthorizationTimer = null;
@@ -21,7 +23,7 @@ public class Spotify : OAuthOverlayApp
 
         _ = Task.Run(async () =>
         {
-            await Start(await configurationService.FetchConfigurationsAsync());
+            await Start(await _configurationService.FetchConfigurationsAsync());
         });
     }
 
@@ -29,6 +31,14 @@ public class Spotify : OAuthOverlayApp
     public override string CallbackAddress => $"http://localhost:{Globals.Port}/spotify/callback";
     public override string AuthorizationAddress => "https://accounts.spotify.com/authorize";
     public override string Scopes => "user-read-playback-state user-read-currently-playing user-modify-playback-state";
+    
+    public async Task RefreshConfigurationsAsync()
+    {
+        AuthorizationTimer?.Stop();
+        _statusTimer?.Stop();
+        
+        await Start(await _configurationService.FetchConfigurationsAsync());
+    }
 
     public Task Start(Dictionary<string, string?>? configurations)
     {

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace CutOverlay.Models.Twitch;
+namespace CutOverlay.Models.Twitch.SevenTv;
 
 public class Role
 {

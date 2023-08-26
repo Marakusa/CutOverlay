@@ -14,7 +14,7 @@ public class UserChatMessage
     public string? Message { get; set; }
 
     [JsonProperty("messageEmotes")]
-    public List<EmoteData>? MessageEmotes { get; set; }
+    public List<EmoteData> MessageEmotes { get; set; }
 
     [JsonProperty("userColor")]
     public string? UserColor { get; set; }
@@ -42,6 +42,9 @@ public class EmoteData
 
     [JsonProperty("endIndex")]
     public int EndIndex { get; set; }
+
+    [JsonProperty("overlay")]
+    public bool Overlay { get; set; }
 }
 
 public class Flags
