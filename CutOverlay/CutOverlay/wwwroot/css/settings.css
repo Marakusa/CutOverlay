@@ -211,13 +211,14 @@ hr {
 	flex-direction: row;
 	height: auto;
 	justify-content: flex-start;
-	padding: 10px 0;
 }
-
-.checkboxInput .label {
-	margin-left: 5px;
-	padding: 0;
-}
+	.checkboxInput input {
+		cursor: pointer;
+	}
+	.checkboxInput .label {
+		margin-left: 5px;
+		padding: 0;
+	}
 
 input[type="checkbox"] {
 	/* Add if not using autoprefixer */
@@ -329,7 +330,18 @@ input[type="submit"]:hover { background-color: var(--accent-alternative-color); 
 	border-width: 1px;
 }
 
-.overlayDiv:nth-child(even) { background-color: #ffffff08; }
+	.overlayDiv:nth-child(even) {
+		background-color: #ffffff08;
+	}
+
+	.overlayDiv a {
+		cursor: move;
+		text-decoration: none;
+	}
+
+		.overlayDiv a .settingsInputNoSave {
+			margin: 0;
+		}
 
 .draggableWindowFooter .button { float: right; }
 

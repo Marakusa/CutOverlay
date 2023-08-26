@@ -19,6 +19,8 @@ public class BeatSaberPlus : OverlayApp
 
     public BeatSaberPlus(OverlayStatusService overlayStatus, ConfigurationService configurationService)
     {
+        Status = ServiceStatusType.Starting;
+
         HttpClient = new HttpClient();
         _overlayStatus = overlayStatus;
 
@@ -42,9 +44,15 @@ public class BeatSaberPlus : OverlayApp
             await webSocket.ConnectAsync(new Uri(WebsocketAddress), CancellationToken.None);
 
             if (webSocket.State == WebSocketState.Open)
+            {
+                Status = ServiceStatusType.Running;
                 Console.WriteLine("BeatSaberPlus app started and connected!");
+            }
             else
+            {
+                Status = ServiceStatusType.Error;
                 throw new Exception("Failed to connect to web socket");
+            }
 
             while (_cancellationTokenSource is { Token.IsCancellationRequested: false })
                 await ReceiveMessage(webSocket, _cancellationTokenSource);
@@ -52,7 +60,12 @@ public class BeatSaberPlus : OverlayApp
         catch (Exception ex)
         {
             if (ex.Message != "Unable to connect to the remote server")
+            {
+                Status = ServiceStatusType.Error;
                 Console.WriteLine("WebSocket error: " + ex.Message);
+            }
+            else
+                Status = ServiceStatusType.Starting;
             // Attempt reconnection after a certain interval
             await Task.Delay(ReconnectInterval);
         }
@@ -167,6 +180,7 @@ public class BeatSaberPlus : OverlayApp
                                 await _overlayStatus.SaveStateAsync<BeatSaberPlus>(playbackState, 10);
                                 break;
                             case "score":
+                                // TODO: Score
                                 /*BeatSaberPlusWebHookScoreEvent? scoreEvent = JsonConvert.DeserializeObject<BeatSaberPlusWebHookScoreEvent>(message);
                                 BeatSaberAppScoreData? scoreData = null;
                                 if (scoreEvent is { ScoreEvent: not null })
@@ -197,6 +211,8 @@ public class BeatSaberPlus : OverlayApp
 
     public override void Unload()
     {
+        Status = ServiceStatusType.Stopping;
+
         try
         {
             _overlayStatus.ClearStatusFiles();
@@ -209,5 +225,12 @@ public class BeatSaberPlus : OverlayApp
         HttpClient?.Dispose();
 
         Console.WriteLine("BeatSaberPlus app unloaded");
+
+        Status = ServiceStatusType.Stopped;
+    }
+
+    public override ServiceStatusType GetStatus()
+    {
+        return Status;
     }
 }

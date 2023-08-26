@@ -17,8 +17,8 @@ public abstract class OAuthOverlayApp : OverlayApp
 
     private static readonly Random Random = new();
 
-    private string? _clientId = "";
-    private string? _clientSecret = "";
+    protected string? ClientId = "";
+    protected string? ClientSecret = "";
     private string _stateToken = "";
     private protected string? AccessToken;
 
@@ -37,8 +37,10 @@ public abstract class OAuthOverlayApp : OverlayApp
 
     private protected void SetupOAuth(string? clientId, string? clientSecret)
     {
-        _clientId = clientId;
-        _clientSecret = clientSecret;
+        Status = ServiceStatusType.Starting;
+
+        ClientId = clientId;
+        ClientSecret = clientSecret;
 
         AuthorizationTimer?.Stop();
         AuthorizationTimer = new Timer { Interval = 120000 };
@@ -54,7 +56,7 @@ public abstract class OAuthOverlayApp : OverlayApp
                 "{0}?response_type={1}&client_id={2}&redirect_uri={3}&scope={4}&state={5}",
                 AuthorizationAddress,
                 ResponseType,
-                _clientId,
+                ClientId,
                 CallbackAddress,
                 Scopes,
                 state
@@ -80,8 +82,8 @@ public abstract class OAuthOverlayApp : OverlayApp
                 {
                     Content = new FormUrlEncodedContent(new[]
                     {
-                        new KeyValuePair<string, string?>("client_id", _clientId),
-                        new KeyValuePair<string, string?>("client_secret", _clientSecret),
+                        new KeyValuePair<string, string?>("client_id", ClientId),
+                        new KeyValuePair<string, string?>("client_secret", ClientSecret),
                         new KeyValuePair<string, string?>("grant_type", "authorization_code"),
                         new KeyValuePair<string, string?>("code", AccessToken),
                         new KeyValuePair<string, string?>("state", state),
@@ -92,7 +94,7 @@ public abstract class OAuthOverlayApp : OverlayApp
                 request.Headers.Authorization = new AuthenticationHeaderValue("Basic",
                     Convert.ToBase64String(
                         Encoding.UTF8.GetBytes(
-                            $"{_clientId}:{_clientSecret}")));
+                            $"{ClientId}:{ClientSecret}")));
             }
             else
             {
@@ -100,8 +102,8 @@ public abstract class OAuthOverlayApp : OverlayApp
                 {
                     Content = new FormUrlEncodedContent(new[]
                     {
-                        new KeyValuePair<string, string?>("client_id", _clientId),
-                        new KeyValuePair<string, string?>("client_secret", _clientSecret),
+                        new KeyValuePair<string, string?>("client_id", ClientId),
+                        new KeyValuePair<string, string?>("client_secret", ClientSecret),
                         new KeyValuePair<string, string?>("grant_type", "refresh_token"),
                         new KeyValuePair<string, string?>("state", state),
                         new KeyValuePair<string, string?>("refresh_token", RefreshToken)
@@ -111,7 +113,7 @@ public abstract class OAuthOverlayApp : OverlayApp
                 request.Headers.Authorization = new AuthenticationHeaderValue("Basic",
                     Convert.ToBase64String(
                         Encoding.UTF8.GetBytes(
-                            $"{_clientId}:{_clientSecret}")));
+                            $"{ClientId}:{ClientSecret}")));
             }
 
             HttpResponseMessage response = await HttpClient!.SendAsync(request);
@@ -120,6 +122,7 @@ public abstract class OAuthOverlayApp : OverlayApp
             if (!response.IsSuccessStatusCode)
             {
                 Console.WriteLine($"ERROR: {content}");
+                Status = ServiceStatusType.Error;
                 return;
             }
 
@@ -127,20 +130,27 @@ public abstract class OAuthOverlayApp : OverlayApp
                 JsonConvert.DeserializeObject<SpotifyAuthenticationModel>(content);
             AccessToken = authentication?.AccessToken;
             if (!string.IsNullOrEmpty(authentication?.RefreshToken))
-                RefreshToken = authentication?.RefreshToken;
+                RefreshToken = authentication.RefreshToken;
+            Status = ServiceStatusType.Running;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"ERROR: {ex}");
+            Status = ServiceStatusType.Error;
         }
     }
 
     public void AuthCallback(string code, string state)
     {
         if (string.IsNullOrEmpty(state) || !state.Equals(state, StringComparison.InvariantCulture))
+        {
+            Status = ServiceStatusType.Error;
             throw new Exception("Failed to verify the request");
+        }
 
         AccessToken = code;
+
+        Status = ServiceStatusType.Running;
 
         _ = UpdateAuthorizationAsync();
     }

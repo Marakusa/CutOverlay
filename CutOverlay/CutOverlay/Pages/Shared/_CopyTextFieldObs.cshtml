@@ -1,0 +1,12 @@
+﻿@model CutOverlay.Models.InputModelObs
+<a id="@Model.Id-drag" href="@Model.Value?@Model.GetSourceQuery()" draggable="true">
+    <div class="settingsInputNoSave textField copyField">
+        <span class="label" style="font-weight: normal;"><i class="fa-solid fa-@Model.Icon" style="color: var(--accent-color);"></i> @Model.Label</span>
+        <input onclick="copyToClipboard('@Model.Id')" type="text" id="@Model.Id" value="@Model.Value" readonly>
+        <span onclick="copyToClipboard('@Model.Id')" class="copyIcon"></span>
+    </div>
+</a>
+
+<script type="text/javascript">
+    document.getElementById("@Model.Id-drag").addEventListener("click", e => e.preventDefault());
+</script>

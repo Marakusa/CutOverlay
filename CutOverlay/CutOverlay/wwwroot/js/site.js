@@ -32,18 +32,6 @@ function hexToRgb(hex) {
         : null;
 }
 
-function checkUpdate() {
-    // Hide heart rate text if empty
-    const heartRateText = document.getElementById("heartRateText");
-    if (heartRateText.innerText === "") {
-        heartRateText.parentElement.parentElement.style.display = "none";
-    } else {
-        heartRateText.parentElement.parentElement.style.display = null;
-    }
-}
-
-setInterval(checkUpdate, 2000);
-
 function fetchFollows() {
     try {
         const response = fetch(`/twitch/followers?since=${followersSince}`, { method: "GET" });
@@ -226,20 +214,24 @@ setInterval(() => {
             const response = fetch("/pulsoid/status", { method: "GET" });
             response.then((res) => {
                 if (res.ok) {
-                    res.text((status) => {
+                    res.text().then((status) => {
                         if (status == null || status === "") {
                             heartRateElement.innerText = "";
+                            heartRateElement.parentElement.parentElement.style.display = "none";
                         } else {
                             heartRateElement.innerText = status;
+                            heartRateElement.parentElement.parentElement.style.display = null;
                         }
                     });
                 } else {
                     heartRateElement.innerText = "";
+                    heartRateElement.parentElement.parentElement.style.display = "none";
                 }
             });
         } catch (error) {
-            console.error("An error occurred while fetching Spotify status");
+            console.error("An error occurred while fetching Pulsoid status");
             heartRateElement.innerText = "";
+            heartRateElement.parentElement.parentElement.style.display = "none";
         }
     },
     5000);

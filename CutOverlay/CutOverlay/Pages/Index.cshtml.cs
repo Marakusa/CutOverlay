@@ -12,7 +12,7 @@ public class IndexModel : PageModel
         _logger = logger;
     }
 
-    public string CopyrightString => "CUT Flags (c) 2023 Markus Kannisto";
+    public string CopyrightString => "CUT Overlay (c) 2023 Markus Kannisto";
 
     public string? Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString();
 

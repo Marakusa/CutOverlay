@@ -16,7 +16,7 @@ public class ConfigurationController : ControllerBase
     private readonly Pulsoid _pulsoid;
     private readonly Spotify _spotify;
     private readonly Twitch _twitch;
-
+    
     public ConfigurationController(IConfiguration configuration, Spotify spotify, Twitch twitch, Pulsoid pulsoid)
     {
         _spotify = spotify;
@@ -83,36 +83,10 @@ public class ConfigurationController : ControllerBase
         {
             EncryptAndSaveConfig(config);
             DecryptAndReadConfig();
-
+            
             await _spotify.RefreshConfigurationsAsync();
             await _twitch.RefreshConfigurationsAsync();
             await _pulsoid.RefreshConfigurationsAsync();
-            /*if (spotifySettingsRefresh)
-            {
-                Spotify.Instance?.Unload();
-                Spotify.Instance?.Dispose();
-                Spotify.Instance = null;
-                _ = new Spotify();
-                await Spotify.Instance?.Start(Configurations)!;
-            }
-
-            if (twitchSettingsRefresh)
-            {
-                Twitch.Instance?.Unload();
-                Twitch.Instance?.Dispose();
-                Twitch.Instance = null;
-                _ = new Twitch();
-                await Twitch.Instance?.Start(Configurations)!;
-            }
-
-            if (pulsoidSettingsRefresh)
-            {
-                Pulsoid.Instance?.Unload();
-                Pulsoid.Instance?.Dispose();
-                Pulsoid.Instance = null;
-                _ = new Pulsoid();
-                await Pulsoid.Instance?.Start(Configurations)!;
-            }*/
 
             return Ok();
         }

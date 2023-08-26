@@ -16,35 +16,59 @@
     <div id="settingsPanelContent" class="draggableWindowContent">
         <div class="settingsSection">
 
-
+            
             @await Html.PartialAsync("_Header", new TextModel
                    {
                        Text = "Twitch"
                    })
+
             @await Html.PartialAsync("_Checkbox", new InputModel
                    {
                        Label = "Use Twitch Chat",
                        Id = "twitchChat",
                        Value = "true"
                    })
+
             @await Html.PartialAsync("_Checkbox", new InputModel
                    {
                        Label = "7TV Integration",
                        Id = "use7TV",
                        Value = "true"
                    })
-            <!--@await Html.PartialAsync("_Checkbox", new InputModel
+            <div style="margin-left: 30px;">
+                @await Html.PartialAsync("_Checkbox", new InputModel
                        {
-                           Label = "BetterTTV Integration",
-                           Id = "userBetterTTV",
+                           Label = "Enable Emotes",
+                           Id = "use7TVemotes",
                            Value = "true"
                        })
+                @await Html.PartialAsync("_Checkbox", new InputModel
+                       {
+                           Label = "Enable User Badges",
+                           Id = "use7TVbadges",
+                           Value = "true"
+                       })
+                @await Html.PartialAsync("_Checkbox", new InputModel
+                       {
+                           Label = "Enable User Paints",
+                           Id = "use7TVpaints",
+                           Value = "true"
+                       })
+            </div>
+
+            @await Html.PartialAsync("_Checkbox", new InputModel
+                   {
+                       Label = "BetterTTV Integration",
+                       Id = "userBetterTTV",
+                       Value = "true"
+                   })
+
             @await Html.PartialAsync("_Checkbox", new InputModel
                    {
                        Label = "FrankerFaceZ Integration",
                        Id = "useFrankerFaceZ",
                        Value = "true"
-                   })-->
+                   })
 
             <hr/>
 
@@ -130,105 +154,121 @@
         <span class="closeWindowButton" onclick="showWindow('overlaysPanel', false)"></span>
     </div>
     <div id="overlaysPanelContent" class="draggableWindowContent" style="padding: 0;">
+        <div class="settingsSection" style="padding: 10px 10px 0; margin: 0;">
+            @await Html.PartialAsync("_Text", new TextModel
+                   {
+                       Text = "Drag and drop these sources to OBS"
+                   })
+        </div>
         <div class="overlayDiv">
-            @await Html.PartialAsync("_CopyTextField", new InputModel
+            @await Html.PartialAsync("_CopyTextFieldObs", new InputModelObs
                    {
                        Id = "overlay1Copy",
                        Value = $"http://localhost:{Globals.Port}/Chat",
-                       Label = "Chat Box"
+                       Icon = "comments",
+                       Label = "Chat Box",
+                       ObsSourceName = "CUT_ChatBox",
+                       ObsSourceWidth = 500,
+                       ObsSourceHeight = 980
                    })
         </div>
         <div class="overlayDiv">
-            @await Html.PartialAsync("_CopyTextField", new InputModel
+            @await Html.PartialAsync("_CopyTextFieldObs", new InputModelObs
                    {
                        Id = "overlay2Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayWarning",
-                       Label = "Warning text"
+                       Icon = "quote-left",
+                       Label = "Warning",
+                       ObsSourceName = "CUT_Warning"
                    })
         </div>
         <div class="overlayDiv">
-            @await Html.PartialAsync("_CopyTextField", new InputModel
+            @await Html.PartialAsync("_CopyTextFieldObs", new InputModelObs
                    {
                        Id = "overlay3Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayStarting",
-                       Label = "Starting soon"
+                       Icon = "quote-left",
+                       Label = "Starting soon + Warning",
+                       ObsSourceName = "CUT_StartingHeader"
                    })
         </div>
         <div class="overlayDiv">
-            @await Html.PartialAsync("_CopyTextField", new InputModel
+            @await Html.PartialAsync("_CopyTextFieldObs", new InputModelObs
                    {
                        Id = "overlay4Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayChat",
-                       Label = "Panel + Background"
+                       Icon = "window-maximize",
+                       Label = "Panel + Background",
+                       ObsSourceName = "CUT_PanelBackground"
                    })
         </div>
         <div class="overlayDiv">
-            @await Html.PartialAsync("_CopyTextField", new InputModel
+            @await Html.PartialAsync("_CopyTextFieldObs", new InputModelObs
                    {
                        Id = "overlay5Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayBrb",
-                       Label = "BRB Screen"
+                       Icon = "window-maximize",
+                       Label = "BRB Screen",
+                       ObsSourceName = "CUT_BRB"
                    })
         </div>
         <div class="overlayDiv">
-            @await Html.PartialAsync("_CopyTextField", new InputModel
+            @await Html.PartialAsync("_CopyTextFieldObs", new InputModelObs
                    {
                        Id = "overlay6Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayGame1",
-                       Label = "Panel"
+                       Icon = "window-maximize",
+                       Label = "Panel",
+                       ObsSourceName = "CUT_Panel"
                    })
         </div>
         <div class="overlayDiv">
-            @await Html.PartialAsync("_CopyTextField", new InputModel
+            @await Html.PartialAsync("_CopyTextFieldObs", new InputModelObs
                    {
                        Id = "overlay7Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayGame2",
-                       Label = "No Panel"
+                       Icon = "window-maximize",
+                       Label = "No Panel (Clean)",
+                       ObsSourceName = "CUT_CleanOverlay"
                    })
         </div>
     </div>
 </div>
 
-<!--<div id="appsPanel" class="draggableWindow" style="height: 235px; left: 571px; top: 522px; width: 340px;">
+<div id="appsPanel" class="draggableWindow" style="height: 235px; left: 571px; top: 522px; width: 340px;">
     <div id="appsPanelHeader" class="draggableWindowHeader">
-        <span>Overlays</span>
+        <span>Services</span>
         <span class="closeWindowButton" onclick="showWindow('appsPanel', false)"></span>
     </div>
-    <div id="appsPanelContent" class="draggableWindowContent">
-        <div class="settingsSection">
-            @await Html.PartialAsync("_Button", new InputModel
-                   {
-                       Id = "twitchApp",
-                       Value = "Twitch Overlay Running",
-                       OnClick = "console.log('test')",
-                       AlignContent = Align.Stretch
-                   })
+    <div id="appsPanelContent" class="draggableWindowContent" style="padding: 0;">
+        @await Html.PartialAsync("_ServiceStatus", new ServiceStatus
+               {
+                   Id = "twitch",
+                   Label = "Twitch"
+               })
 
-            <hr />
+        @await Html.PartialAsync("_ServiceStatus", new ServiceStatus
+               {
+                   Id = "spotify",
+                   Label = "Spotify"
+               })
 
-            @await Html.PartialAsync("_Button", new InputModel
-                   {
-                       Id = "spotifyApp",
-                       Value = "Spotify Overlay Running",
-                       OnClick = "console.log('test')",
-                       AlignContent = Align.Stretch
-                   })
+        @await Html.PartialAsync("_ServiceStatus", new ServiceStatus
+               {
+                   Id = "bsp",
+                   Label = "BeatSaber+"
+               })
 
-            <hr />
-
-            @await Html.PartialAsync("_Button", new InputModel
-                   {
-                       Id = "pulsoidApp",
-                       Value = "Pulsoid Overlay Running",
-                       OnClick = "console.log('test')",
-                       AlignContent = Align.Stretch
-                   })
-        </div>
+        @await Html.PartialAsync("_ServiceStatus", new ServiceStatus
+               {
+                   Id = "pulsoid",
+                   Label = "Pulsoid"
+               })
     </div>
-</div>-->
-<div id="debugPanel" class="draggableWindow" style="height: 235px; left: 571px; top: 522px; width: 340px;">
+</div>
+<!--<div id="debugPanel" class="draggableWindow" style="height: 235px; left: 571px; top: 522px; width: 340px;">
     <div id="debugPanelHeader" class="draggableWindowHeader">
-        <span>Overlays</span>
+        <span>Debug</span>
         <span class="closeWindowButton" onclick="showWindow('debugPanel', false)"></span>
     </div>
     <div id="debugPanelContent" class="draggableWindowContent">
@@ -242,7 +282,7 @@
                    })
         </div>
     </div>
-</div>
+</div>-->
 
 <div id="toolbox" class="draggableWindow" style="height: 67px; left: 10px; max-height: 67px; min-height: 67px; min-width: 298px; top: 10px; width: 298px;">
     <div id="toolboxHeader" class="draggableWindowHeader">
@@ -267,24 +307,24 @@
                    Value = "icon-overlays.png",
                    OnClick = "showWindow('overlaysPanel', true)"
                })
-        <!--@await Html.PartialAsync("_ToolboxButton", new InputModel
+        @await Html.PartialAsync("_ToolboxButton", new InputModel
                    {
                        Id = "toolboxInfo",
                        Value = "icon-apps.png",
                        OnClick = "showWindow('appsPanel', true)"
-                   })-->
+                   })
         @await Html.PartialAsync("_ToolboxButton", new InputModel
                {
                    Id = "toolboxInfo",
                    Value = "icon-info.png",
                    OnClick = "showWindow('infoPanel', true)"
                })
-        @await Html.PartialAsync("_ToolboxButton", new InputModel
+        <!--@await Html.PartialAsync("_ToolboxButton", new InputModel
                {
                    Id = "toolboxDebug",
                    Value = "icon-debug.png",
                    OnClick = "showWindow('debugPanel', true)"
-               })
+        })-->
     </div>
 </div>
 

@@ -65,6 +65,8 @@ public class Twitch : OverlayApp
 
     public Twitch(ConfigurationService configurationService)
     {
+        Status = ServiceStatusType.Starting;
+
         HttpClient = new HttpClient();
         _configurationService = configurationService;
 
@@ -92,10 +94,7 @@ public class Twitch : OverlayApp
         Console.WriteLine("Twitch app starting...");
 
         _configurations = configurations;
-
-        if (string.IsNullOrEmpty(_configurations?["twitchUsername"]))
-            return Task.CompletedTask;
-
+        
         SetupOAuth(ClientId);
 
         Console.WriteLine("Twitch app started!");
@@ -104,6 +103,8 @@ public class Twitch : OverlayApp
 
     public override void Unload()
     {
+        Status = ServiceStatusType.Stopping;
+
         foreach (WebSocket socket in Sockets) socket.Dispose();
 
         _twitchBotClient?.Disconnect();
@@ -117,6 +118,13 @@ public class Twitch : OverlayApp
         _followerService = null;
 
         Console.WriteLine("Twitch app unloaded");
+
+        Status = ServiceStatusType.Stopped;
+    }
+
+    public override ServiceStatusType GetStatus()
+    {
+        return Status;
     }
 
     #region Service Methods
@@ -149,66 +157,76 @@ public class Twitch : OverlayApp
 
     public async Task SetOAuth(string? oAuth, string state)
     {
-        if (string.IsNullOrEmpty(state) || !state.Equals(state, StringComparison.InvariantCulture))
-            throw new Exception("Failed to verify the request");
-
-        _accessToken = oAuth;
-
-        _cosmetics = await Get7TvCosmeticsAsync();
-        _sevenTvEmotes = await Get7TvGlobalEmotesAsync();
-
-        Console.WriteLine($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Badges.Count)} 7TV badges");
-        Console.WriteLine($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Paints.Count)} 7TV paints");
-        Console.WriteLine($"Loaded {_sevenTvEmotes.Count} 7TV emotes");
-
-        _twitchApi = new TwitchAPI
+        try
         {
-            Settings =
+            if (string.IsNullOrEmpty(state) || !state.Equals(state, StringComparison.InvariantCulture))
+                throw new Exception("Failed to verify the request");
+
+            _accessToken = oAuth;
+
+            _cosmetics = await Get7TvCosmeticsAsync();
+            _sevenTvEmotes = await Get7TvGlobalEmotesAsync();
+
+            Console.WriteLine($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Badges.Count)} 7TV badges");
+            Console.WriteLine($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Paints.Count)} 7TV paints");
+            Console.WriteLine($"Loaded {_sevenTvEmotes.Count} 7TV emotes");
+
+            _twitchApi = new TwitchAPI
             {
-                ClientId = ClientId,
-                AccessToken = _accessToken,
-                Scopes = new List<AuthScopes>
+                Settings =
                 {
-                    AuthScopes.Helix_Moderation_Read,
-                    AuthScopes.Helix_Moderator_Read_Followers,
-                    AuthScopes.Helix_User_Read_Follows
+                    ClientId = ClientId,
+                    AccessToken = _accessToken,
+                    Scopes = new List<AuthScopes>
+                    {
+                        AuthScopes.Helix_Moderation_Read,
+                        AuthScopes.Helix_Moderator_Read_Followers,
+                        AuthScopes.Helix_User_Read_Follows
+                    }
                 }
-            }
-        };
-        GetUsersResponse? users = await _twitchApi.Helix.Users.GetUsersAsync();
-        foreach (User u in users.Users) _userCache.Add(await HandleExtensionsAsync(u));
-        User? user = users.Users.First();
+            };
+            GetUsersResponse? users = await _twitchApi.Helix.Users.GetUsersAsync();
+            foreach (User u in users.Users) _userCache.Add(await HandleExtensionsAsync(u));
+            User? user = users.Users.First();
 
-        ConnectionCredentials credentials = new(user.Login, $"oauth:{oAuth}");
+            ConnectionCredentials credentials = new(user.Login, $"oauth:{oAuth}");
 
-        _twitchBotClient = new TwitchClient();
-        _twitchBotClient.Initialize(credentials, _configurations?["twitchUsername"]);
+            _twitchBotClient = new TwitchClient();
+            _twitchBotClient.Initialize(credentials, user.Login);
 
-        _twitchBotClient.OnError += OnError;
-        _twitchBotClient.OnJoinedChannel += OnJoinedChannel;
-        _twitchBotClient.OnNewSubscriber += OnNewSubscriber;
-        _twitchBotClient.OnRaidNotification += OnRaidNotification;
-        _twitchBotClient.OnMessageReceived += OnMessageReceived;
+            _twitchBotClient.OnError += OnError;
+            _twitchBotClient.OnJoinedChannel += OnJoinedChannel;
+            _twitchBotClient.OnNewSubscriber += OnNewSubscriber;
+            _twitchBotClient.OnRaidNotification += OnRaidNotification;
+            _twitchBotClient.OnMessageReceived += OnMessageReceived;
 
-        _twitchBotClient.Connect();
+            _twitchBotClient.Connect();
 
-        _followerService = new FollowerService(_twitchApi, 5, invokeEventsOnStartup: false);
-        _followerService.OnNewFollowersDetected += OnNewFollowers;
-        _followerService.OnServiceStarted += OnFollowerServiceStarted;
+            _followerService = new FollowerService(_twitchApi, 5, invokeEventsOnStartup: false);
+            _followerService.OnNewFollowersDetected += OnNewFollowers;
+            _followerService.OnServiceStarted += OnFollowerServiceStarted;
 
-        _followerService.SetChannelsById(new List<string>
+            _followerService.SetChannelsById(new List<string>
+            {
+                user.Id
+            });
+            _badges = (await _twitchApi.Helix.Chat.GetChannelChatBadgesAsync(user.Id)).EmoteSet.ToList();
+            _badges.AddRange((await _twitchApi.Helix.Chat.GetGlobalChatBadgesAsync()).EmoteSet.ToList());
+
+            _followerService.ClearCache();
+            _followerService.Start();
+
+            _broadcasterId = user.Id;
+
+            // TODO: Channel emotes on 7TV
+
+            _ = StartChatWebSocket();
+        }
+        catch
         {
-            user.Id
-        });
-        _badges = (await _twitchApi.Helix.Chat.GetChannelChatBadgesAsync(user.Id)).EmoteSet.ToList();
-        _badges.AddRange((await _twitchApi.Helix.Chat.GetGlobalChatBadgesAsync()).EmoteSet.ToList());
-
-        _followerService.ClearCache();
-        _followerService.Start();
-
-        _broadcasterId = user.Id;
-
-        _ = StartChatWebSocket();
+            Status = ServiceStatusType.Error;
+            throw;
+        }
     }
 
     private async Task<TwitchUser> HandleExtensionsAsync(User user)
@@ -251,6 +269,7 @@ public class Twitch : OverlayApp
         }
         catch (Exception ex)
         {
+            Status = ServiceStatusType.Error;
             Console.WriteLine($"Failed to fetch 7TV user data: {ex}");
         }
 
@@ -276,6 +295,7 @@ public class Twitch : OverlayApp
         }
         catch (Exception ex)
         {
+            Status = ServiceStatusType.Error;
             Console.WriteLine($"Failed to fetch 7TV cosmetics: {ex}");
         }
 
@@ -297,6 +317,7 @@ public class Twitch : OverlayApp
         }
         catch (Exception ex)
         {
+            Status = ServiceStatusType.Error;
             Console.WriteLine($"Failed to fetch 7TV cosmetics: {ex}");
         }
 
@@ -339,6 +360,7 @@ public class Twitch : OverlayApp
         }
         catch (Exception ex)
         {
+            Status = ServiceStatusType.Error;
             Console.WriteLine($"Failed to get 7TV paint for user {twitchId}: {ex}");
         }
 
@@ -361,6 +383,7 @@ public class Twitch : OverlayApp
         }
         catch (Exception ex)
         {
+            Status = ServiceStatusType.Error;
             Console.WriteLine($"Failed to get 7TV paint for user {twitchId}: {ex}");
         }
 
@@ -420,130 +443,7 @@ public class Twitch : OverlayApp
 
     private void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
-        _ = Task.Run(async () =>
-        {
-            TwitchUser? user = _userCache.Find(f => f.DisplayName == e.ChatMessage.DisplayName);
-            if (user == null)
-            {
-                GetUsersResponse? users = await _twitchApi?.Helix.Users.GetUsersAsync(new List<string>
-                {
-                    e.ChatMessage.UserId
-                })!;
-                foreach (User u in users.Users) _userCache.Add(await HandleExtensionsAsync(u));
-                user = await HandleExtensionsAsync(users.Users.First());
-            }
-
-            UserChatMessage message = new()
-            {
-                UserId = e.ChatMessage.UserId,
-                Message = e.ChatMessage.Message,
-                DisplayName = e.ChatMessage.DisplayName,
-                UserColor = e.ChatMessage.ColorHex,
-                Paint = _configurations?["use7TV"] == "true" ? user.Paint : null,
-                UserBadges = new List<string>(),
-                UserProfileImageUrl = user.ProfileImageUrl,
-                Flags = new Flags
-                {
-                    Broadcaster = e.ChatMessage.IsBroadcaster,
-                    Founder = false,
-                    Highlighted = e.ChatMessage.IsHighlighted,
-                    Mod = e.ChatMessage.IsModerator,
-                    Subscriber = e.ChatMessage.IsSubscriber,
-                    Vip = e.ChatMessage.IsVip
-                },
-                MessageEmotes = new List<EmoteData>()
-            };
-
-            // Set badges
-            foreach (BadgeVersion badgeVersion in from badge in e.ChatMessage.Badges
-                     let index = _badges.FindIndex(f => f.SetId == badge.Key)
-                     where index >= 0
-                     select _badges[index].Versions.FirstOrDefault(f => f.Id.ToString() == badge.Value, null)
-                     into badgeVersion
-                     where badgeVersion?.ImageUrl1x != null
-                     select badgeVersion)
-                message.UserBadges.Add(badgeVersion.ImageUrl4x);
-
-            // Add 7TV badges
-            if (_configurations?["use7TV"] == "true")
-                message.UserBadges.AddRange(user.SevenTvBadges);
-
-            // Set emotes
-            foreach (EmoteData emoteData in e.ChatMessage.EmoteSet.Emotes.Select(emote => new EmoteData
-                     {
-                         Url = emote.ImageUrl,
-                         StartIndex = emote.StartIndex,
-                         EndIndex = emote.EndIndex
-                     }))
-            {
-                emoteData.Url =
-                    $"https://static-cdn.jtvnw.net/emoticons/v2/{emoteData.Url?.Split("/")[5]}/default/light/2.0";
-                message.MessageEmotes.Add(emoteData);
-            }
-
-            // Set 7TV emotes
-            if (_configurations?["use7TV"] == "true")
-            {
-                void AddEmote(int start, int end, string currentWord)
-                {
-                    int s = start;
-                    // Return if any emotes are already added at the start position
-                    if (message.MessageEmotes.Find(f => f.StartIndex == s) != null)
-                        return;
-
-                    // Find the 7TV emote from the word
-                    string word = currentWord;
-                    Emote? emote = _sevenTvEmotes.Find(f => f.Name == word || f.Data.Name == word);
-
-                    if (emote != null)
-                        message.MessageEmotes.Add(new EmoteData
-                        {
-                            Url =
-                                $"https:{emote.Data.Host.Url}/{emote.Data.Host.Files.FindLast(f => f.Format.Equals("AVIF", StringComparison.InvariantCultureIgnoreCase))?.Name}",
-                            StartIndex = start,
-                            EndIndex = end,
-                            Overlay = IsOverlayEmote(emote.Data.Flags)
-                        });
-                }
-
-                int i = 0;
-                int start = 0;
-                string currentWord = "";
-                while (i < e.ChatMessage.Message.Length)
-                {
-                    if (e.ChatMessage.Message[i] == ' ')
-                    {
-                        AddEmote(start, i - 1, currentWord);
-
-                        start = i + 1;
-                        currentWord = "";
-                    }
-                    else
-                    {
-                        currentWord += e.ChatMessage.Message[i];
-                    }
-
-                    i++;
-                }
-
-                AddEmote(start, i - 1, currentWord);
-            }
-
-            // Sort emotes
-            message.MessageEmotes = message.MessageEmotes.OrderBy(o => o.StartIndex).ToList();
-
-            await SendMessageToAllAsync(JsonConvert.SerializeObject(message));
-        });
-    }
-
-    private static bool IsOverlayEmote(int? flags, bool isLegacy = false)
-    {
-        return flags != null && HasFlag((int)flags, isLegacy ? 1 << 7 : 1 << 8);
-    }
-
-    private static bool HasFlag(int flags, int flag)
-    {
-        return (flags & flag) != 0;
+        _ = Task.Run(async () => await ReceiveMessageAsync(e.ChatMessage));
     }
 
     #endregion
@@ -614,6 +514,7 @@ public class Twitch : OverlayApp
 
         listener.Start();
         Console.WriteLine("Listening for WebSocket connections...");
+        Status = ServiceStatusType.Running;
 
         while (true)
         {
@@ -625,12 +526,18 @@ public class Twitch : OverlayApp
         }
     }
 
-    private async void ProcessWebSocketRequest(HttpListenerContext context)
+    private static async void ProcessWebSocketRequest(HttpListenerContext context)
     {
         HttpListenerWebSocketContext socketContext = await context.AcceptWebSocketAsync(null);
         WebSocket socket = socketContext.WebSocket;
 
         Console.WriteLine("WebSocket connection established.");
+        for (int i = 0; i < Sockets.Count; i++)
+        {
+            if (Sockets[i].State == WebSocketState.Open) continue;
+            Sockets[i] = socket;
+            return;
+        }
         Sockets.Add(socket);
     }
 
@@ -638,6 +545,13 @@ public class Twitch : OverlayApp
     {
         foreach (WebSocket socket in Sockets)
         {
+            if (socket.State != WebSocketState.Open)
+            {
+                socket.Abort();
+                await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
+                socket.Dispose();
+                continue;
+            }
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
             await socket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true,
                 CancellationToken.None);
@@ -646,55 +560,134 @@ public class Twitch : OverlayApp
 
     #endregion
 
-    //public void DebugMessages()
-    //{
-    //    _ = Task.Run(async () =>
-    //    {
-    //        UserChatMessage message = new()
-    //        {
-    //            Message = "This is a test message",
-    //            DisplayName = "Marakusa",
-    //            UserColor = "",
-    //            UserBadges = new List<string>(),
-    //            UserProfileImageUrl = user.ProfileImageUrl,
-    //            Flags = new Flags
-    //            {
-    //                Broadcaster = e.ChatMessage.IsBroadcaster,
-    //                Founder = false,
-    //                Highlighted = e.ChatMessage.IsHighlighted,
-    //                Mod = e.ChatMessage.IsModerator,
-    //                Subscriber = e.ChatMessage.IsSubscriber,
-    //                Vip = e.ChatMessage.IsVip
-    //            },
-    //            MessageEmotes = new List<EmoteData>()
-    //        };
+    #region Private Methods
 
-    //        // Set badges
-    //        foreach (BadgeVersion badgeVersion in from badge in e.ChatMessage.Badges
-    //                                              let index = _badges.FindIndex(f => f.SetId == badge.Key)
-    //                                              where index >= 0
-    //                                              select _badges[index].Versions.FirstOrDefault(f => f.Id.ToString() == badge.Value, null)
-    //                 into badgeVersion
-    //                                              where badgeVersion?.ImageUrl1x != null
-    //                                              select badgeVersion)
-    //        {
-    //            message.UserBadges.Add(badgeVersion.ImageUrl4x);
-    //        }
+    private async Task ReceiveMessageAsync(ChatMessage chatMessage)
+    {
+        TwitchUser? user = _userCache.Find(f => f.DisplayName == chatMessage.DisplayName);
+        if (user == null)
+        {
+            GetUsersResponse? users = await _twitchApi?.Helix.Users.GetUsersAsync(new List<string>
+                {
+                    chatMessage.UserId
+                })!;
+            foreach (User u in users.Users) _userCache.Add(await HandleExtensionsAsync(u));
+            user = await HandleExtensionsAsync(users.Users.First());
+        }
 
-    //        // Set emotes
-    //        foreach (EmoteData emoteData in e.ChatMessage.EmoteSet.Emotes.Select(emote => new EmoteData
-    //        {
-    //            Url = emote.ImageUrl,
-    //            StartIndex = emote.StartIndex,
-    //            EndIndex = emote.EndIndex
-    //        }))
-    //        {
-    //            emoteData.Url =
-    //                $"https://static-cdn.jtvnw.net/emoticons/v2/{emoteData.Url?.Split("/")[5]}/default/light/2.0";
-    //            message.MessageEmotes.Add(emoteData);
-    //        }
+        UserChatMessage message = new()
+        {
+            UserId = chatMessage.UserId,
+            Message = chatMessage.Message,
+            DisplayName = chatMessage.DisplayName,
+            UserColor = chatMessage.ColorHex,
+            Paint = _configurations?["use7TV"] == "true" && _configurations?["use7TVpaints"] == "true" ? user.Paint : null,
+            UserBadges = new List<string>(),
+            UserProfileImageUrl = user.ProfileImageUrl,
+            Flags = new Flags
+            {
+                Broadcaster = chatMessage.IsBroadcaster,
+                Founder = false,
+                Highlighted = chatMessage.IsHighlighted,
+                Mod = chatMessage.IsModerator,
+                Subscriber = chatMessage.IsSubscriber,
+                Vip = chatMessage.IsVip
+            },
+            MessageEmotes = new List<EmoteData>()
+        };
 
-    //        await SendMessageToAllAsync(JsonConvert.SerializeObject(message));
-    //    });
-    //}
+        // Set badges
+        Console.WriteLine(JsonConvert.SerializeObject(chatMessage.Badges));
+        Console.WriteLine(JsonConvert.SerializeObject(chatMessage.EmoteSet));
+        foreach (BadgeVersion badgeVersion in from badge in chatMessage.Badges
+                                              let index = _badges.FindIndex(f => f.SetId == badge.Key)
+                                              where index >= 0
+                                              select _badges[index].Versions.FirstOrDefault(f => f.Id.ToString() == badge.Value, null)
+                 into badgeVersion
+                                              where badgeVersion?.ImageUrl1x != null
+                                              select badgeVersion)
+            message.UserBadges.Add(badgeVersion.ImageUrl4x);
+
+        // Add 7TV badges
+        if (_configurations?["use7TV"] == "true" && _configurations?["use7TVbadges"] == "true")
+            message.UserBadges.AddRange(user.SevenTvBadges);
+
+        // Set emotes
+        foreach (EmoteData emoteData in chatMessage.EmoteSet.Emotes.Select(emote => new EmoteData
+        {
+            Url = emote.ImageUrl,
+            StartIndex = emote.StartIndex,
+            EndIndex = emote.EndIndex
+        }))
+        {
+            emoteData.Url =
+                $"https://static-cdn.jtvnw.net/emoticons/v2/{emoteData.Url?.Split("/")[5]}/default/light/2.0";
+            message.MessageEmotes.Add(emoteData);
+        }
+
+        // Set 7TV emotes
+        if (_configurations?["use7TV"] == "true" && _configurations?["use7TVemotes"] == "true")
+        {
+            void AddEmote(int start, int end, string currentWord)
+            {
+                int s = start;
+                // Return if any emotes are already added at the start position
+                if (message.MessageEmotes.Find(f => f.StartIndex == s) != null)
+                    return;
+
+                // Find the 7TV emote from the word
+                string word = currentWord;
+                Emote? emote = _sevenTvEmotes.Find(f => f.Name == word || f.Data.Name == word);
+
+                if (emote != null)
+                    message.MessageEmotes.Add(new EmoteData
+                    {
+                        Url =
+                            $"https:{emote.Data.Host.Url}/{emote.Data.Host.Files.FindLast(f => f.Format.Equals("AVIF", StringComparison.InvariantCultureIgnoreCase))?.Name}",
+                        StartIndex = start,
+                        EndIndex = end,
+                        Overlay = IsOverlayEmote(emote.Data.Flags)
+                    });
+            }
+
+            int i = 0;
+            int start = 0;
+            string currentWord = "";
+            while (i < chatMessage.Message.Length)
+            {
+                if (chatMessage.Message[i] == ' ')
+                {
+                    AddEmote(start, i - 1, currentWord);
+
+                    start = i + 1;
+                    currentWord = "";
+                }
+                else
+                {
+                    currentWord += chatMessage.Message[i];
+                }
+
+                i++;
+            }
+
+            AddEmote(start, i - 1, currentWord);
+        }
+
+        // Sort emotes
+        message.MessageEmotes = message.MessageEmotes.OrderBy(o => o.StartIndex).ToList();
+
+        await SendMessageToAllAsync(JsonConvert.SerializeObject(message));
+    }
+
+    private static bool IsOverlayEmote(int? flags, bool isLegacy = false)
+    {
+        return flags != null && HasFlag((int)flags, isLegacy ? 1 << 7 : 1 << 8);
+    }
+
+    private static bool HasFlag(int flags, int flag)
+    {
+        return (flags & flag) != 0;
+    }
+
+    #endregion
 }

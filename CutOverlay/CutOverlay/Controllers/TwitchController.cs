@@ -30,22 +30,7 @@ public class TwitchController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
-
-    [HttpGet("chat/debug")]
-    public IActionResult ChatDebugCallback()
-    {
-        try
-        {
-            // TODO: Debug
-            //_twitch.DebugMessages();
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
+    
     [HttpGet("callback")]
     public IActionResult TwitchCallback()
     {
@@ -68,7 +53,7 @@ public class TwitchController : ControllerBase
             return new ContentResult
             {
                 Content =
-                    "<div>Authorization successful! This tab can now be closed.</div><script>setTimeout(() => {close();},3000);</script>",
+                    "<div>Authorization successful! This tab can now be closed.</div><script>setTimeout(() => {close();},100);</script>",
                 ContentType = "text/html",
                 StatusCode = 200
             };

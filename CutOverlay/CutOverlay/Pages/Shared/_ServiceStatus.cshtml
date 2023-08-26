@@ -1,0 +1,18 @@
+﻿@model CutOverlay.Models.ServiceStatus
+<div class="settingsInputNoSave">
+    <span class="label" style="padding: 10px; width: calc(100% - 20px);"><i id="@Model.Id-status-icon" class="fa-solid fa-circle" style="color: grey;"></i> @Model.Label <span id="@Model.Id-status" style="color: #aaa;font-size: 14px;">Stopped</span></span>
+</div>
+<script type="text/javascript">
+    setInterval(() => {
+        fetch("status/service/@Model.Id").then((res) => {
+            if (res.ok) {
+                res.json().then((data) => {
+                    document.getElementById("@Model.Id-status-icon").style.color = data.color;
+                    document.getElementById("@Model.Id-status").innerText = data.status;
+                });
+            } else {
+                log.error("Couldn't fetch @Model.Id service status");
+            }
+        });
+    }, 500);
+</script>

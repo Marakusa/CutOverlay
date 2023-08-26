@@ -14,6 +14,8 @@ public class Spotify : OAuthOverlayApp
 
     public Spotify(OverlayStatusService overlayStatus, ConfigurationService configurationService)
     {
+        Status = ServiceStatusType.Starting;
+
         HttpClient = new HttpClient();
         _configurationService = configurationService;
         _overlayStatus = overlayStatus;
@@ -39,14 +41,22 @@ public class Spotify : OAuthOverlayApp
 
     public Task Start(Dictionary<string, string?>? configurations)
     {
-        Console.WriteLine("Spotify app starting...");
-
         if (configurations == null ||
             !configurations.ContainsKey("spotifyClientId") || !configurations.ContainsKey("spotifyClientSecret") ||
             string.IsNullOrEmpty(configurations["spotifyClientId"]) ||
             string.IsNullOrEmpty(configurations["spotifyClientSecret"]))
             return Task.CompletedTask;
 
+        if (ClientId == configurations["spotifyClientId"] && ClientSecret == configurations["spotifyClientSecret"])
+        {
+            Console.WriteLine("Spotify settings unchanged");
+            return Task.CompletedTask;
+        }
+
+        Status = ServiceStatusType.Starting;
+
+        Console.WriteLine("Spotify app starting...");
+        
         _statusTimer?.Stop();
         _statusTimer = new Timer { Interval = 2000 };
         _statusTimer.Elapsed += async (_, _) => { await FetchStatusAsync(); };
@@ -75,6 +85,7 @@ public class Spotify : OAuthOverlayApp
 
             if (!response.IsSuccessStatusCode)
             {
+                Status = ServiceStatusType.Error;
                 Console.WriteLine($"ERROR: {content}");
                 return;
             }
@@ -86,12 +97,15 @@ public class Spotify : OAuthOverlayApp
         }
         catch (Exception ex)
         {
+            Status = ServiceStatusType.Error;
             Console.WriteLine($"ERROR: {ex}");
         }
     }
 
     public override void Unload()
     {
+        Status = ServiceStatusType.Stopping;
+
         try
         {
             _overlayStatus.ClearStatusFiles();
@@ -106,5 +120,12 @@ public class Spotify : OAuthOverlayApp
         HttpClient?.Dispose();
 
         Console.WriteLine("Spotify app unloaded");
+
+        Status = ServiceStatusType.Stopped;
+    }
+
+    public override ServiceStatusType GetStatus()
+    {
+        return Status;
     }
 }
