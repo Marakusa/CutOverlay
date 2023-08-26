@@ -13,9 +13,9 @@ public class ConfigurationController : ControllerBase
 {
     public static Dictionary<string, string?>? Configurations;
     private readonly IConfiguration _configuration;
+    private readonly Pulsoid _pulsoid;
     private readonly Spotify _spotify;
     private readonly Twitch _twitch;
-    private readonly Pulsoid _pulsoid;
 
     public ConfigurationController(IConfiguration configuration, Spotify spotify, Twitch twitch, Pulsoid pulsoid)
     {

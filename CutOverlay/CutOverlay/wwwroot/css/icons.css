@@ -1,17 +1,17 @@
 .fa-triangle-exclamation {
-	background: linear-gradient(-20deg, rgb(255, 84, 0) 0%, rgb(255, 203, 0) 60%) padding-box !important;
 	-webkit-background-clip: text !important;
+	background: linear-gradient(-20deg, rgb(255, 84, 0) 0%, rgb(255, 203, 0) 60%) padding-box !important;
 	background-clip: text !important;
 }
 
 .fa-heart {
-	background: linear-gradient(-20deg, #ec2b92 0%, #ffa4df 70%) padding-box !important;
 	-webkit-background-clip: text !important;
+	background: linear-gradient(-20deg, #ec2b92 0%, #ffa4df 70%) padding-box !important;
 	background-clip: text !important;
 }
 
 .headerCommand {
-	background: linear-gradient(-20deg, #aaa 0%, #ffffff 100%) padding-box !important;
 	-webkit-background-clip: text !important;
+	background: linear-gradient(-20deg, #aaa 0%, #ffffff 100%) padding-box !important;
 	background-clip: text !important;
 }

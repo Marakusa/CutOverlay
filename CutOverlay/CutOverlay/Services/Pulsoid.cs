@@ -1,5 +1,4 @@
-﻿using System.Net.Sockets;
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Text;
 using CutOverlay.App;
 using CutOverlay.Models;
@@ -9,11 +8,11 @@ namespace CutOverlay.Services;
 
 public class Pulsoid : OverlayApp
 {
+    private readonly ConfigurationService _configurationService;
+    private string? _heartBeat;
     private string? _pulsoidApiToken;
     private int _reconnectInterval = 1000;
     private ClientWebSocket? _socket;
-    private string? _heartBeat;
-    private readonly ConfigurationService _configurationService;
 
     public Pulsoid(ConfigurationService configurationService)
     {
@@ -22,15 +21,13 @@ public class Pulsoid : OverlayApp
 
         _socket = null;
 
-        _ = Task.Run(async () =>
-        {
-            await Start(await _configurationService.FetchConfigurationsAsync());
-        });
+        _ = Task.Run(async () => { await Start(await _configurationService.FetchConfigurationsAsync()); });
     }
 
     public async Task RefreshConfigurationsAsync()
     {
-        await _socket?.CloseAsync(WebSocketCloseStatus.NormalClosure, "Restarting the service", CancellationToken.None)!;
+        await _socket?.CloseAsync(WebSocketCloseStatus.NormalClosure, "Restarting the service",
+            CancellationToken.None)!;
         _socket.Dispose();
         _socket = null;
         await Start(await _configurationService.FetchConfigurationsAsync());
@@ -107,5 +104,8 @@ public class Pulsoid : OverlayApp
         Console.WriteLine("Pulsoid app unloaded");
     }
 
-    public string GetHeartBeat() => _heartBeat ?? "";
+    public string GetHeartBeat()
+    {
+        return _heartBeat ?? "";
+    }
 }

@@ -11,7 +11,7 @@ function addMessage(username, message, userColor, flags, userBadges, userProfile
         let profileElement = document.createElement("span");
         profileElement.classList.add("badge");
         profileElement.classList.add("overlayMessage");
-        profileElement.style.content = "url(\"" + userProfileImageUrl + "\")";
+        profileElement.style.content = `url("${userProfileImageUrl}")`;
         profileElement.style.width = "38px";
         profileElement.style.height = "38px";
         profileElement.style.margin = "2px 12px 2px 0";
@@ -32,7 +32,7 @@ function addMessage(username, message, userColor, flags, userBadges, userProfile
             let badgeElement = document.createElement("span");
             badgeElement.classList.add("badge");
             badgeElement.classList.add("overlayMessage");
-            badgeElement.style.content = "url(\"" + userBadges[j] + "\")";
+            badgeElement.style.content = `url("${userBadges[j]}")`;
             messageInnerElement.appendChild(badgeElement);
         }
 
@@ -99,14 +99,14 @@ function removeExpiredMessages() {
     }
 }
 
-const socketURL = 'ws://localhost:37101/';
+const socketURL = "ws://localhost:37101/";
 let retryInterval = 5000; // Initial retry interval in milliseconds
 
 function connectWebSocket() {
     const socket = new WebSocket(socketURL);
 
     socket.onopen = event => {
-        console.log('Connected to WebSocket');
+        console.log("Connected to WebSocket");
     };
 
     socket.onmessage = event => {
@@ -126,13 +126,13 @@ function connectWebSocket() {
     };
 
     socket.onclose = event => {
-        console.log('WebSocket closed:', event);
+        console.log("WebSocket closed:", event);
         fetch("/twitch/apiConnection", { method: "GET" });
         setTimeout(connectWebSocket, retryInterval);
     };
 
     socket.onerror = error => {
-        console.error('WebSocket error:', error);
+        console.error("WebSocket error:", error);
     };
 }
 
@@ -141,7 +141,7 @@ connectWebSocket(); // Start the initial connection
 function replaceEmotes(message, emotes) {
     var emoteList = [];
 
-    emotes.forEach(function (emoteData) {
+    emotes.forEach(function(emoteData) {
         emoteList.push([emoteData.url, [emoteData.startIndex, emoteData.endIndex], emoteData.overlay]);
     });
 

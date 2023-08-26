@@ -1,10 +1,8 @@
-﻿using System.Net.Mime;
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using System.Text;
 using CutOverlay.App;
 using CutOverlay.Models;
 using CutOverlay.Models.BeatSaberPlus;
-using CutOverlay.Models.BeatSaberPlus.App;
 using CutOverlay.Models.BeatSaberPlus.BeatSaver;
 using Newtonsoft.Json;
 
@@ -16,20 +14,17 @@ public class BeatSaberPlus : OverlayApp
     private const string WebsocketAddress = "ws://localhost:2947/socket";
     private const string MapDataUrl = "https://api.beatsaver.com/maps/hash/{0}";
     private const int ReconnectInterval = 10000;
-    private CancellationTokenSource? _cancellationTokenSource;
     private readonly OverlayStatusService _overlayStatus;
+    private CancellationTokenSource? _cancellationTokenSource;
 
     public BeatSaberPlus(OverlayStatusService overlayStatus, ConfigurationService configurationService)
     {
         HttpClient = new HttpClient();
         _overlayStatus = overlayStatus;
 
-        _ = Task.Run(async () =>
-        {
-            await Start(await configurationService.FetchConfigurationsAsync());
-        });
+        _ = Task.Run(async () => { await Start(await configurationService.FetchConfigurationsAsync()); });
     }
-    
+
     public virtual async Task Start(Dictionary<string, string?>? configurations)
     {
         _cancellationTokenSource = new CancellationTokenSource();

@@ -26,8 +26,6 @@ namespace CutOverlay.Services;
 
 public class Twitch : OverlayApp
 {
-    private static readonly List<WebSocket> Sockets = new();
-
     private const string ClientId = "nrlnctz147p5v5xwy2rhjlas2afh3s";
 
     private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -37,32 +35,34 @@ public class Twitch : OverlayApp
     private const string Scopes =
         "chat%3Aread+whispers%3Aread+moderation%3Aread+moderator%3Aread%3Afollowers+user%3Aread%3Aemail+channel%3Aread%3Asubscriptions";
 
+    private static readonly List<WebSocket> Sockets = new();
+
     private static readonly Random Random =
         new(DateTime.Now.Second + DateTime.Now.DayOfYear + DateTime.Now.Year + DateTime.Now.Millisecond);
-    
+
     private static TwitchAPI? _twitchApi;
     private static FollowerService? _followerService;
+    private static List<string> _subscribers = new();
 
     private readonly string _callbackAddress = $"http://localhost:{Globals.Port}/twitch/callback";
+    private readonly ConfigurationService _configurationService;
 
     private readonly List<ChannelFollower> _followers = new();
-    
-    private string? _accessToken;
-    private Dictionary<string, string?>? _configurations;
-    private DateTime _lastFetch = DateTime.UnixEpoch;
-    private string _stateToken = "";
-
-    private TwitchClient? _twitchBotClient;
-    private List<BadgeEmoteSet>? _badges;
 
     private readonly List<TwitchUser> _userCache = new();
 
+    private string? _accessToken;
+    private List<BadgeEmoteSet>? _badges;
+
     private string? _broadcasterId;
-    private static List<string> _subscribers = new();
+    private Dictionary<string, string?>? _configurations;
     private SevenTvCosmetics? _cosmetics;
-    private readonly ConfigurationService _configurationService;
+    private DateTime _lastFetch = DateTime.UnixEpoch;
     private List<Emote> _sevenTvEmotes;
-    
+    private string _stateToken = "";
+
+    private TwitchClient? _twitchBotClient;
+
     public Twitch(ConfigurationService configurationService)
     {
         HttpClient = new HttpClient();
@@ -79,10 +79,7 @@ public class Twitch : OverlayApp
 
         _userCache.Clear();
 
-        _ = Task.Run(async () =>
-        {
-            await Start(await configurationService.FetchConfigurationsAsync());
-        });
+        _ = Task.Run(async () => { await Start(await configurationService.FetchConfigurationsAsync()); });
     }
 
     public async Task RefreshConfigurationsAsync()
@@ -179,10 +176,7 @@ public class Twitch : OverlayApp
             }
         };
         GetUsersResponse? users = await _twitchApi.Helix.Users.GetUsersAsync();
-        foreach (User u in users.Users)
-        {
-            _userCache.Add(await HandleExtensionsAsync(u));
-        }
+        foreach (User u in users.Users) _userCache.Add(await HandleExtensionsAsync(u));
         User? user = users.Users.First();
 
         ConnectionCredentials credentials = new(user.Login, $"oauth:{oAuth}");
@@ -213,7 +207,7 @@ public class Twitch : OverlayApp
         _followerService.Start();
 
         _broadcasterId = user.Id;
-        
+
         _ = StartChatWebSocket();
     }
 
@@ -284,6 +278,7 @@ public class Twitch : OverlayApp
         {
             Console.WriteLine($"Failed to fetch 7TV cosmetics: {ex}");
         }
+
         return null;
     }
 
@@ -298,10 +293,7 @@ public class Twitch : OverlayApp
             string content = await response.Content.ReadAsStringAsync();
             SevenTvEmotes? globalEmotes = JsonConvert.DeserializeObject<SevenTvEmotes>(content);
 
-            if (globalEmotes != null)
-            {
-                return globalEmotes.Emotes;
-            }
+            if (globalEmotes != null) return globalEmotes.Emotes;
         }
         catch (Exception ex)
         {
@@ -332,24 +324,15 @@ public class Twitch : OverlayApp
                     .ToList();
 
                 string func = cosmetic.Function;
-                if (cosmetic.Repeat)
-                {
-                    func = $"repeating-{cosmetic.Function}";
-                }
+                if (cosmetic.Repeat) func = $"repeating-{cosmetic.Function}";
 
                 string angle = $"{cosmetic.Angle}deg";
-                if (cosmetic.Function == "radial-gradient")
-                {
-                    angle = $"{cosmetic.Shape} at {cosmetic.Angle}%";
-                }
+                if (cosmetic.Function == "radial-gradient") angle = $"{cosmetic.Shape} at {cosmetic.Angle}%";
 
                 paint.BackgroundImage = $"{func}({angle}, {string.Join(',', stops)})";
             }
 
-            if (cosmetic.Color != null)
-            {
-                paint.BackgroundColor = Parse7TvColor((int)cosmetic.Color);
-            }
+            if (cosmetic.Color != null) paint.BackgroundColor = Parse7TvColor((int)cosmetic.Color);
 
             paint.BackgroundSize = "contain";
             return paint;
@@ -386,10 +369,7 @@ public class Twitch : OverlayApp
 
     private static string Parse7TvColor(int color)
     {
-        if (color == 0)
-        {
-            return "#fff";
-        }
+        if (color == 0) return "#fff";
 
         int red = (color >> 24) & 0xFF;
         int green = (color >> 16) & 0xFF;
@@ -449,10 +429,7 @@ public class Twitch : OverlayApp
                 {
                     e.ChatMessage.UserId
                 })!;
-                foreach (User u in users.Users)
-                {
-                    _userCache.Add(await HandleExtensionsAsync(u));
-                }
+                foreach (User u in users.Users) _userCache.Add(await HandleExtensionsAsync(u));
                 user = await HandleExtensionsAsync(users.Users.First());
             }
 
@@ -479,15 +456,13 @@ public class Twitch : OverlayApp
 
             // Set badges
             foreach (BadgeVersion badgeVersion in from badge in e.ChatMessage.Badges
-                                                  let index = _badges.FindIndex(f => f.SetId == badge.Key)
-                                                  where index >= 0
-                                                  select _badges[index].Versions.FirstOrDefault(f => f.Id.ToString() == badge.Value, null)
+                     let index = _badges.FindIndex(f => f.SetId == badge.Key)
+                     where index >= 0
+                     select _badges[index].Versions.FirstOrDefault(f => f.Id.ToString() == badge.Value, null)
                      into badgeVersion
-                                                  where badgeVersion?.ImageUrl1x != null
-                                                  select badgeVersion)
-            {
+                     where badgeVersion?.ImageUrl1x != null
+                     select badgeVersion)
                 message.UserBadges.Add(badgeVersion.ImageUrl4x);
-            }
 
             // Add 7TV badges
             if (_configurations?["use7TV"] == "true")
@@ -495,11 +470,11 @@ public class Twitch : OverlayApp
 
             // Set emotes
             foreach (EmoteData emoteData in e.ChatMessage.EmoteSet.Emotes.Select(emote => new EmoteData
-            {
-                Url = emote.ImageUrl,
-                StartIndex = emote.StartIndex,
-                EndIndex = emote.EndIndex
-            }))
+                     {
+                         Url = emote.ImageUrl,
+                         StartIndex = emote.StartIndex,
+                         EndIndex = emote.EndIndex
+                     }))
             {
                 emoteData.Url =
                     $"https://static-cdn.jtvnw.net/emoticons/v2/{emoteData.Url?.Split("/")[5]}/default/light/2.0";
@@ -521,7 +496,6 @@ public class Twitch : OverlayApp
                     Emote? emote = _sevenTvEmotes.Find(f => f.Name == word || f.Data.Name == word);
 
                     if (emote != null)
-                    {
                         message.MessageEmotes.Add(new EmoteData
                         {
                             Url =
@@ -530,7 +504,6 @@ public class Twitch : OverlayApp
                             EndIndex = end,
                             Overlay = IsOverlayEmote(emote.Data.Flags)
                         });
-                    }
                 }
 
                 int i = 0;
@@ -549,6 +522,7 @@ public class Twitch : OverlayApp
                     {
                         currentWord += e.ChatMessage.Message[i];
                     }
+
                     i++;
                 }
 
@@ -579,11 +553,11 @@ public class Twitch : OverlayApp
     public NewFollowerData GetFollowers(DateTime since)
     {
         List<string> list = (from follower in _followers
-                             let username = follower.UserName
-                             let dateTime =
-                                 DateTime.ParseExact(follower.FollowedAt, "yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture)
-                             where dateTime > since
-                             select username).ToList();
+            let username = follower.UserName
+            let dateTime =
+                DateTime.ParseExact(follower.FollowedAt, "yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture)
+            where dateTime > since
+            select username).ToList();
         return new NewFollowerData
         {
             Followers = list,
@@ -593,7 +567,8 @@ public class Twitch : OverlayApp
 
     public async Task<string> GetLatestFollowerAsync()
     {
-        GetChannelFollowersResponse? response = await _twitchApi?.Helix.Channels.GetChannelFollowersAsync(_broadcasterId, first: 1)!;
+        GetChannelFollowersResponse? response =
+            await _twitchApi?.Helix.Channels.GetChannelFollowersAsync(_broadcasterId, first: 1)!;
         if (response?.Data == null || response.Data.Length == 0)
             return "";
         return response.Data.First().UserName;
@@ -601,18 +576,15 @@ public class Twitch : OverlayApp
 
     public async Task<string> GetLatestSubscriberAsync()
     {
-        if (_subscribers.Count != 0)
-        {
-            return _subscribers.Last();
-        }
+        if (_subscribers.Count != 0) return _subscribers.Last();
         bool done = false;
         string? lastSub = null;
         string? pagination = null;
         while (!done)
         {
             GetBroadcasterSubscriptionsResponse? response =
-                await _twitchApi?.Helix.Subscriptions.GetBroadcasterSubscriptionsAsync(_broadcasterId, first: 2,
-                    after: pagination)!;
+                await _twitchApi?.Helix.Subscriptions.GetBroadcasterSubscriptionsAsync(_broadcasterId, 2,
+                    pagination)!;
             if (response?.Data == null || response.Data.Length == 0)
             {
                 done = true;
@@ -620,10 +592,8 @@ public class Twitch : OverlayApp
             }
 
             foreach (Subscription subscription in response.Data)
-            {
                 if (subscription.UserId != _broadcasterId)
                     _subscribers.Add(subscription.UserName);
-            }
 
             lastSub = _subscribers.Last();
             pagination = response.Pagination.Cursor;
@@ -644,7 +614,7 @@ public class Twitch : OverlayApp
 
         listener.Start();
         Console.WriteLine("Listening for WebSocket connections...");
-        
+
         while (true)
         {
             HttpListenerContext context = await listener.GetContextAsync();
@@ -669,7 +639,8 @@ public class Twitch : OverlayApp
         foreach (WebSocket socket in Sockets)
         {
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            await socket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+            await socket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true,
+                CancellationToken.None);
         }
     }
 

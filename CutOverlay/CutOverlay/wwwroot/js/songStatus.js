@@ -66,7 +66,8 @@ function checkUpdate() {
                         newArtist = uniqueArtistsArray.join("; ");
                         newSong = status.Song.Name;
                         color =
-                            `${status.Song.Color.Red * 255}, ${status.Song.Color.Green * 255}, ${status.Song.Color.Blue *
+                            `${status.Song.Color.Red * 255}, ${status.Song.Color.Green * 255}, ${
+                            status.Song.Color.Blue *
                             255}, 255`;
                         progressData = status.Status;
                     }
@@ -84,6 +85,7 @@ function checkUpdate() {
         displayData();
     }
 }
+
 setInterval(checkUpdate, 2000);
 
 function emptyConfig() {
@@ -110,7 +112,7 @@ setInterval(function() {
             const elapsedMilliseconds = progressData.Progress + Date.now() - (progressData.FetchTime * 1000);
 
             // Calculate the progress based on elapsed time
-            var progressPercentage = ((elapsedSeconds * 1000.0) / progressData.Total);
+            let progressPercentage = ((elapsedSeconds * 1000.0) / progressData.Total);
             if (progressPercentage > 1.0)
                 progressPercentage = 1.0;
             else if (progressPercentage < 0.0)
@@ -159,7 +161,8 @@ function displayData() {
     if (newSong == null) newSong = "";
     if (newArtist == null) newArtist = "";
     if (color == null) color = `0, 0, 0, 255`;
-    if ((newSong === "" && newSong !== document.getElementById("song").innerHTML) || newSong !== document.getElementById("song").innerHTML) {
+    if ((newSong === "" && newSong !== document.getElementById("song").innerHTML) ||
+        newSong !== document.getElementById("song").innerHTML) {
         if (newSong.length > 1 && !shown) {
             $("#statusDiv").animate({
                     marginLeft: "0px",
@@ -233,7 +236,7 @@ function displayData() {
             document.getElementById("chatBackgroundAnimation").style.filter =
                 `hue-rotate(${hsl[0]}deg) saturate(${hsl[1]}%) brightness(${hsl[2]}%) opacity(0.4)`;
         }
-        
+
         if (document.getElementById("artist") != null) {
             var hsl = RGBToHSL(colors[0], colors[1], colors[2]);
             document.getElementById("artist").style.background =

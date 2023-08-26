@@ -16,7 +16,7 @@ public class Program
         builder.Services.AddRazorPages();
 
         builder.Services.AddSingleton<ConfigurationService>();
-        builder.Services.AddSingleton<OverlayStatusService>(); 
+        builder.Services.AddSingleton<OverlayStatusService>();
         builder.Services.AddSingleton<Spotify>();
         builder.Services.AddSingleton<Twitch>();
         builder.Services.AddSingleton<Pulsoid>();
@@ -60,7 +60,7 @@ public class Program
 
         // Open the Electron-Window here
         await Electron.WindowManager.CreateWindowAsync(options, $"http://localhost:{Globals.Port}/");
-        
+
         await app.WaitForShutdownAsync();
 
         await app.DisposeAsync();

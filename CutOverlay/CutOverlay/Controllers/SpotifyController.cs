@@ -24,7 +24,8 @@ public class SpotifyController : ControllerBase
 
             return new ContentResult
             {
-                Content = "<div>Authorization successful! This tab can now be closed.</div><script>setTimeout(() => {close();},3000);</script>",
+                Content =
+                    "<div>Authorization successful! This tab can now be closed.</div><script>setTimeout(() => {close();},3000);</script>",
                 ContentType = "text/html",
                 StatusCode = 200
             };

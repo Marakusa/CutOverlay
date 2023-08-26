@@ -41,11 +41,12 @@ function checkUpdate() {
         heartRateText.parentElement.parentElement.style.display = null;
     }
 }
+
 setInterval(checkUpdate, 2000);
 
 function fetchFollows() {
     try {
-        const response = fetch("/twitch/followers?since=" + followersSince, { method: "GET" });
+        const response = fetch(`/twitch/followers?since=${followersSince}`, { method: "GET" });
         response.then((res) => {
             if (res.ok) {
                 res.json().then((data) => {
@@ -66,9 +67,11 @@ function fetchFollows() {
         console.error("An error occurred while fetching new followers");
     }
     setTimeout(() => {
-        fetchFollows();
-    }, 3000);
+            fetchFollows();
+        },
+        3000);
 }
+
 fetchFollows();
 
 function fetchLatestFollowSub() {
@@ -129,6 +132,7 @@ function fetchLatestFollowSub() {
         },
         3000);
 }
+
 fetchLatestFollowSub();
 
 var alerts = [];
@@ -189,25 +193,27 @@ function showAlertMessage(message) {
     statusDiv.style.opacity = "0";
 
     setTimeout(() => {
-        // Slide out the message
-        messageContentDiv.style.left = "100%";
-        messageContentDiv.style.animation = "slideOutAlertMessage 0.5s ease-in forwards";
+            // Slide out the message
+            messageContentDiv.style.left = "100%";
+            messageContentDiv.style.animation = "slideOutAlertMessage 0.5s ease-in forwards";
 
-        // Fade out the panel
-        messagePanel.style.opacity = "0";
+            // Fade out the panel
+            messagePanel.style.opacity = "0";
 
-        setTimeout(() => {
-            // Reset styles and hide the panel
-            messagePanel.style.display = "none";
-            messageContentDiv.style.left = "-100%";
-            messageContentDiv.style.animation = "";
+            setTimeout(() => {
+                    // Reset styles and hide the panel
+                    messagePanel.style.display = "none";
+                    messageContentDiv.style.left = "-100%";
+                    messageContentDiv.style.animation = "";
 
-            for (let i = 0; i < panelItems.length; i++) {
-                panelItems[i].style.opacity = "1";
-            }
-            statusDiv.style.opacity = "1";
-        }, 500);
-    }, 3500); // Stay for 3 seconds + slide in animation duration
+                    for (let i = 0; i < panelItems.length; i++) {
+                        panelItems[i].style.opacity = "1";
+                    }
+                    statusDiv.style.opacity = "1";
+                },
+                500);
+        },
+        3500); // Stay for 3 seconds + slide in animation duration
 }
 
 setInterval(() => {
@@ -237,4 +243,3 @@ setInterval(() => {
         }
     },
     5000);
-    

@@ -22,6 +22,9 @@ public class InputModel
 
 public enum Align
 {
-    Left, Center, Right, Stretch,
+    Left,
+    Center,
+    Right,
+    Stretch,
     None
 }

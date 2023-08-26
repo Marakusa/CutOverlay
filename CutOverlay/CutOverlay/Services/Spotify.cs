@@ -8,9 +8,9 @@ namespace CutOverlay.Services;
 
 public class Spotify : OAuthOverlayApp
 {
-    private Timer? _statusTimer;
-    private readonly OverlayStatusService _overlayStatus;
     private readonly ConfigurationService _configurationService;
+    private readonly OverlayStatusService _overlayStatus;
+    private Timer? _statusTimer;
 
     public Spotify(OverlayStatusService overlayStatus, ConfigurationService configurationService)
     {
@@ -21,22 +21,19 @@ public class Spotify : OAuthOverlayApp
         AuthorizationTimer = null;
         _statusTimer = null;
 
-        _ = Task.Run(async () =>
-        {
-            await Start(await _configurationService.FetchConfigurationsAsync());
-        });
+        _ = Task.Run(async () => { await Start(await _configurationService.FetchConfigurationsAsync()); });
     }
 
     public override string AuthApiUri => "https://accounts.spotify.com/api/token";
     public override string CallbackAddress => $"http://localhost:{Globals.Port}/spotify/callback";
     public override string AuthorizationAddress => "https://accounts.spotify.com/authorize";
     public override string Scopes => "user-read-playback-state user-read-currently-playing user-modify-playback-state";
-    
+
     public async Task RefreshConfigurationsAsync()
     {
         AuthorizationTimer?.Stop();
         _statusTimer?.Stop();
-        
+
         await Start(await _configurationService.FetchConfigurationsAsync());
     }
 

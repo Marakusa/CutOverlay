@@ -16,7 +16,7 @@
     <div id="settingsPanelContent" class="draggableWindowContent">
         <div class="settingsSection">
 
-            
+
             @await Html.PartialAsync("_Header", new TextModel
                    {
                        Text = "Twitch"
@@ -34,11 +34,11 @@
                        Value = "true"
                    })
             <!--@await Html.PartialAsync("_Checkbox", new InputModel
-                   {
-                       Label = "BetterTTV Integration",
-                       Id = "userBetterTTV",
-                       Value = "true"
-                   })
+                       {
+                           Label = "BetterTTV Integration",
+                           Id = "userBetterTTV",
+                           Value = "true"
+                       })
             @await Html.PartialAsync("_Checkbox", new InputModel
                    {
                        Label = "FrankerFaceZ Integration",
@@ -244,7 +244,7 @@
     </div>
 </div>
 
-<div id="toolbox" class="draggableWindow" style="height: 67px; left: 10px; min-height: 67px; top: 10px; width: 298px; min-width: 298px; max-height: 67px;">
+<div id="toolbox" class="draggableWindow" style="height: 67px; left: 10px; max-height: 67px; min-height: 67px; min-width: 298px; top: 10px; width: 298px;">
     <div id="toolboxHeader" class="draggableWindowHeader">
         <span>Toolbox</span>
     </div>
@@ -268,11 +268,11 @@
                    OnClick = "showWindow('overlaysPanel', true)"
                })
         <!--@await Html.PartialAsync("_ToolboxButton", new InputModel
-               {
-                   Id = "toolboxInfo",
-                   Value = "icon-apps.png",
-                   OnClick = "showWindow('appsPanel', true)"
-               })-->
+                   {
+                       Id = "toolboxInfo",
+                       Value = "icon-apps.png",
+                       OnClick = "showWindow('appsPanel', true)"
+                   })-->
         @await Html.PartialAsync("_ToolboxButton", new InputModel
                {
                    Id = "toolboxInfo",

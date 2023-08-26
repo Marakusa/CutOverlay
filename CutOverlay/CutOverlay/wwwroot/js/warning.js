@@ -31,7 +31,8 @@ function checkUpdateWarning() {
                         colorWarning = "130, 180, 255, 50";
                     } else {
                         colorWarning =
-                            `${status.Song.Color.Red * 255}, ${status.Song.Color.Green * 255}, ${status.Song.Color.Blue *
+                            `${status.Song.Color.Red * 255}, ${status.Song.Color.Green * 255}, ${
+                            status.Song.Color.Blue *
                             255}, 255`;
                     }
                     displayWarningData();
@@ -48,16 +49,17 @@ function checkUpdateWarning() {
         displayWarningData();
     }
 }
+
 setInterval(checkUpdateWarning, 2000);
 
 function displayWarningData() {
     if (colorWarning == null) colorWarning = "130, 180, 255, 50";
 
-    var colors = colorWarning.split(",");
+    const colors = colorWarning.split(",");
 
     const startingHeaders = document.getElementsByClassName("startingHeader");
-    for (var j = 0; j < startingHeaders.length; j++) {
-        var hsl = RGBToHSLWarning(colors[0], colors[1], colors[2]);
+    for (let j = 0; j < startingHeaders.length; j++) {
+        const hsl = RGBToHSLWarning(colors[0], colors[1], colors[2]);
         startingHeaders[j].style.background =
             `linear-gradient(-20deg, hsl(${hsl[0]},${hsl[1]}%,${hsl[2]}%) -50%, #ffffff 80%)`;
         startingHeaders[j].style.webkitTextFillColor = "transparent";
@@ -66,12 +68,12 @@ function displayWarningData() {
 }
 
 function startingHeaderWarning() {
-    let paragraphs = $('.startingHeader');
+    const paragraphs = $(".startingHeader");
     let currentIndex = 0;
 
     function fadeNext() {
-        paragraphs.removeClass('active');
-        paragraphs.eq(currentIndex).addClass('active');
+        paragraphs.removeClass("active");
+        paragraphs.eq(currentIndex).addClass("active");
         currentIndex = (currentIndex + 1) % paragraphs.length;
     }
 
