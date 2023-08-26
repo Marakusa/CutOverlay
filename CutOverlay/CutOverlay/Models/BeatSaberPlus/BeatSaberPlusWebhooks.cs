@@ -4,7 +4,7 @@ namespace CutOverlay.Models.BeatSaberPlus;
 
 public class BeatSaberPlusWebHookGameState : BeatSaberPlusWebHookEvent
 {
-    [JsonProperty("gameStateChanged")] public string GameStateChanged { get; set; }
+    [JsonProperty("gameStateChanged")] public string? GameStateChanged { get; set; }
 }
 
 public class BeatSaberPlusWebHookResumeTime : BeatSaberPlusWebHookEvent
@@ -19,34 +19,34 @@ public class BeatSaberPlusWebHookPauseEvent : BeatSaberPlusWebHookEvent
 
 public class BeatSaberPlusWebHookMapInfoChanged : BeatSaberPlusWebHookEvent
 {
-    [JsonProperty("mapInfoChanged")] public MapInfoChanged MapInfoChanged { get; set; }
+    [JsonProperty("mapInfoChanged")] public MapInfoChanged? MapInfoChanged { get; set; }
 }
 
 public class MapInfoChanged
 {
-    [JsonProperty("level_id")] public string LevelId { get; set; }
+    [JsonProperty("level_id")] public string? LevelId { get; set; }
 
-    [JsonProperty("name")] public string Name { get; set; }
+    [JsonProperty("name")] public string? Name { get; set; }
 
-    [JsonProperty("sub_name")] public string SubName { get; set; }
+    [JsonProperty("sub_name")] public string? SubName { get; set; }
 
-    [JsonProperty("artist")] public string Artist { get; set; }
+    [JsonProperty("artist")] public string? Artist { get; set; }
 
-    [JsonProperty("mapper")] public string Mapper { get; set; }
+    [JsonProperty("mapper")] public string? Mapper { get; set; }
 
-    [JsonProperty("characteristic")] public string Characteristic { get; set; }
+    [JsonProperty("characteristic")] public string? Characteristic { get; set; }
 
-    [JsonProperty("difficulty")] public string Difficulty { get; set; }
+    [JsonProperty("difficulty")] public string? Difficulty { get; set; }
 
     [JsonProperty("duration")] public long Duration { get; set; }
 
-    [JsonProperty("BPM")] public double BPM { get; set; }
+    [JsonProperty("BPM")] public double Bpm { get; set; }
 
-    [JsonProperty("PP")] public double PP { get; set; }
+    [JsonProperty("PP")] public double Pp { get; set; }
 
-    [JsonProperty("BSRKey")] public string BSRKey { get; set; }
+    [JsonProperty("BSRKey")] public string? BsrKey { get; set; }
 
-    [JsonProperty("coverRaw")] public string CoverRaw { get; set; }
+    [JsonProperty("coverRaw")] public string? CoverRaw { get; set; }
 
     [JsonProperty("time")] public double Time { get; set; }
 
@@ -55,7 +55,7 @@ public class MapInfoChanged
 
 public class BeatSaberPlusWebHookScoreEvent : BeatSaberPlusWebHookEvent
 {
-    [JsonProperty("scoreEvent")] public ScoreEvent ScoreEvent { get; set; }
+    [JsonProperty("scoreEvent")] public ScoreEvent? ScoreEvent { get; set; }
 }
 
 public class ScoreEvent

@@ -1,5 +1,6 @@
 ﻿using ColorThief;
 using CutOverlay.Models;
+using CutOverlay.Models.BeatSaberPlus.App;
 using Newtonsoft.Json;
 using SkiaSharp;
 using Color = System.Drawing.Color;
@@ -126,6 +127,32 @@ public class OverlayStatusService : IDisposable
         string stateString = JsonConvert.SerializeObject(state);
 
         await File.WriteAllTextAsync(statusFile, stateString);
+    }
+
+    public async Task SaveScoreStateAsync(BeatSaberAppScoreData? scoreData)
+    {
+        string dataFolder = $"{Globals.GetAppDataPath()}data\\";
+        if (!Directory.Exists(dataFolder)) Directory.CreateDirectory(dataFolder);
+        string scoreStatusFile = $"{dataFolder}score.json";
+
+        if (scoreData == null)
+        {
+            await File.WriteAllTextAsync(scoreStatusFile, JsonConvert.SerializeObject(new BeatSaberAppScoreData
+            {
+                Time = 0,
+                Score = 0,
+                Accuracy = 0,
+                Combo = 0,
+                MissCount = 0,
+                CurrentHealth = 0,
+                Pp = 0,
+                Bpm = 0
+            }));
+            return;
+        }
+
+        string scoreDataString = JsonConvert.SerializeObject(scoreData);
+        await File.WriteAllTextAsync(scoreStatusFile, scoreDataString);
     }
 
     public void ClearStatusFiles()

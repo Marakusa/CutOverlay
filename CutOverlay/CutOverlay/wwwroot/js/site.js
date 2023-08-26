@@ -76,13 +76,17 @@ function fetchLatestFollowSub() {
 
     if (lastFollowerElement != null) {
         try {
-            const response = fetch("/twitch/latest/follow", { method: "GET" });
-            response.then((res) => {
+            const followResponse = fetch("/twitch/latest/follow", { method: "GET" });
+            followResponse.then((res) => {
                 if (res.ok) {
-                    res.text((follow) => {
-                        console.log(follow);
-                        lastFollowerElement.innerText = follow;
-                        lastFollowerElement.parentElement.parentElement.style.display = null;
+                    res.json().then((follow) => {
+                        if (follow == null || follow === "") {
+                            lastFollowerElement.innerText = "";
+                            lastFollowerElement.parentElement.parentElement.style.display = "none";
+                        } else {
+                            lastFollowerElement.innerText = follow.name;
+                            lastFollowerElement.parentElement.parentElement.style.display = null;
+                        }
                     });
                 } else {
                     lastFollowerElement.innerText = "";
@@ -101,12 +105,12 @@ function fetchLatestFollowSub() {
             const response = fetch("/twitch/latest/sub", { method: "GET" });
             response.then((res) => {
                 if (res.ok) {
-                    res.text((sub) => {
+                    res.json().then((sub) => {
                         if (sub == null || sub === "") {
                             lastSubElement.innerText = "";
                             lastSubElement.parentElement.parentElement.style.display = "none";
                         } else {
-                            lastSubElement.innerText = sub;
+                            lastSubElement.innerText = sub.name;
                             lastSubElement.parentElement.parentElement.style.display = null;
                         }
                     });
@@ -121,8 +125,9 @@ function fetchLatestFollowSub() {
     }
 
     setTimeout(() => {
-        fetchLatestFollowSub();
-    }, 3000);
+            fetchLatestFollowSub();
+        },
+        3000);
 }
 fetchLatestFollowSub();
 
@@ -232,20 +237,4 @@ setInterval(() => {
         }
     },
     5000);
-
-function startingHeader() {
-    let paragraphs = $('.startingHeader');
-    let currentIndex = 0;
-
-    function fadeNext() {
-        paragraphs.removeClass('active');
-        paragraphs.eq(currentIndex).addClass('active');
-        currentIndex = (currentIndex + 1) % paragraphs.length;
-    }
-
-    fadeNext(); // Show the first paragraph initially
-
-    setInterval(fadeNext, 10000); // Change paragraph every 5 seconds (adjust as needed)
-}
-
-startingHeader();
+    

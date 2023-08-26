@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Geologica:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 body {
-	background-color: rgba(0, 0, 0, 0);
+	background-color: #111;
 	font-family: 'Geologica', sans-serif;
 	height: 100%;
 	margin: 0;
@@ -348,7 +348,6 @@ body {
 
 
 body {
-	background-color: #ffffff;
 	margin: 0 !important;
 	padding: 0 !important;
 }
@@ -695,16 +694,4 @@ p { white-space: nowrap; }
 	100% {
 		left: 100%;
 	}
-}
-
-.fa-triangle-exclamation {
-	background: linear-gradient(-20deg, rgb(176, 74, 0) 0%, rgb(255, 209, 30) 100%) padding-box text;
-}
-
-.fa-heart {
-	background: linear-gradient(-20deg, #cc237d 0%, #f059bb 100%) padding-box text;
-}
-
-.headerCommand {
-	background: linear-gradient(-20deg, #aaa 0%, #ffffff 100%) padding-box text;
 }

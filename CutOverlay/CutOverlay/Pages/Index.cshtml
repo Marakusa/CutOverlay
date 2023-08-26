@@ -16,7 +16,7 @@
     <div id="settingsPanelContent" class="draggableWindowContent">
         <div class="settingsSection">
 
-
+            
             @await Html.PartialAsync("_Header", new TextModel
                    {
                        Text = "Twitch"
@@ -25,7 +25,25 @@
                    {
                        Label = "Use Twitch Chat",
                        Id = "twitchChat",
-                       Value = "false"
+                       Value = "true"
+                   })
+            @await Html.PartialAsync("_Checkbox", new InputModel
+                   {
+                       Label = "7TV Integration",
+                       Id = "use7TV",
+                       Value = "true"
+                   })
+            @await Html.PartialAsync("_Checkbox", new InputModel
+                   {
+                       Label = "BetterTTV Integration",
+                       Id = "userBetterTTV",
+                       Value = "true"
+                   })
+            @await Html.PartialAsync("_Checkbox", new InputModel
+                   {
+                       Label = "FrankerFaceZ Integration",
+                       Id = "useFrankerFaceZ",
+                       Value = "true"
                    })
 
             <hr/>
@@ -115,7 +133,7 @@
         <div class="overlayDiv">
             @await Html.PartialAsync("_CopyTextField", new InputModel
                    {
-                       Id = "overlay2Copy",
+                       Id = "overlay1Copy",
                        Value = $"http://localhost:{Globals.Port}/Chat",
                        Label = "Chat Box"
                    })
@@ -123,7 +141,15 @@
         <div class="overlayDiv">
             @await Html.PartialAsync("_CopyTextField", new InputModel
                    {
-                       Id = "overlay1Copy",
+                       Id = "overlay2Copy",
+                       Value = $"http://localhost:{Globals.Port}/OverlayWarning",
+                       Label = "Warning text"
+                   })
+        </div>
+        <div class="overlayDiv">
+            @await Html.PartialAsync("_CopyTextField", new InputModel
+                   {
+                       Id = "overlay3Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayStarting",
                        Label = "Starting soon"
                    })
@@ -131,7 +157,7 @@
         <div class="overlayDiv">
             @await Html.PartialAsync("_CopyTextField", new InputModel
                    {
-                       Id = "overlay2Copy",
+                       Id = "overlay4Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayChat",
                        Label = "Panel + Background"
                    })
@@ -139,7 +165,7 @@
         <div class="overlayDiv">
             @await Html.PartialAsync("_CopyTextField", new InputModel
                    {
-                       Id = "overlay3Copy",
+                       Id = "overlay5Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayBrb",
                        Label = "BRB Screen"
                    })
@@ -147,7 +173,7 @@
         <div class="overlayDiv">
             @await Html.PartialAsync("_CopyTextField", new InputModel
                    {
-                       Id = "overlay4Copy",
+                       Id = "overlay6Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayGame1",
                        Label = "Panel"
                    })
@@ -155,7 +181,7 @@
         <div class="overlayDiv">
             @await Html.PartialAsync("_CopyTextField", new InputModel
                    {
-                       Id = "overlay5Copy",
+                       Id = "overlay7Copy",
                        Value = $"http://localhost:{Globals.Port}/OverlayGame2",
                        Label = "No Panel"
                    })
@@ -200,6 +226,23 @@
         </div>
     </div>
 </div>-->
+<div id="debugPanel" class="draggableWindow" style="height: 235px; left: 571px; top: 522px; width: 340px;">
+    <div id="debugPanelHeader" class="draggableWindowHeader">
+        <span>Overlays</span>
+        <span class="closeWindowButton" onclick="showWindow('debugPanel', false)"></span>
+    </div>
+    <div id="debugPanelContent" class="draggableWindowContent">
+        <div class="settingsSection">
+            @await Html.PartialAsync("_Button", new InputModel
+                   {
+                       Id = "chatDebug",
+                       Value = "Chat Debug Messages",
+                       OnClick = "fetch('twitch/chat/debug')",
+                       AlignContent = Align.Stretch
+                   })
+        </div>
+    </div>
+</div>
 
 <div id="toolbox" class="draggableWindow" style="height: 67px; left: 10px; min-height: 67px; top: 10px; width: 298px; min-width: 298px; max-height: 67px;">
     <div id="toolboxHeader" class="draggableWindowHeader">
@@ -235,6 +278,12 @@
                    Id = "toolboxInfo",
                    Value = "icon-info.png",
                    OnClick = "showWindow('infoPanel', true)"
+               })
+        @await Html.PartialAsync("_ToolboxButton", new InputModel
+               {
+                   Id = "toolboxDebug",
+                   Value = "icon-debug.png",
+                   OnClick = "showWindow('debugPanel', true)"
                })
     </div>
 </div>

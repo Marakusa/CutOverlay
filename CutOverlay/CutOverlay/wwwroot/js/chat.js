@@ -2,7 +2,7 @@
 const MESSAGE_EXPIRATION_TIME = 15000; // Message expiration time in milliseconds
 var removingMessages = [];
 
-function addMessage(username, message, userColor, flags, userBadges, userProfileImageUrl) {
+function addMessage(username, message, userColor, flags, userBadges, userProfileImageUrl, paint) {
     const chatContainers = document.getElementsByClassName("chat-messages");
 
     for (let i = 0; i < chatContainers.length; i++) {
@@ -40,9 +40,18 @@ function addMessage(username, message, userColor, flags, userBadges, userProfile
         let usernameElement = document.createElement("span");
         usernameElement.classList.add("chatUser");
         usernameElement.classList.add("overlayMessage");
-        usernameElement.style.background = `linear-gradient(-60deg, ${userColor} -50%, #ffffff 200%)`;
-        usernameElement.style.webkitTextFillColor = "transparent";
-        usernameElement.style.webkitBackgroundClip = "text";
+        if (paint == null || paint.backgroundImage == null) {
+            usernameElement.style.background = `linear-gradient(-60deg, ${userColor} -50%, #ffffff 200%)`;
+            usernameElement.style.webkitTextFillColor = "transparent";
+            usernameElement.style.webkitBackgroundClip = "text";
+        } else {
+            usernameElement.style.backgroundColor = paint.backgroundColor;
+            usernameElement.style.backgroundImage = paint.backgroundImage;
+            usernameElement.style.backgroundSize = paint.backgroundSize;
+            usernameElement.style.filter = paint.filter;
+            usernameElement.style.webkitTextFillColor = "transparent";
+            usernameElement.style.webkitBackgroundClip = "text";
+        }
         usernameElement.textContent = `${username}`;
         messageInnerElement.appendChild(usernameElement);
 
@@ -89,34 +98,44 @@ function removeExpiredMessages() {
     }
 }
 
-const socket = new WebSocket('ws://localhost:37101/');
+const socketURL = 'ws://localhost:37101/';
+let retryInterval = 5000; // Initial retry interval in milliseconds
 
-socket.onopen = event => {
-    console.log('Connected to WebSocket');
-};
+function connectWebSocket() {
+    const socket = new WebSocket(socketURL);
 
-socket.onmessage = event => {
-    console.log(event.data);
-    const data = JSON.parse(event.data);
-    const displayName = data.displayName;
-    const message = data.message;
-    const emotes = data.messageEmotes || {};
-    const userColor = data.userColor;
-    const flags = data.flags;
-    const userBadges = data.userBadges;
-    const userProfileImageUrl = data.userProfileImageUrl;
-    // Replace emote codes with emote images
-    var messageWithEmotes = replaceEmotes(message, emotes);
-    addMessage(displayName, messageWithEmotes, userColor, flags, userBadges, userProfileImageUrl);
-};
+    socket.onopen = event => {
+        console.log('Connected to WebSocket');
+    };
 
-socket.onclose = event => {
-    console.log('WebSocket closed:', event);
-};
+    socket.onmessage = event => {
+        console.log(event.data);
+        const data = JSON.parse(event.data);
+        const displayName = data.displayName;
+        const message = data.message;
+        const emotes = data.messageEmotes || {};
+        const userColor = data.userColor;
+        const flags = data.flags;
+        const userBadges = data.userBadges;
+        const userProfileImageUrl = data.userProfileImageUrl;
+        const paint = data.paint;
+        // Replace emote codes with emote images
+        var messageWithEmotes = replaceEmotes(message, emotes);
+        addMessage(displayName, messageWithEmotes, userColor, flags, userBadges, userProfileImageUrl, paint);
+    };
 
-socket.onerror = error => {
-    console.error('WebSocket error:', error);
-};
+    socket.onclose = event => {
+        console.log('WebSocket closed:', event);
+        fetch("/twitch/apiConnection", { method: "GET" });
+        setTimeout(connectWebSocket, retryInterval);
+    };
+
+    socket.onerror = error => {
+        console.error('WebSocket error:', error);
+    };
+}
+
+connectWebSocket(); // Start the initial connection
 
 function replaceEmotes(message, emotes) {
     var emoteList = [];

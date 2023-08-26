@@ -8,4 +8,6 @@ public class BeatSaberAppScoreData
     public int Combo { get; set; }
     public int MissCount { get; set; }
     public double CurrentHealth { get; set; }
+    public double Pp { get; set; }
+    public double Bpm { get; set; }
 }

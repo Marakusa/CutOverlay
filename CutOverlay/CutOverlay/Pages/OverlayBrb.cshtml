@@ -1,5 +1,4 @@
 ﻿@page
-@using CutOverlay.Models
 @model OverlayBrbModel
 @{
 }
@@ -7,8 +6,9 @@
 <div id="panelOverColor"></div>
 <div id="panelOverColorGradient"></div>
 <div id="startingHeaderDiv">
-    <p id="startingHeader" style="font-size: 110px; top: -20px;">Be right back!</p>
-    <p id="startingHeaderShadow" style="font-size: 110px; top: -20px;">Be right back!</p>
+    <p class="overlayMessage startingHeader">
+        Be right back!
+    </p>
 </div>
 
 <div id="panelBottomGradient" style="display: none;"></div>
@@ -26,3 +26,4 @@
 
 <script src="~/js/site.js"></script>
 <script src="~/js/songStatus.js"></script>
+<script src="~/js/warning.js"></script>

@@ -17,6 +17,35 @@ public class TwitchController : ControllerBase
         _twitch = twitch;
     }
 
+    [HttpGet("apiConnection")]
+    public IActionResult ApiConnectionCallback()
+    {
+        try
+        {
+            _ = _twitch;
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("chat/debug")]
+    public IActionResult ChatDebugCallback()
+    {
+        try
+        {
+            // TODO: Debug
+            //_twitch.DebugMessages();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpGet("callback")]
     public IActionResult TwitchCallback()
     {
@@ -75,7 +104,20 @@ public class TwitchController : ControllerBase
     {
         try
         {
-            return Ok(await _twitch.GetLatestFollowerAsync());
+            return Ok($"{{\"name\":\"{await _twitch.GetLatestFollowerAsync()}\"}}");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("latest/sub")]
+    public async Task<IActionResult> LatestSubCallback()
+    {
+        try
+        {
+            return Ok($"{{\"name\":\"{await _twitch.GetLatestSubscriberAsync()}\"}}");
         }
         catch (Exception ex)
         {

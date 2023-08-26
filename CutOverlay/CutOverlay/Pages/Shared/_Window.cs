@@ -1,6 +1,5 @@
-﻿namespace CutOverlay.Pages.Shared
+﻿namespace CutOverlay.Pages.Shared;
+
+public class _Window
 {
-    public class _Window
-    {
-    }
 }

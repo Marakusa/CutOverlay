@@ -1,8 +1,10 @@
-﻿using System.Net.WebSockets;
+﻿using System.Net.Mime;
+using System.Net.WebSockets;
 using System.Text;
 using CutOverlay.App;
 using CutOverlay.Models;
 using CutOverlay.Models.BeatSaberPlus;
+using CutOverlay.Models.BeatSaberPlus.App;
 using CutOverlay.Models.BeatSaberPlus.BeatSaver;
 using Newtonsoft.Json;
 
@@ -125,17 +127,17 @@ public class BeatSaberPlus : OverlayApp
                                         {
                                             new()
                                             {
-                                                Name = mapInfo?.MapInfoChanged.Artist
+                                                Name = mapInfo?.MapInfoChanged?.Artist
                                             }
                                         },
-                                        Name = mapInfo?.MapInfoChanged.Name,
+                                        Name = mapInfo?.MapInfoChanged?.Name,
                                         IsLocal = false,
-                                        DurationMs = mapInfo!.MapInfoChanged.Duration
+                                        DurationMs = mapInfo?.MapInfoChanged?.Duration ?? 0
                                     }
                                 };
 
-                                string id = mapInfo.MapInfoChanged.LevelId;
-                                if (id.StartsWith("custom_level_"))
+                                string? id = mapInfo?.MapInfoChanged?.LevelId;
+                                if (id != null && id.StartsWith("custom_level_"))
                                     id = id["custom_level_".Length..];
 
                                 try
@@ -170,17 +172,21 @@ public class BeatSaberPlus : OverlayApp
                                 await _overlayStatus.SaveStateAsync<BeatSaberPlus>(playbackState, 10);
                                 break;
                             case "score":
-                                /*BeatSaberPlusWebHookScoreEvent? scoreEvent = JsonConvert.DeserializeObject<BeatSaberPlusWebHookScoreEvent>(message);
-                                _currentScore = new BeatSaberAppScoreData
-                                {
-                                    Time = scoreEvent.ScoreEvent.Time,
-                                    Score = scoreEvent.ScoreEvent.Score,
-                                    Accuracy = scoreEvent.ScoreEvent.Accuracy,
-                                    Combo = scoreEvent.ScoreEvent.Combo,
-                                    MissCount = scoreEvent.ScoreEvent.MissCount,
-                                    CurrentHealth = scoreEvent.ScoreEvent.CurrentHealth
-                                };
-                                await File.WriteAllTextAsync(@Application.StartupPath + @"\Snip_BSPlusScore.txt", JsonConvert.SerializeObject(_currentScore));*/
+                                BeatSaberPlusWebHookScoreEvent? scoreEvent = JsonConvert.DeserializeObject<BeatSaberPlusWebHookScoreEvent>(message);
+                                BeatSaberAppScoreData? scoreData = null;
+                                if (scoreEvent is { ScoreEvent: not null })
+                                    scoreData = new BeatSaberAppScoreData
+                                    {
+                                        Time = scoreEvent.ScoreEvent.Time,
+                                        Score = scoreEvent.ScoreEvent.Score,
+                                        Accuracy = scoreEvent.ScoreEvent.Accuracy,
+                                        Combo = scoreEvent.ScoreEvent.Combo,
+                                        MissCount = scoreEvent.ScoreEvent.MissCount,
+                                        CurrentHealth = scoreEvent.ScoreEvent.CurrentHealth,
+                                        Bpm = 0,
+                                        Pp = 0
+                                    };
+                                await _overlayStatus.SaveScoreStateAsync(scoreData);
                                 break;
                         }
 

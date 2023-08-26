@@ -48,7 +48,7 @@ function showText() {
 function checkUpdate() {
     // Hide song progress text if no song playing
     const progressText = document.getElementById("progressText");
-    if (newSong === "") {
+    if (newSong === "" && progressText != null) {
         progressText.parentElement.parentElement.style.display = "none";
     }
 
@@ -140,13 +140,15 @@ setInterval(function() {
 
             // Update the progress text
             const progressTextElement = document.getElementById("progressText");
-            progressTextElement.innerHTML = progressText;
+            if (progressTextElement != null) {
+                progressTextElement.innerHTML = progressText;
 
-            // Update the progress header text
-            document.getElementById("progressHeader").innerHTML = "Track progress";
+                // Update the progress header text
+                document.getElementById("progressHeader").innerHTML = "Track progress";
 
-            // Show progress text element
-            progressTextElement.parentElement.parentElement.style.display = null;
+                // Show progress text element
+                progressTextElement.parentElement.parentElement.style.display = null;
+            }
         } catch (ex) {
             console.error(ex);
         }
@@ -157,8 +159,7 @@ function displayData() {
     if (newSong == null) newSong = "";
     if (newArtist == null) newArtist = "";
     if (color == null) color = `0, 0, 0, 255`;
-    if ((newSong === "" && newSong !== document.getElementById("song").innerHTML) ||
-        newSong !== document.getElementById("song").innerHTML) {
+    if ((newSong === "" && newSong !== document.getElementById("song").innerHTML) || newSong !== document.getElementById("song").innerHTML) {
         if (newSong.length > 1 && !shown) {
             $("#statusDiv").animate({
                     marginLeft: "0px",
