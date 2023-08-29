@@ -388,7 +388,7 @@ body {
 #song {
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
-	background: linear-gradient(to top, #444444 0%, #ffffff 50%);
+	background: white;
 	background-clip: text;
 	color: #ffffff;
 	display: inline-block;

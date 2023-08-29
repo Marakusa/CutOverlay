@@ -194,11 +194,11 @@ function displayData() {
             color = "130, 180, 255, 50";
         }
         var colors = color.split(",");
+        var hslColors = RGBToHSL(colors[0], colors[1], colors[2]);
 
         if (document.getElementById("panelBottom") != null) {
             document.getElementById("panelBottom").style.background =
-                `rgb(${colors[0]},${colors[1]},${colors[2]
-                }, 50) linear-gradient(0deg, #00000056 0%, #000000b7 70%, #000000ff 100%)`;
+                `hsla(${hslColors[0]},${hslColors[1]}%,${hslColors[2] * 0.8}%,0.2) linear-gradient(0deg, #00000056 0%, #000000b7 70%, #000000ff 100%)`;
         }
 
         if (document.getElementById("panelChat") != null) {
@@ -218,29 +218,25 @@ function displayData() {
 
         const startingHeaders = document.getElementsByClassName("startingHeader");
         for (var j = 0; j < startingHeaders.length; j++) {
-            var hsl = RGBToHSL(colors[0], colors[1], colors[2]);
             startingHeaders[j].style.background =
-                `linear-gradient(-20deg, hsl(${hsl[0]},${hsl[1]}%,${hsl[2]}%) -50%, #ffffff 80%)`;
+                `linear-gradient(-20deg, hsl(${hslColors[0]},${hslColors[1]}%,${hslColors[2]}%) -50%, #ffffff 80%)`;
             startingHeaders[j].style.webkitTextFillColor = "transparent";
             startingHeaders[j].style.webkitBackgroundClip = "text";
         }
 
         if (document.getElementById("panelBottomBackgroundAnimation") != null) {
-            var hsl = RGBToHSL(colors[0], colors[1], colors[2]);
             document.getElementById("panelBottomBackgroundAnimation").style.filter =
-                `hue-rotate(${hsl[0]}deg) saturate(${hsl[1]}%) brightness(${hsl[2]}%) opacity(0.4)`;
+                `hue-rotate(${hslColors[0]}deg) saturate(${hslColors[1]}%) brightness(75%) opacity(0.5)`;
         }
 
         if (document.getElementById("chatBackgroundAnimation") != null) {
-            var hsl = RGBToHSL(colors[0], colors[1], colors[2]);
             document.getElementById("chatBackgroundAnimation").style.filter =
-                `hue-rotate(${hsl[0]}deg) saturate(${hsl[1]}%) brightness(${hsl[2]}%) opacity(0.4)`;
+                `hue-rotate(${hslColors[0]}deg) saturate(${hslColors[1]}%) brightness(${hslColors[2]}%) opacity(0.4)`;
         }
 
         if (document.getElementById("artist") != null) {
-            var hsl = RGBToHSL(colors[0], colors[1], colors[2]);
             document.getElementById("artist").style.background =
-                `linear-gradient(-20deg, hsl(${hsl[0]},${hsl[1]}%,${hsl[2]}%) -50%, #ffffff 100%)`;
+                `linear-gradient(-20deg, hsl(${hslColors[0]},${hslColors[1]}%,${hslColors[2]}%) -50%, #ffffff 100%)`;
             document.getElementById("artist").style.webkitTextFillColor = "transparent";
             document.getElementById("artist").style.webkitBackgroundClip = "text";
         }
@@ -257,8 +253,7 @@ function displayData() {
         let headerTexts = document.getElementsByClassName("styledHeaderText");
         for (let i = 0; i < headerTexts.length; i++) {
             let h = headerTexts[i];
-            var hsl = RGBToHSL(colors[0], colors[1], colors[2]);
-            h.style.background = `linear-gradient(-20deg, hsl(${hsl[0]},${hsl[1]}%,${hsl[2]}%) -20%, #ffffff 100%)`;
+            h.style.background = `linear-gradient(-20deg, hsl(${hslColors[0]},${hslColors[1]}%,${hslColors[2]}%) -20%, #ffffff 100%)`;
             h.style.webkitTextFillColor = "transparent";
             h.style.webkitBackgroundClip = "text";
         }
@@ -266,7 +261,6 @@ function displayData() {
         let styledTexts = document.getElementsByClassName("styledText");
         for (let i = 0; i < styledTexts.length; i++) {
             let h = styledTexts[i];
-            var hsl = RGBToHSL(colors[0], colors[1], colors[2]);
             h.style.background = `white`;
             h.style.webkitTextFillColor = "transparent";
             h.style.webkitBackgroundClip = "text";
@@ -274,7 +268,7 @@ function displayData() {
 
         let songText = document.getElementById("song");
         if (songText != null) {
-            songText.style.background = `linear-gradient(to top, rgb(104, 104, 104) 0%, #ffffff 60%)`;
+            songText.style.background = `white`;
             songText.style.webkitTextFillColor = "transparent";
             songText.style.webkitBackgroundClip = "text";
         }
