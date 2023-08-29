@@ -267,7 +267,7 @@ function displayData() {
         for (let i = 0; i < styledTexts.length; i++) {
             let h = styledTexts[i];
             var hsl = RGBToHSL(colors[0], colors[1], colors[2]);
-            h.style.background = `linear-gradient(to top, rgb(104, 104, 104) 0%, #ffffff 60%)`;
+            h.style.background = `white`;
             h.style.webkitTextFillColor = "transparent";
             h.style.webkitBackgroundClip = "text";
         }

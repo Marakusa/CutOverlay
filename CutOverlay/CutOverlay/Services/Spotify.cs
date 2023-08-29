@@ -33,9 +33,6 @@ public class Spotify : OAuthOverlayApp
 
     public async Task RefreshConfigurationsAsync()
     {
-        AuthorizationTimer?.Stop();
-        _statusTimer?.Stop();
-
         await Start(await _configurationService.FetchConfigurationsAsync());
     }
 
@@ -56,7 +53,9 @@ public class Spotify : OAuthOverlayApp
         Status = ServiceStatusType.Starting;
 
         Console.WriteLine("Spotify app starting...");
-        
+
+        AuthorizationTimer?.Stop();
+
         _statusTimer?.Stop();
         _statusTimer = new Timer { Interval = 2000 };
         _statusTimer.Elapsed += async (_, _) => { await FetchStatusAsync(); };
