@@ -483,7 +483,7 @@ p { white-space: nowrap; }
 .message span:last-child {
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
-	background: linear-gradient(-60deg, #9b9b9b 0%, #ffffff 50%);
+	background: white;
 	background-clip: text;
 }
 

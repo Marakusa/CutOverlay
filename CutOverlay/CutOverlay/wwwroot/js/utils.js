@@ -28,3 +28,60 @@ const HexToRGB = (hex) => {
         }
         : null;
 }
+
+var themeColor;
+
+function checkColorUpdate() {
+    try {
+        const response = fetch("/status/get", { method: "GET" });
+        response.then((res) => {
+            if (res.ok) {
+                res.json().then((status) => {
+
+                    if (status == null || status.Status == null || status.Status.Paused) {
+                        themeColor = "130, 180, 255, 50";
+                    } else {
+                        themeColor =
+                            `${status.Song.Color.Red * 255}, ${status.Song.Color.Green * 255}, ${status.Song.Color.Blue *
+                            255}, 255`;
+                    }
+                    themeColorUpdate();
+                });
+            } else {
+                console.error("An error occurred while fetching song status");
+                themeColor = "130, 180, 255, 50";
+                themeColorUpdate();
+            }
+        });
+    } catch (error) {
+        console.error("An error occurred while fetching song status");
+        themeColor = "130, 180, 255, 50";
+        themeColorUpdate();
+    }
+}
+
+setInterval(checkColorUpdate, 2000);
+
+function themeColorUpdate() {
+    if (themeColor == null) themeColor = "130, 180, 255, 50";
+
+    const colors = themeColor.split(",");
+    const hslColors = RGBToHSL(colors[0], colors[1], colors[2]);
+
+    const headerTexts = document.getElementsByClassName("styledHeaderText");
+    for (let i = 0; i < headerTexts.length; i++) {
+        const h = headerTexts[i];
+        h.style.background =
+            `linear-gradient(-20deg, hsl(${hslColors[0]},${hslColors[1]}%,${hslColors[2]}%) -20%, #ffffff 100%)`;
+        h.style.webkitTextFillColor = "transparent";
+        h.style.webkitBackgroundClip = "text";
+    }
+
+    const styledTexts = document.getElementsByClassName("styledText");
+    for (let i = 0; i < styledTexts.length; i++) {
+        const h = styledTexts[i];
+        h.style.background = `white`;
+        h.style.webkitTextFillColor = "transparent";
+        h.style.webkitBackgroundClip = "text";
+    }
+}

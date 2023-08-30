@@ -55,6 +55,7 @@ public class Twitch : OverlayApp
     private List<BadgeEmoteSet>? _badges;
 
     private string? _broadcasterId;
+    private string? _chatLogin;
     private Dictionary<string, string?>? _configurations;
     private SevenTvCosmetics? _cosmetics;
     private DateTime _lastFetch = DateTime.UnixEpoch;
@@ -73,7 +74,6 @@ public class Twitch : OverlayApp
         _logger = logger;
 
         _accessToken = null;
-        _twitchBotClient = null;
         _twitchApi = null;
         _followerService = null;
 
@@ -81,14 +81,23 @@ public class Twitch : OverlayApp
 
         _sevenTvEmotes = new List<Emote>();
 
+        SetupChatBot();
+
         _userCache.Clear();
 
         _ = Task.Run(async () => { await Start(await configurationService.FetchConfigurationsAsync()); });
     }
 
-    public async Task RefreshConfigurationsAsync()
+    private void SetupChatBot()
     {
-        _configurations = await _configurationService.FetchConfigurationsAsync();
+        _twitchBotClient = new TwitchClient();
+        _twitchBotClient.OnLog += (_, args) =>
+            _logger.LogTrace($"{args.DateTime} {args.BotUsername}: {args.Data}");
+        _twitchBotClient.OnError += OnError;
+        _twitchBotClient.OnJoinedChannel += OnJoinedChannel;
+        _twitchBotClient.OnNewSubscriber += OnNewSubscriber;
+        _twitchBotClient.OnRaidNotification += OnRaidNotification;
+        _twitchBotClient.OnMessageReceived += OnMessageReceived;
     }
 
     public virtual Task Start(Dictionary<string, string?>? configurations)
@@ -96,7 +105,7 @@ public class Twitch : OverlayApp
         _logger.LogInformation("Twitch app starting...");
 
         _configurations = configurations;
-        
+
         SetupOAuth(ClientId);
 
         _logger.LogInformation("Twitch app started!");
@@ -108,14 +117,12 @@ public class Twitch : OverlayApp
         Status = ServiceStatusType.Stopping;
 
         foreach (WebSocket socket in Sockets) socket.Dispose();
-
-        _twitchBotClient?.Disconnect();
+        
         _followerService?.Stop();
 
         HttpClient?.Dispose();
 
         _accessToken = null;
-        _twitchBotClient = null;
         _twitchApi = null;
         _followerService = null;
 
@@ -127,6 +134,16 @@ public class Twitch : OverlayApp
     public override ServiceStatusType GetStatus()
     {
         return Status;
+    }
+
+    public async Task RefreshConfigurationsAsync()
+    {
+        _configurations = await _configurationService.FetchConfigurationsAsync();
+
+        if (_configurations?["twitchChatUsername"]?.ToLower() != _chatLogin?.ToLower())
+        {
+            _ = Task.Run(async () => { await Start(await _configurationService.FetchConfigurationsAsync()); });
+        }
     }
 
     #region Service Methods
@@ -188,30 +205,14 @@ public class Twitch : OverlayApp
 
             ConnectionCredentials credentials = new(user.Login, $"oauth:{oAuth}");
 
-            _twitchBotClient = new TwitchClient();
-            _twitchBotClient.Initialize(credentials, user.Login);
+            _chatLogin = _configurations == null || !_configurations.ContainsKey("twitchChatUsername") || string.IsNullOrEmpty(_configurations?["twitchChatUsername"])
+                ? user.Login
+                : _configurations?["twitchChatUsername"];
 
-            _twitchBotClient.OnError += OnError;
-            _twitchBotClient.OnJoinedChannel += OnJoinedChannel;
-            _twitchBotClient.OnNewSubscriber += OnNewSubscriber;
-            _twitchBotClient.OnRaidNotification += OnRaidNotification;
-            _twitchBotClient.OnMessageReceived += OnMessageReceived;
-
+            _twitchBotClient!.Initialize(credentials, _chatLogin);
             _twitchBotClient.Connect();
 
-            _followerService = new FollowerService(_twitchApi, 5, invokeEventsOnStartup: false);
-            _followerService.OnNewFollowersDetected += OnNewFollowers;
-            _followerService.OnServiceStarted += OnFollowerServiceStarted;
-
-            _followerService.SetChannelsById(new List<string>
-            {
-                user.Id
-            });
-            _badges = (await _twitchApi.Helix.Chat.GetChannelChatBadgesAsync(user.Id)).EmoteSet.ToList();
-            _badges.AddRange((await _twitchApi.Helix.Chat.GetGlobalChatBadgesAsync()).EmoteSet.ToList());
-
-            _followerService.ClearCache();
-            _followerService.Start();
+            await StartFollowerServiceAsync(user);
 
             _broadcasterId = user.Id;
 
@@ -224,6 +225,32 @@ public class Twitch : OverlayApp
             Status = ServiceStatusType.Error;
             throw;
         }
+    }
+
+    private async Task StartFollowerServiceAsync(User user)
+    {
+        async Task SetupServiceAsync()
+        {
+            _followerService = new FollowerService(_twitchApi, 5, invokeEventsOnStartup: false);
+            _followerService.OnServiceStopped += async (_, _) => await SetupServiceAsync();
+            _followerService.OnNewFollowersDetected += OnNewFollowers;
+            _followerService.OnServiceStarted += OnFollowerServiceStarted;
+
+            _followerService.SetChannelsById(new List<string>
+            {
+                user.Id
+            });
+            _badges = (await _twitchApi?.Helix.Chat.GetChannelChatBadgesAsync(user.Id)!).EmoteSet.ToList();
+            _badges.AddRange((await _twitchApi.Helix.Chat.GetGlobalChatBadgesAsync()).EmoteSet.ToList());
+
+            _followerService.ClearCache();
+            _followerService.Start();
+        }
+        
+        if (_followerService == null)
+            await SetupServiceAsync();
+        else
+            _followerService.Stop();
     }
 
     private async Task LoadIntegrationsDataAsync()
@@ -266,7 +293,7 @@ public class Twitch : OverlayApp
             string content = await response.Content.ReadAsStringAsync();
             SevenTvUser? sevenTvUser = JsonConvert.DeserializeObject<SevenTvUser>(content);
 
-            if (sevenTvUser?.Role.Color != null)
+            if (sevenTvUser?.Role?.Color != null)
                 newUser.Color = Parse7TvColor(sevenTvUser.Role.Color);
 
             if (sevenTvUser?.TwitchId != null)
@@ -554,6 +581,9 @@ public class Twitch : OverlayApp
 
     public async Task SendMessageToAllAsync(string message)
     {
+        if (_configurations?["twitchChat"] != "true")
+            return;
+
         foreach (WebSocket socket in Sockets)
         {
             if (socket.State != WebSocketState.Open)

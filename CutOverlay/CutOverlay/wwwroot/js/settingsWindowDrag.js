@@ -84,12 +84,13 @@ function setWindowTop(window) {
     }
 }
 
-function showWindow(id, show) {
+function showWindow(id, show, save = true) {
     document.getElementById(id).style.display = show ? null : "none";
     setWindowTop(document.getElementById(id));
     if (id === "infoPanel" && !show) {
         config["infoClosed"] = "true";
-        saveConfig();
+        if (save)
+            saveConfig();
     }
 }
 
@@ -99,7 +100,7 @@ try {
         if (res.ok) {
             res.json().then((configurations) => {
                 if (configurations["infoClosed"] === "true") {
-                    showWindow("infoPanel", false);
+                    showWindow("infoPanel", false, false);
                 }
             });
         } else {

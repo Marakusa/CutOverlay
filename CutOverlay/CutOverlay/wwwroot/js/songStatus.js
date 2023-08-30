@@ -250,22 +250,6 @@ function displayData() {
             document.getElementById("panelOverColorGradient").style.backgroundPosition = "-1800px -2600px";
         }
 
-        let headerTexts = document.getElementsByClassName("styledHeaderText");
-        for (let i = 0; i < headerTexts.length; i++) {
-            let h = headerTexts[i];
-            h.style.background = `linear-gradient(-20deg, hsl(${hslColors[0]},${hslColors[1]}%,${hslColors[2]}%) -20%, #ffffff 100%)`;
-            h.style.webkitTextFillColor = "transparent";
-            h.style.webkitBackgroundClip = "text";
-        }
-
-        let styledTexts = document.getElementsByClassName("styledText");
-        for (let i = 0; i < styledTexts.length; i++) {
-            let h = styledTexts[i];
-            h.style.background = `white`;
-            h.style.webkitTextFillColor = "transparent";
-            h.style.webkitBackgroundClip = "text";
-        }
-
         let songText = document.getElementById("song");
         if (songText != null) {
             songText.style.background = `white`;
