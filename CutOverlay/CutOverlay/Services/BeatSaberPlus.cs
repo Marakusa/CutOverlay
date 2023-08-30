@@ -16,13 +16,15 @@ public class BeatSaberPlus : OverlayApp
     private const int ReconnectInterval = 10000;
     private readonly OverlayStatusService _overlayStatus;
     private CancellationTokenSource? _cancellationTokenSource;
+    private readonly LoggerService _logger;
 
-    public BeatSaberPlus(OverlayStatusService overlayStatus, ConfigurationService configurationService)
+    public BeatSaberPlus(OverlayStatusService overlayStatus, ConfigurationService configurationService, LoggerService logger)
     {
         Status = ServiceStatusType.Starting;
 
         HttpClient = new HttpClient();
         _overlayStatus = overlayStatus;
+        _logger = logger;
 
         _ = Task.Run(async () => { await Start(await configurationService.FetchConfigurationsAsync()); });
     }
@@ -31,7 +33,7 @@ public class BeatSaberPlus : OverlayApp
     {
         _cancellationTokenSource = new CancellationTokenSource();
 
-        Console.WriteLine("BSPlus web socket setting up...");
+        _logger.LogInformation("BSPlus web socket setting up...");
 
         while (_cancellationTokenSource is { Token.IsCancellationRequested: false }) await SetupWebSocket();
     }
@@ -46,7 +48,7 @@ public class BeatSaberPlus : OverlayApp
             if (webSocket.State == WebSocketState.Open)
             {
                 Status = ServiceStatusType.Running;
-                Console.WriteLine("BeatSaberPlus app started and connected!");
+                _logger.LogInformation("BeatSaberPlus app started and connected!");
             }
             else
             {
@@ -62,10 +64,10 @@ public class BeatSaberPlus : OverlayApp
             if (ex.Message != "Unable to connect to the remote server")
             {
                 Status = ServiceStatusType.Error;
-                Console.WriteLine("WebSocket error: " + ex.Message);
+                _logger.LogError("WebSocket error: " + ex.Message);
             }
             else
-                Status = ServiceStatusType.Starting;
+                Status = ServiceStatusType.Waiting;
             // Attempt reconnection after a certain interval
             await Task.Delay(ReconnectInterval);
         }
@@ -155,7 +157,7 @@ public class BeatSaberPlus : OverlayApp
 
                                     if (!response.IsSuccessStatusCode)
                                     {
-                                        Console.WriteLine($"No map data found. Status code: {response.StatusCode}");
+                                        _logger.LogError($"No map data found. Status code: {response.StatusCode}");
                                         throw new Exception();
                                     }
 
@@ -169,7 +171,7 @@ public class BeatSaberPlus : OverlayApp
                                     }
                                     else
                                     {
-                                        Console.WriteLine("No map data available.");
+                                        _logger.LogError("No map data available.");
                                     }
                                 }
                                 catch (Exception)
@@ -224,7 +226,7 @@ public class BeatSaberPlus : OverlayApp
 
         HttpClient?.Dispose();
 
-        Console.WriteLine("BeatSaberPlus app unloaded");
+        _logger.LogInformation("BeatSaberPlus app unloaded");
 
         Status = ServiceStatusType.Stopped;
     }

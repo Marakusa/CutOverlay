@@ -1,25 +1,5 @@
 ﻿var colorWarning;
 
-const RGBToHSLWarning = (r, g, b) => {
-    r /= 255;
-    g /= 255;
-    b /= 255;
-    const l = Math.max(r, g, b);
-    const s = l - Math.min(r, g, b);
-    const h = s
-        ? l === r
-        ? (g - b) / s
-        : l === g
-        ? 2 + (b - r) / s
-        : 4 + (r - g) / s
-        : 0;
-    return [
-        60 * h < 0 ? 60 * h + 360 : 60 * h,
-        100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0),
-        (100 * (2 * l - s)) / 2,
-    ];
-};
-
 function checkUpdateWarning() {
     try {
         const response = fetch("/status/get", { method: "GET" });
@@ -59,7 +39,7 @@ function displayWarningData() {
 
     const startingHeaders = document.getElementsByClassName("startingHeader");
     for (let j = 0; j < startingHeaders.length; j++) {
-        const hsl = RGBToHSLWarning(colors[0], colors[1], colors[2]);
+        const hsl = RGBToHSL(colors[0], colors[1], colors[2]);
         startingHeaders[j].style.background =
             `linear-gradient(-20deg, hsl(${hsl[0]},${hsl[1]}%,${hsl[2]}%) -50%, #ffffff 80%)`;
         startingHeaders[j].style.webkitTextFillColor = "transparent";

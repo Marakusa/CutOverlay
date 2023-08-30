@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using CutOverlay.Models.Spotify;
+using CutOverlay.Services;
 using Newtonsoft.Json;
 using Timer = System.Timers.Timer;
 
@@ -24,6 +25,13 @@ public abstract class OAuthOverlayApp : OverlayApp
 
     private protected Timer? AuthorizationTimer;
     private protected string? RefreshToken;
+    private protected LoggerService Logger;
+
+    protected OAuthOverlayApp(LoggerService logger)
+    {
+        Logger = logger;
+    }
+
     public abstract string AuthApiUri { get; }
     public abstract string CallbackAddress { get; }
     public abstract string AuthorizationAddress { get; }
@@ -121,7 +129,7 @@ public abstract class OAuthOverlayApp : OverlayApp
 
             if (!response.IsSuccessStatusCode)
             {
-                Console.WriteLine($"ERROR: {content}");
+                Logger.LogError($"{content}");
                 Status = ServiceStatusType.Error;
                 return;
             }
@@ -135,14 +143,14 @@ public abstract class OAuthOverlayApp : OverlayApp
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR: {ex}");
+            Logger.LogError($"{ex}");
             Status = ServiceStatusType.Error;
         }
     }
 
     public void AuthCallback(string code, string state)
     {
-        if (string.IsNullOrEmpty(state) || !state.Equals(state, StringComparison.InvariantCulture))
+        if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state) || !state.Equals(state, StringComparison.InvariantCulture))
         {
             Status = ServiceStatusType.Error;
             throw new Exception("Failed to verify the request");

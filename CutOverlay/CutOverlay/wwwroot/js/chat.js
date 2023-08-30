@@ -22,7 +22,7 @@ function addMessage(username, message, userColor, flags, userBadges, userProfile
             messageInnerElement.classList.add("highlighted");
             messageInnerElement.classList.add("overlayMessage");
             messageInnerElement.style.borderColor = userColor;
-            var rgb = hexToRgb(userColor);
+            var rgb = HexToRGB(userColor);
             messageInnerElement.style.background =
                 `linear-gradient(-60deg, rgba(${rgb.r},${rgb.g},${rgb.b},0.5) 0%, rgba(${rgb.r},${rgb.g},${rgb.b
                 },0.2) 100%)`;

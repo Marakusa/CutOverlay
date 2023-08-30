@@ -10,6 +10,7 @@
 body {
 	background-color: #181818;
 	font-family: 'Geologica', sans-serif;
+	color: white;
 }
 
 input, select, textarea, button {
@@ -149,8 +150,8 @@ hr {
 }
 
 .draggableWindowFooter {
-	border-color: var(--background-border-color);
 	border-top: solid;
+	border-color: var(--background-border-color);
 	border-width: 1px;
 	box-shadow: 0px -5px 20px #0000005e;
 	clip-path: inset(-30px 0px 0px 0px);
@@ -367,4 +368,30 @@ input[type="submit"]:hover { background-color: var(--accent-alternative-color); 
 	90% { opacity: 1; }
 
 	100% { opacity: 0; }
+}
+
+/* LOG LEVELS */
+
+.log-trace {
+	color: #ccc;
+}
+
+.log-debug {
+	color: #3cb371;
+}
+
+.log-info {
+	color: #1e90ff;
+}
+
+.log-warn {
+	color: #ffa500;
+}
+
+.log-error {
+	color: #fa8072;
+}
+
+.log-critical {
+	color: #ba55d3;
 }

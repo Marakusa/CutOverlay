@@ -17,5 +17,5 @@ public abstract class OverlayApp : IDisposable
 
 public enum ServiceStatusType
 {
-    Running, Starting, Stopping, Stopped, Error
+    Running, Starting, Stopping, Stopped, Error, Waiting
 }

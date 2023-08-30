@@ -62,13 +62,15 @@ public class Twitch : OverlayApp
     private string _stateToken = "";
 
     private TwitchClient? _twitchBotClient;
+    private readonly LoggerService _logger;
 
-    public Twitch(ConfigurationService configurationService)
+    public Twitch(ConfigurationService configurationService, LoggerService logger)
     {
         Status = ServiceStatusType.Starting;
 
         HttpClient = new HttpClient();
         _configurationService = configurationService;
+        _logger = logger;
 
         _accessToken = null;
         _twitchBotClient = null;
@@ -91,13 +93,13 @@ public class Twitch : OverlayApp
 
     public virtual Task Start(Dictionary<string, string?>? configurations)
     {
-        Console.WriteLine("Twitch app starting...");
+        _logger.LogInformation("Twitch app starting...");
 
         _configurations = configurations;
         
         SetupOAuth(ClientId);
 
-        Console.WriteLine("Twitch app started!");
+        _logger.LogInformation("Twitch app started!");
         return Task.CompletedTask;
     }
 
@@ -117,7 +119,7 @@ public class Twitch : OverlayApp
         _twitchApi = null;
         _followerService = null;
 
-        Console.WriteLine("Twitch app unloaded");
+        _logger.LogInformation("Twitch app unloaded");
 
         Status = ServiceStatusType.Stopped;
     }
@@ -164,12 +166,7 @@ public class Twitch : OverlayApp
 
             _accessToken = oAuth;
 
-            _cosmetics = await Get7TvCosmeticsAsync();
-            _sevenTvEmotes = await Get7TvGlobalEmotesAsync();
-
-            Console.WriteLine($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Badges.Count)} 7TV badges");
-            Console.WriteLine($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Paints.Count)} 7TV paints");
-            Console.WriteLine($"Loaded {_sevenTvEmotes.Count} 7TV emotes");
+            await LoadIntegrationsDataAsync();
 
             _twitchApi = new TwitchAPI
             {
@@ -229,6 +226,17 @@ public class Twitch : OverlayApp
         }
     }
 
+    private async Task LoadIntegrationsDataAsync()
+    {
+        // 7TV stuff
+        _cosmetics = await Get7TvCosmeticsAsync();
+        _sevenTvEmotes = await Get7TvGlobalEmotesAsync();
+
+        _logger.LogInformation($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Badges.Count)} 7TV badges");
+        _logger.LogInformation($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Paints.Count)} 7TV paints");
+        _logger.LogInformation($"Loaded {_sevenTvEmotes.Count} 7TV emotes");
+    }
+
     private async Task<TwitchUser> HandleExtensionsAsync(User user)
     {
         TwitchUser newUser = new()
@@ -270,7 +278,7 @@ public class Twitch : OverlayApp
         catch (Exception ex)
         {
             Status = ServiceStatusType.Error;
-            Console.WriteLine($"Failed to fetch 7TV user data: {ex}");
+            _logger.LogError($"Failed to fetch 7TV user data: {ex}");
         }
 
         return newUser;
@@ -296,7 +304,7 @@ public class Twitch : OverlayApp
         catch (Exception ex)
         {
             Status = ServiceStatusType.Error;
-            Console.WriteLine($"Failed to fetch 7TV cosmetics: {ex}");
+            _logger.LogError($"Failed to fetch 7TV cosmetics: {ex}");
         }
 
         return null;
@@ -318,7 +326,7 @@ public class Twitch : OverlayApp
         catch (Exception ex)
         {
             Status = ServiceStatusType.Error;
-            Console.WriteLine($"Failed to fetch 7TV cosmetics: {ex}");
+            _logger.LogError($"Failed to fetch 7TV cosmetics: {ex}");
         }
 
         return new List<Emote>();
@@ -361,7 +369,7 @@ public class Twitch : OverlayApp
         catch (Exception ex)
         {
             Status = ServiceStatusType.Error;
-            Console.WriteLine($"Failed to get 7TV paint for user {twitchId}: {ex}");
+            _logger.LogError($"Failed to get 7TV paint for user {twitchId}: {ex}");
         }
 
         return twitchUser.Paint;
@@ -384,7 +392,7 @@ public class Twitch : OverlayApp
         catch (Exception ex)
         {
             Status = ServiceStatusType.Error;
-            Console.WriteLine($"Failed to get 7TV paint for user {twitchId}: {ex}");
+            _logger.LogError($"Failed to get 7TV paint for user {twitchId}: {ex}");
         }
 
         return twitchUser.SevenTvBadges;
@@ -405,33 +413,33 @@ public class Twitch : OverlayApp
 
     #region Twitch Bot Client Events
 
-    private static void OnError(object? sender, OnErrorEventArgs e)
+    private void OnError(object? sender, OnErrorEventArgs e)
     {
-        Console.WriteLine($"Failed to connect: {e.Exception.Message}");
+        _logger.LogError($"Failed to connect: {e.Exception.Message}");
     }
 
-    private static void OnJoinedChannel(object? sender, OnJoinedChannelArgs e)
+    private void OnJoinedChannel(object? sender, OnJoinedChannelArgs e)
     {
-        Console.WriteLine($"Bot {e.BotUsername} has joined the channel {e.Channel}");
+        _logger.LogInformation($"Bot {e.BotUsername} has joined the channel {e.Channel}");
     }
 
-    private static void OnNewSubscriber(object? sender, OnNewSubscriberArgs e)
+    private void OnNewSubscriber(object? sender, OnNewSubscriberArgs e)
     {
         // TODO: Sub alerts
         _subscribers.Add(e.Subscriber.DisplayName);
-        Console.WriteLine(
+        _logger.LogDebug(
             $"New subscriber alert! User: {e.Subscriber.DisplayName}, Sub Plan: {e.Subscriber.SubscriptionPlan}");
     }
 
-    private static void OnRaidNotification(object? sender, OnRaidNotificationArgs e)
+    private void OnRaidNotification(object? sender, OnRaidNotificationArgs e)
     {
-        Console.WriteLine(
+        _logger.LogDebug(
             $"Raid alert! User: {e.RaidNotification.DisplayName}, Raid Count: {e.RaidNotification.MsgParamViewerCount}");
     }
 
-    private static void OnFollowerServiceStarted(object? sender, OnServiceStartedArgs e)
+    private void OnFollowerServiceStarted(object? sender, OnServiceStartedArgs e)
     {
-        Console.WriteLine("Follower service started");
+        _logger.LogInformation("Follower service started");
     }
 
     private void OnNewFollowers(object? sender, OnNewFollowersDetectedArgs e)
@@ -513,7 +521,7 @@ public class Twitch : OverlayApp
             $"http://localhost:{Globals.ChatWebSocketPort}/"); // Replace with your desired address
 
         listener.Start();
-        Console.WriteLine("Listening for WebSocket connections...");
+        _logger.LogInformation("Listening for WebSocket connections...");
         Status = ServiceStatusType.Running;
 
         while (true)
@@ -526,12 +534,15 @@ public class Twitch : OverlayApp
         }
     }
 
-    private static async void ProcessWebSocketRequest(HttpListenerContext context)
+    private async void ProcessWebSocketRequest(HttpListenerContext context)
     {
         HttpListenerWebSocketContext socketContext = await context.AcceptWebSocketAsync(null);
         WebSocket socket = socketContext.WebSocket;
 
-        Console.WriteLine("WebSocket connection established.");
+        _logger.LogInformation("WebSocket connection established.");
+
+        await LoadIntegrationsDataAsync();
+
         for (int i = 0; i < Sockets.Count; i++)
         {
             if (Sockets[i].State == WebSocketState.Open) continue;
@@ -597,8 +608,8 @@ public class Twitch : OverlayApp
         };
 
         // Set badges
-        Console.WriteLine(JsonConvert.SerializeObject(chatMessage.Badges));
-        Console.WriteLine(JsonConvert.SerializeObject(chatMessage.EmoteSet));
+        _logger.LogDebug(JsonConvert.SerializeObject(chatMessage.Badges));
+        _logger.LogDebug(JsonConvert.SerializeObject(chatMessage.EmoteSet));
         foreach (BadgeVersion badgeVersion in from badge in chatMessage.Badges
                                               let index = _badges.FindIndex(f => f.SetId == badge.Key)
                                               where index >= 0

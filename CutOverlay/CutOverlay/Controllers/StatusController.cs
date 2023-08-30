@@ -14,13 +14,15 @@ public class StatusController : ControllerBase
     private readonly BeatSaberPlus _beatSaberPlus;
     private readonly Twitch _twitch;
     private readonly Pulsoid _pulsoid;
+    private readonly LoggerService _logger;
 
-    public StatusController(Spotify spotify, BeatSaberPlus beatSaberPlus, Twitch twitch, Pulsoid pulsoid)
+    public StatusController(Spotify spotify, BeatSaberPlus beatSaberPlus, Twitch twitch, Pulsoid pulsoid, LoggerService logger)
     {
         _spotify = spotify;
         _beatSaberPlus = beatSaberPlus;
         _twitch = twitch;
         _pulsoid = pulsoid;
+        _logger = logger;
     }
 
     [HttpGet("get")]
@@ -51,34 +53,41 @@ public class StatusController : ControllerBase
         }
     }
 
+    private IActionResult StatusCheck(ServiceStatusType status)
+    {
+        ServiceStatusModel statusModel = new()
+        {
+            Color = status switch
+            {
+                ServiceStatusType.Running => "greenyellow",
+                ServiceStatusType.Stopped => "grey",
+                ServiceStatusType.Waiting => "grey",
+                ServiceStatusType.Stopping => "coral",
+                ServiceStatusType.Starting => "darkorange",
+                ServiceStatusType.Error => "crimson",
+                _ => throw new ArgumentOutOfRangeException()
+            },
+            Status = status switch
+            {
+                ServiceStatusType.Running => "Running",
+                ServiceStatusType.Stopped => "Stopped",
+                ServiceStatusType.Waiting => "Waiting",
+                ServiceStatusType.Stopping => "Stopping",
+                ServiceStatusType.Starting => "Starting",
+                ServiceStatusType.Error => "Error",
+                _ => throw new ArgumentOutOfRangeException()
+            }
+        };
+        return Ok(JsonConvert.SerializeObject(statusModel));
+    }
+
     [HttpGet("service/twitch")]
     public IActionResult ServiceTwitch()
     {
         try
         {
             ServiceStatusType status = _twitch.GetStatus();
-            ServiceStatusModel statusModel = new()
-            {
-                Color = status switch
-                {
-                    ServiceStatusType.Running => "greenyellow",
-                    ServiceStatusType.Stopped => "grey",
-                    ServiceStatusType.Stopping => "coral",
-                    ServiceStatusType.Starting => "darkorange",
-                    ServiceStatusType.Error => "crimson",
-                    _ => throw new ArgumentOutOfRangeException()
-                },
-                Status = status switch
-                {
-                    ServiceStatusType.Running => "Running",
-                    ServiceStatusType.Stopped => "Stopped",
-                    ServiceStatusType.Stopping => "Stopping",
-                    ServiceStatusType.Starting => "Starting",
-                    ServiceStatusType.Error => "Error",
-                    _ => throw new ArgumentOutOfRangeException()
-                }
-            };
-            return Ok(JsonConvert.SerializeObject(statusModel));
+            return StatusCheck(status);
         }
         catch (Exception ex)
         {
@@ -92,28 +101,7 @@ public class StatusController : ControllerBase
         try
         {
             ServiceStatusType status = _spotify.GetStatus();
-            ServiceStatusModel statusModel = new()
-            {
-                Color = status switch
-                {
-                    ServiceStatusType.Running => "greenyellow",
-                    ServiceStatusType.Stopped => "grey",
-                    ServiceStatusType.Stopping => "coral",
-                    ServiceStatusType.Starting => "darkorange",
-                    ServiceStatusType.Error => "crimson",
-                    _ => throw new ArgumentOutOfRangeException()
-                },
-                Status = status switch
-                {
-                    ServiceStatusType.Running => "Running",
-                    ServiceStatusType.Stopped => "Stopped",
-                    ServiceStatusType.Stopping => "Stopping",
-                    ServiceStatusType.Starting => "Starting",
-                    ServiceStatusType.Error => "Error",
-                    _ => throw new ArgumentOutOfRangeException()
-                }
-            };
-            return Ok(JsonConvert.SerializeObject(statusModel));
+            return StatusCheck(status);
         }
         catch (Exception ex)
         {
@@ -127,28 +115,7 @@ public class StatusController : ControllerBase
         try
         {
             ServiceStatusType status = _beatSaberPlus.GetStatus();
-            ServiceStatusModel statusModel = new()
-            {
-                Color = status switch
-                {
-                    ServiceStatusType.Running => "greenyellow",
-                    ServiceStatusType.Stopped => "grey",
-                    ServiceStatusType.Stopping => "coral",
-                    ServiceStatusType.Starting => "darkorange",
-                    ServiceStatusType.Error => "crimson",
-                    _ => throw new ArgumentOutOfRangeException()
-                },
-                Status = status switch
-                {
-                    ServiceStatusType.Running => "Running",
-                    ServiceStatusType.Stopped => "Stopped",
-                    ServiceStatusType.Stopping => "Stopping",
-                    ServiceStatusType.Starting => "Starting",
-                    ServiceStatusType.Error => "Error",
-                    _ => throw new ArgumentOutOfRangeException()
-                }
-            };
-            return Ok(JsonConvert.SerializeObject(statusModel));
+            return StatusCheck(status);
         }
         catch (Exception ex)
         {
@@ -162,28 +129,40 @@ public class StatusController : ControllerBase
         try
         {
             ServiceStatusType status = _pulsoid.GetStatus();
-            ServiceStatusModel statusModel = new()
-            {
-                Color = status switch
-                {
-                    ServiceStatusType.Running => "greenyellow",
-                    ServiceStatusType.Stopped => "grey",
-                    ServiceStatusType.Stopping => "coral",
-                    ServiceStatusType.Starting => "darkorange",
-                    ServiceStatusType.Error => "crimson",
-                    _ => throw new ArgumentOutOfRangeException()
-                },
-                Status = status switch
-                {
-                    ServiceStatusType.Running => "Running",
-                    ServiceStatusType.Stopped => "Stopped",
-                    ServiceStatusType.Stopping => "Stopping",
-                    ServiceStatusType.Starting => "Starting",
-                    ServiceStatusType.Error => "Error",
-                    _ => throw new ArgumentOutOfRangeException()
-                }
-            };
-            return Ok(JsonConvert.SerializeObject(statusModel));
+            return StatusCheck(status);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("service/logger")]
+    public IActionResult ServiceLogger()
+    {
+        try
+        {
+            ServiceStatusType status = _logger.GetStatus();
+            return StatusCheck(status);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("service/logger/test")]
+    public IActionResult ServiceLoggerTest()
+    {
+        try
+        {
+            _logger.LogTrace("Test message");
+            _logger.LogDebug("Test message");
+            _logger.LogInformation("Test message");
+            _logger.LogWarning("Test message");
+            _logger.LogError("Test message");
+            _logger.LogCritical("Test message");
+            return Ok();
         }
         catch (Exception ex)
         {

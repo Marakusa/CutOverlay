@@ -13,7 +13,6 @@ function saveConfig() {
     }
 
     try {
-        console.log(config);
         const response = fetch("/configuration",
             {
                 method: "POST",

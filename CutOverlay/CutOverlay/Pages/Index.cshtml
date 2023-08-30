@@ -264,6 +264,30 @@
                    Id = "pulsoid",
                    Label = "Pulsoid"
                })
+
+        @await Html.PartialAsync("_ServiceStatus", new ServiceStatus
+               {
+                   Id = "logger",
+                   Label = "Logger"
+               })
+    </div>
+</div>
+
+<div id="logPanel" class="draggableWindow" style="height: 635px; left: 919px; top: 93px; width: 440px;">
+    <div id="logPanelHeader" class="draggableWindowHeader">
+        <span>Logs</span>
+        <span class="closeWindowButton" onclick="showWindow('logPanel', false)"></span>
+    </div>
+    <div id="logPanelContent" class="draggableWindowContent" style="padding: 0;">
+    </div>
+    <div id="logPanelBottomBar" class="draggableWindowFooter">
+        @await Html.PartialAsync("_Button", new InputModel
+               {
+                   Id = "testLogs",
+                   Value = "Test Logging",
+                   OnClick = "fetch('status/service/logger/test')",
+                   AlignContent = Align.Right
+               })
     </div>
 </div>
 <!--<div id="debugPanel" class="draggableWindow" style="height: 235px; left: 571px; top: 522px; width: 340px;">
@@ -318,6 +342,12 @@
                    Id = "toolboxInfo",
                    Value = "icon-info.png",
                    OnClick = "showWindow('infoPanel', true)"
+               })
+        @await Html.PartialAsync("_ToolboxButton", new InputModel
+               {
+                   Id = "toolboxInfo",
+                   Value = "icon-debug.png",
+                   OnClick = "showWindow('logPanel', true)"
                })
         <!--@await Html.PartialAsync("_ToolboxButton", new InputModel
                {
@@ -376,3 +406,4 @@
 </div>
 
 <script src="~/js/settingsWindowDrag.js"></script>
+<script src="~/js/logsWindow.js"></script>

@@ -13,13 +13,15 @@ public class Pulsoid : OverlayApp
     private string? _pulsoidApiToken;
     private int _reconnectInterval = 1000;
     private ClientWebSocket? _socket;
+    private readonly LoggerService _logger;
 
-    public Pulsoid(ConfigurationService configurationService)
+    public Pulsoid(ConfigurationService configurationService, LoggerService logger)
     {
         Status = ServiceStatusType.Starting;
 
         HttpClient = new HttpClient();
         _configurationService = configurationService;
+        _logger = logger;
 
         _socket = null;
 
@@ -37,19 +39,19 @@ public class Pulsoid : OverlayApp
             !configurations.ContainsKey("pulsoidAccessToken") ||
             string.IsNullOrEmpty(configurations["pulsoidAccessToken"]))
         {
-            Console.WriteLine("Pulsoid access token missing");
+            _logger.LogError("Pulsoid access token missing");
             return;
         }
 
         if (_pulsoidApiToken == configurations["pulsoidAccessToken"])
         {
-            Console.WriteLine("Pulsoid settings unchanged");
+            _logger.LogInformation("Pulsoid settings unchanged");
             return;
         }
 
         Status = ServiceStatusType.Starting;
 
-        Console.WriteLine("Pulsoid app starting...");
+        _logger.LogInformation("Pulsoid app starting...");
 
         if (_socket != null)
         {
@@ -62,12 +64,12 @@ public class Pulsoid : OverlayApp
         _pulsoidApiToken = configurations["pulsoidAccessToken"];
         _ = SetupWebSocket();
 
-        Console.WriteLine("Pulsoid app started!");
+        _logger.LogInformation("Pulsoid app started!");
     }
 
     private async Task SetupWebSocket()
     {
-        Console.WriteLine("Pulsoid web socket setting up...");
+        _logger.LogInformation("Pulsoid web socket setting up...");
 
         string url = $"wss://dev.pulsoid.net/api/v1/data/real_time?access_token={_pulsoidApiToken}";
 
@@ -86,7 +88,7 @@ public class Pulsoid : OverlayApp
         catch (Exception ex)
         {
             Status = ServiceStatusType.Error;
-            Console.WriteLine("WebSocket error: " + ex.Message);
+            _logger.LogError("WebSocket error: " + ex.Message);
             // Attempt reconnection after a certain interval
             await Task.Delay(_reconnectInterval);
             // Increase the reconnect interval for the next attempt
@@ -121,7 +123,7 @@ public class Pulsoid : OverlayApp
         _socket?.Dispose();
         HttpClient?.Dispose();
 
-        Console.WriteLine("Pulsoid app unloaded");
+        _logger.LogInformation("Pulsoid app unloaded");
 
         Status = ServiceStatusType.Stopped;
     }

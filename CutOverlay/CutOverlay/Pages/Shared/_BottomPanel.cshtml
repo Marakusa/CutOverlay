@@ -1,14 +1,5 @@
 ﻿@using CutOverlay.Models
 <div id="panelBottom">
-    <div class="panelItem" style="width: 170px;">
-        @await Html.PartialAsync("_StylizedHeader", new TextModel
-               {
-                   Text = Model.TimeZoneString,
-                   StyleId = "timezoneText"
-               })
-        @await Html.PartialAsync("_ClockText")
-    </div>
-
     <div class="panelItem" style="display: none; width: 120px;">
         @await Html.PartialAsync("_StylizedHeader", new TextModel
                {

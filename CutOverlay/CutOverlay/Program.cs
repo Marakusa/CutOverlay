@@ -14,7 +14,8 @@ public class Program
 
         builder.Services.AddElectron();
         builder.Services.AddRazorPages();
-
+        
+        builder.Services.AddSingleton<LoggerService>();
         builder.Services.AddSingleton<ConfigurationService>();
         builder.Services.AddSingleton<OverlayStatusService>();
         builder.Services.AddSingleton<Spotify>();
@@ -45,8 +46,8 @@ public class Program
             AlwaysOnTop = false,
             AutoHideMenuBar = true,
             Center = false,
-            Width = 1100,
-            Height = 800,
+            Width = 1500,
+            Height = 960,
             MinWidth = 750,
             MinHeight = 650,
             Resizable = true
@@ -57,6 +58,7 @@ public class Program
         var manifest = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
         Globals.Port = int.Parse(manifest?["aspCoreBackendPort"].ToString() ?? "0");
         Globals.ChatWebSocketPort = 37101;
+        Globals.LoggerWebSocketPort = 37110;
 
         // Open the Electron-Window here
         await Electron.WindowManager.CreateWindowAsync(options, $"http://localhost:{Globals.Port}/");
