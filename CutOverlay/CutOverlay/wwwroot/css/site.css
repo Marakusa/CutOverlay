@@ -430,7 +430,7 @@ p { white-space: nowrap; }
 	bottom: 20px;
 	overflow: hidden;
 	position: absolute;
-	width: 100%;
+	width: calc(100% - 40px);
 }
 
 .chatUser {
@@ -456,25 +456,29 @@ p { white-space: nowrap; }
 	font-weight: 500;
 	margin-top: 10px; /* Adjusting margin top */
 	padding: 0;
-	width: calc(100% - 40px);
+	width: 100%;
 }
+	.message div:last-child {
+		width: calc(100% - 50px);
+		overflow-wrap: break-word;
+	}
 
-.message span:last-child {
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background: white;
-	background-clip: text;
-}
+	.message span:last-child {
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background: white;
+		background-clip: text;
+	}
 
-.message span:last-child img {
-	-webkit-text-fill-color: initial;
-	grid-column: 1;
-	grid-row: 1;
-	height: 32px;
-	margin: -3px -6px -3px 2px;
-	object-fit: contain;
-	width: 32px;
-}
+		.message span:last-child img {
+			-webkit-text-fill-color: initial;
+			grid-column: 1;
+			grid-row: 1;
+			height: 32px;
+			margin: -3px -6px -3px 2px;
+			object-fit: contain;
+			width: 32px;
+		}
 
 .highlighted {
 	-webkit-background-clip: unset;
