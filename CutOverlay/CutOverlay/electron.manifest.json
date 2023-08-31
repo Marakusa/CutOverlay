@@ -12,7 +12,7 @@
 		"appId": "com.CutOverlay.app",
 		"productName": "CUT Overlay",
 		"copyright": "Copyright © Markus Kannisto 2023",
-		"buildVersion": "0.1.4-rc2",
+		"buildVersion": "0.1.4-rc3",
 		"win": {
 			"icon": "./public/icons/ico/favicon.ico"
 		},
