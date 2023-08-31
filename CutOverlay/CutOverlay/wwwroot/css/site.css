@@ -73,7 +73,7 @@ body {
 	background: linear-gradient(90deg, #000000 0%, #ffffffff 5%, #000000 10%, #000000 50%, #ffffffff 55%, #000000 60%);
 	background-repeat: repeat;
 	background-size: 500% 100%;
-	bottom: 98px;
+	bottom: 100px;
 	height: 2px;
 	left: 0;
 	position: absolute;
@@ -206,30 +206,6 @@ body {
 	z-index: 2;
 }
 
-#panelSideSmall {
-	height: 980px;
-	position: absolute;
-	position: absolute;
-	right: 0;
-	top: 0;
-	transform-origin: top right;
-	transition: 0.4s;
-	width: 192px;
-	z-index: 1;
-}
-
-#panelChat {
-	height: 980px;
-	position: absolute;
-	position: absolute;
-	right: 0;
-	top: 0;
-	transform-origin: top right;
-	transition: 0.4s;
-	width: 700px;
-	z-index: 1;
-}
-
 #chatBackgroundAnimation {
 	animation: linear infinite chatBackgroundAnimation 10s;
 	background-image: url(../img/Mask1.png);
@@ -247,7 +223,7 @@ body {
 }
 
 #statusDiv {
-	bottom: 8px;
+	bottom: 10px;
 	height: 80px;
 	justify-content: flex-start;
 	left: 10px;
@@ -374,14 +350,14 @@ body {
 }
 
 #songNameDiv {
+	width: calc(100% - 50px);
 	height: 100%;
 	left: 0;
 	margin-left: 10px;
-	margin-top: 36px;
+	margin-top: 30px;
 	padding-left: 10px;
 	position: absolute;
 	top: 0;
-	width: 100%;
 	z-index: 2;
 }
 
@@ -393,7 +369,7 @@ body {
 	color: #ffffff;
 	display: inline-block;
 	font-family: 'Geologica', sans-serif;
-	font-size: 30px;
+	font-size: 36px;
 	font-weight: 800;
 	margin-left: 0;
 	margin-top: 0;
@@ -401,6 +377,9 @@ body {
 	position: absolute;
 	transition: 0.4s;
 	z-index: 3;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: inherit;
 }
 
 .pDiv {
@@ -541,7 +520,7 @@ p { white-space: nowrap; }
 	align-items: end;
 	display: flex;
 	flex-flow: row-reverse;
-	height: 42px;
+	height: 46px;
 	width: auto;
 	z-index: 2;
 }
@@ -583,7 +562,7 @@ p { white-space: nowrap; }
 		bottom: 0;
 		display: inline-block;
 		font-family: 'Geologica', sans-serif;
-		font-size: 30px;
+		font-size: 36px;
 		font-weight: 800;
 		margin: 0;
 		padding: 0 5px;
@@ -594,9 +573,7 @@ p { white-space: nowrap; }
 	}
 
 
-#panelOverColor { opacity: 0.8; }
-
-#panelBorders, #panelBottom, #panelChat { opacity: 0.9; }
+#panelOverColor { opacity: 0.9; }
 
 
 @keyframes slide-up {

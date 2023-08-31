@@ -1,5 +1,5 @@
 ﻿@model CutOverlay.Models.TextModel
 
-<div id="@Model.StyleIdDiv" class="styledHeaderDiv">
-    <p id="@Model.StyleIdText" class="styledHeaderText overlayMessage">@Model.Text</p>
+<div id="@Model.StyleIdDiv" class="styledHeaderDiv" style="height: calc(@{@Model.FontSize}px + 6px);">
+    <p id="@Model.StyleIdText" class="styledHeaderText overlayMessage" style="width: 100%; text-align: @Model.AlignmentStyle; font-size: @{@Model.FontSize}px;">@Model.Text</p>
 </div>

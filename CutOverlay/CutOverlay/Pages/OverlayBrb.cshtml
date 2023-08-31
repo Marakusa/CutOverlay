@@ -1,29 +1,15 @@
 ﻿@page
+@using CutOverlay.Models
 @model OverlayBrbModel
 @{
 }
 
-<div id="panelOverColor"></div>
-<div id="panelOverColorGradient"></div>
-<div id="startingHeaderDiv">
-    <p class="overlayMessage startingHeader">
-        Be right back!
-    </p>
-</div>
-
-<div id="panelBottomGradient" style="display: none;"></div>
-<div id="panelBorders">
-    <div id="borderBottom"></div>
-    <!--<div id=borderRightChat></div>-->
-</div>
-<div id="panelBottomBackgroundAnimation"></div>
-
-@await Html.PartialAsync("_BottomPanel")
-
-@await Html.PartialAsync("_PanelAlert")
-
-@await Html.PartialAsync("_SongStatus")
+@await Html.PartialAsync("_StylizedHeader", new TextModel
+       {
+           Text = "Be right back!",
+           StyleId = "brbText",
+           Align = Align.Left,
+           FontSize = 60
+       })
 
 <script src="~/js/site.js"></script>
-<script src="~/js/songStatus.js"></script>
-<script src="~/js/warning.js"></script>

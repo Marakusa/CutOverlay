@@ -1,0 +1,22 @@
+﻿@page
+@using CutOverlay.Models
+@model CutOverlay.Pages.SongProgressModel
+@{
+}
+
+<div class="panelItem" style="width: 250px; margin-right: 10px;">
+    @await Html.PartialAsync("_StylizedHeader", new TextModel
+           {
+               Text = "",
+               StyleId = "progressHeader",
+               Align = Align.Right
+           })
+    @await Html.PartialAsync("_StylizedText", new TextModel
+           {
+               Text = "",
+               StyleId = "progressText",
+               Align = Align.Right
+           })
+</div>
+
+<script src="~/js/songStatus.js"></script>

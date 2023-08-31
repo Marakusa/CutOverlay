@@ -11,10 +11,7 @@ public class OverlayChatModel : PageModel
         _logger = logger;
     }
 
-    public string? Artist { get; set; }
-
     public void OnGet()
     {
-        Artist = "Artist";
     }
 }

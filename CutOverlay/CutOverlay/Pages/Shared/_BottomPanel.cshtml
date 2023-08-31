@@ -8,43 +8,4 @@
                })
         @await Html.PartialAsync("_HeartRateText")
     </div>
-
-    <div class="panelItem" style="width: 250px;">
-        @await Html.PartialAsync("_StylizedHeader", new TextModel
-               {
-                   Text = "",
-                   StyleId = "progressHeader"
-               })
-        @await Html.PartialAsync("_StylizedText", new TextModel
-               {
-                   Text = "",
-                   StyleId = "progressText"
-               })
-    </div>
-
-    <div class="panelItem">
-        @await Html.PartialAsync("_StylizedHeader", new TextModel
-               {
-                   Text = "Latest Follow",
-                   StyleId = "lastFollowHeader"
-               })
-        @await Html.PartialAsync("_StylizedText", new TextModel
-               {
-                   Text = "",
-                   StyleId = "lastFollowText"
-               })
-    </div>
-
-    <div class="panelItem" style="margin-left: 50px;">
-        @await Html.PartialAsync("_StylizedHeader", new TextModel
-               {
-                   Text = "Latest Sub",
-                   StyleId = "lastSubHeader"
-               })
-        @await Html.PartialAsync("_StylizedText", new TextModel
-               {
-                   Text = "",
-                   StyleId = "lastSubText"
-               })
-    </div>
 </div>

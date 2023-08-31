@@ -195,59 +195,12 @@ function displayData() {
         }
         var colors = color.split(",");
         var hslColors = RGBToHSL(colors[0], colors[1], colors[2]);
-
-        if (document.getElementById("panelBottom") != null) {
-            document.getElementById("panelBottom").style.background =
-                `hsla(${hslColors[0]},${hslColors[1]}%,${hslColors[2] * 0.8}%,0.2) linear-gradient(0deg, #00000056 0%, #000000b7 70%, #000000ff 100%)`;
-        }
-
-        if (document.getElementById("panelChat") != null) {
-            document.getElementById("panelChat").style.backgroundColor =
-                `rgba(${colors[0]},${colors[1]},${colors[2]}, 50)`;
-        }
-
-        if (document.getElementById("panelOverColor") != null) {
-            document.getElementById("panelOverColor").style.backgroundColor =
-                `rgba(${colors[0]},${colors[1]},${colors[2]}, 50)`;
-        }
-
-        if (document.getElementById("panelSideSmall") != null) {
-            document.getElementById("panelSideSmall").style.backgroundColor =
-                `rgba(${colors[0]},${colors[1]},${colors[2]}, 50)`;
-        }
-
-        const startingHeaders = document.getElementsByClassName("startingHeader");
-        for (var j = 0; j < startingHeaders.length; j++) {
-            startingHeaders[j].style.background =
-                `linear-gradient(-20deg, hsl(${hslColors[0]},${hslColors[1]}%,${hslColors[2]}%) -50%, #ffffff 80%)`;
-            startingHeaders[j].style.webkitTextFillColor = "transparent";
-            startingHeaders[j].style.webkitBackgroundClip = "text";
-        }
-
-        if (document.getElementById("panelBottomBackgroundAnimation") != null) {
-            document.getElementById("panelBottomBackgroundAnimation").style.filter =
-                `hue-rotate(${hslColors[0]}deg) saturate(${hslColors[1]}%) brightness(75%) opacity(0.5)`;
-        }
-
-        if (document.getElementById("chatBackgroundAnimation") != null) {
-            document.getElementById("chatBackgroundAnimation").style.filter =
-                `hue-rotate(${hslColors[0]}deg) saturate(${hslColors[1]}%) brightness(${hslColors[2]}%) opacity(0.4)`;
-        }
-
+        
         if (document.getElementById("artist") != null) {
             document.getElementById("artist").style.background =
                 `linear-gradient(-20deg, hsl(${hslColors[0]},${hslColors[1]}%,${hslColors[2]}%) -50%, #ffffff 100%)`;
             document.getElementById("artist").style.webkitTextFillColor = "transparent";
             document.getElementById("artist").style.webkitBackgroundClip = "text";
-        }
-
-        if (document.getElementById("panelOverColorGradient") != null) {
-            document.getElementById("panelOverColorGradient").style.background =
-                `radial-gradient(1500px, rgba(${colors[0]},${colors[1]},${colors[2]}, 255), rgba(${colors[0]},${colors[
-                    1]},${colors[2]}, 0))`;
-            document.getElementById("panelOverColorGradient").style.backgroundRepeat = "no-repeat";
-            document.getElementById("panelOverColorGradient").style.backgroundSize = "4000px 4000px";
-            document.getElementById("panelOverColorGradient").style.backgroundPosition = "-1800px -2600px";
         }
 
         let songText = document.getElementById("song");

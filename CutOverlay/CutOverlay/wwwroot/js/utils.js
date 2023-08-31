@@ -38,7 +38,7 @@ function checkColorUpdate() {
             if (res.ok) {
                 res.json().then((status) => {
 
-                    if (status == null || status.Status == null || status.Status.Paused) {
+                    if (status == null || status.Status == null || status.Status.Total === 0 || status.Status.Paused) {
                         themeColor = "130, 180, 255, 50";
                     } else {
                         themeColor =
@@ -83,5 +83,29 @@ function themeColorUpdate() {
         h.style.background = `white`;
         h.style.webkitTextFillColor = "transparent";
         h.style.webkitBackgroundClip = "text";
+    }
+
+    if (document.getElementById("panelBottom") != null) {
+        document.getElementById("panelBottom").style.background =
+            `hsla(${hslColors[0]},${hslColors[1]}%,${hslColors[2] * 0.8}%,0.97) linear-gradient(0deg, rgba(0, 0, 0, 0.337) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.9) 100%)`;
+    }
+
+    if (document.getElementById("panelOverColor") != null) {
+        document.getElementById("panelOverColor").style.backgroundColor =
+            `hsla(${hslColors[0]},${hslColors[1]}%,${hslColors[2] * 0.8}%,0.9)`;
+    }
+
+    if (document.getElementById("panelOverColorGradient") != null) {
+        document.getElementById("panelOverColorGradient").style.background =
+            `radial-gradient(1500px, rgba(${colors[0]},${colors[1]},${colors[2]}, 255), rgba(${colors[0]},${colors[
+                1]},${colors[2]}, 0))`;
+        document.getElementById("panelOverColorGradient").style.backgroundRepeat = "no-repeat";
+        document.getElementById("panelOverColorGradient").style.backgroundSize = "4000px 4000px";
+        document.getElementById("panelOverColorGradient").style.backgroundPosition = "-1800px -2600px";
+    }
+
+    if (document.getElementById("panelBottomBackgroundAnimation") != null) {
+        document.getElementById("panelBottomBackgroundAnimation").style.filter =
+            `hue-rotate(${hslColors[0]}deg) saturate(${hslColors[1]}%) brightness(75%) opacity(0.5)`;
     }
 }

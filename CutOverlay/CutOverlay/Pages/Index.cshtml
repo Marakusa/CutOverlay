@@ -186,7 +186,9 @@
                        Value = $"http://localhost:{Globals.Port}/OverlayWarning",
                        Icon = "quote-left",
                        Label = "Warning",
-                       ObsSourceName = "CUT_Warning"
+                       ObsSourceName = "CUT_Warning",
+                       ObsSourceWidth = 1920,
+                       ObsSourceHeight = 500
                    })
         </div>
         <div class="overlayDiv">
@@ -196,7 +198,9 @@
                        Value = $"http://localhost:{Globals.Port}/OverlayStarting",
                        Icon = "quote-left",
                        Label = "Starting soon + Warning",
-                       ObsSourceName = "CUT_StartingHeader"
+                       ObsSourceName = "CUT_StartingHeader",
+                       ObsSourceWidth = 1920,
+                       ObsSourceHeight = 500
                    })
         </div>
         <div class="overlayDiv">
@@ -206,7 +210,9 @@
                        Value = $"http://localhost:{Globals.Port}/OverlayChat",
                        Icon = "window-maximize",
                        Label = "Panel + Background",
-                       ObsSourceName = "CUT_PanelBackground"
+                       ObsSourceName = "CUT_PanelBackground",
+                       ObsSourceWidth = 1920,
+                       ObsSourceHeight = 1080
                    })
         </div>
         <div class="overlayDiv">
@@ -216,7 +222,9 @@
                        Value = $"http://localhost:{Globals.Port}/OverlayBrb",
                        Icon = "window-maximize",
                        Label = "BRB Screen",
-                       ObsSourceName = "CUT_BRB"
+                       ObsSourceName = "CUT_BRB",
+                       ObsSourceWidth = 500,
+                       ObsSourceHeight = 70
                    })
         </div>
         <div class="overlayDiv">
@@ -226,17 +234,57 @@
                        Value = $"http://localhost:{Globals.Port}/OverlayGame1",
                        Icon = "window-maximize",
                        Label = "Panel",
-                       ObsSourceName = "CUT_Panel"
+                       ObsSourceName = "CUT_Panel",
+                       ObsSourceWidth = 1920,
+                       ObsSourceHeight = 1080
                    })
         </div>
         <div class="overlayDiv">
             @await Html.PartialAsync("_CopyTextFieldObs", new InputModelObs
                    {
-                       Id = "overlay7Copy",
-                       Value = $"http://localhost:{Globals.Port}/OverlayGame2",
-                       Icon = "window-maximize",
-                       Label = "No Panel (Clean)",
-                       ObsSourceName = "CUT_CleanOverlay"
+                       Id = "overlay8Copy",
+                       Value = $"http://localhost:{Globals.Port}/SongStatus",
+                       Icon = "music",
+                       Label = "Song Status",
+                       ObsSourceName = "CUT_SongStatus",
+                       ObsSourceWidth = 1000,
+                       ObsSourceHeight = 100
+                   })
+        </div>
+        <div class="overlayDiv">
+            @await Html.PartialAsync("_CopyTextFieldObs", new InputModelObs
+                   {
+                       Id = "overlay9Copy",
+                       Value = $"http://localhost:{Globals.Port}/Clock",
+                       Icon = "clock",
+                       Label = "Clock",
+                       ObsSourceName = "CUT_Clock",
+                       ObsSourceWidth = 180,
+                       ObsSourceHeight = 100
+                   })
+        </div>
+        <div class="overlayDiv">
+            @await Html.PartialAsync("_CopyTextFieldObs", new InputModelObs
+                   {
+                       Id = "overlay10Copy",
+                       Value = $"http://localhost:{Globals.Port}/SongProgress",
+                       Icon = "music",
+                       Label = "Song Progress",
+                       ObsSourceName = "CUT_SongProgress",
+                       ObsSourceWidth = 270,
+                       ObsSourceHeight = 100
+                   })
+        </div>
+        <div class="overlayDiv">
+            @await Html.PartialAsync("_CopyTextFieldObs", new InputModelObs
+                   {
+                       Id = "overlay11Copy",
+                       Value = $"http://localhost:{Globals.Port}/FollowSubs",
+                       Icon = "comments",
+                       Label = "Latest Follow + Sub",
+                       ObsSourceName = "CUT_FollowSubs",
+                       ObsSourceWidth = 600,
+                       ObsSourceHeight = 100
                    })
         </div>
     </div>
