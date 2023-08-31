@@ -12,9 +12,13 @@ public class LoggerService : OverlayApp
 
     private static readonly List<WebSocket> Sockets = new();
 
+    public LogLevel LogLevel { get; set; }
+
     public LoggerService()
     {
         Status = ServiceStatusType.Starting;
+
+        LogLevel = LogLevel.Information;
 
         _ = SetupWebSocketAsync();
     }
@@ -77,41 +81,42 @@ public class LoggerService : OverlayApp
 
     public override ServiceStatusType GetStatus() => Status;
 
-    public void LogInformation(string? message)
-    {
-        Log(LogLevel.Information, message);
-    }
-
-    public void LogDebug(string? message)
-    {
-        Log(LogLevel.Debug, message);
-    }
-
-    public void LogCritical(string? message)
-    {
-        Log(LogLevel.Critical, message);
-    }
-
-    public void LogError(string? message)
-    {
-        Log(LogLevel.Error, message);
-    }
-
-    public void LogTrace(string? message)
+    public void LogTrace(object? message)
     {
         Log(LogLevel.Trace, message);
     }
 
-    public void LogWarning(string? message)
+    public void LogDebug(object? message)
+    {
+        Log(LogLevel.Debug, message);
+    }
+
+    public void LogInformation(object? message)
+    {
+        Log(LogLevel.Information, message);
+    }
+
+    public void LogWarning(object? message)
     {
         Log(LogLevel.Warning, message);
     }
 
-    public void Log(LogLevel logLevel, string? message)
+    public void LogError(object? message)
+    {
+        Log(LogLevel.Error, message);
+    }
+
+    public void LogCritical(object? message)
+    {
+        Log(LogLevel.Critical, message);
+    }
+
+    public void Log(LogLevel logLevel, object? message)
     {
         try
         {
-            if (message == null) return;
+            if (message == null || (int)LogLevel > (int)logLevel)
+                return;
 
             string log = $"[{logLevel}]: {message}";
             Console.WriteLine(log);
