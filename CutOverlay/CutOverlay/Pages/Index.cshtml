@@ -29,12 +29,12 @@
                        Value = "true"
                    })
 
-            @await Html.PartialAsync("_TextField", new InputModel
+            <!--@await Html.PartialAsync("_TextField", new InputModel
                    {
                        Label = "Chat Username",
                        Id = "twitchChatUsername",
                        Value = ""
-                   })
+                   })-->
 
             @await Html.PartialAsync("_Checkbox", new InputModel
                    {
@@ -45,8 +45,14 @@
             <div style="margin-left: 30px;">
                 @await Html.PartialAsync("_Checkbox", new InputModel
                        {
-                           Label = "Enable Emotes",
-                           Id = "use7TVemotes",
+                           Label = "Enable Global Emotes",
+                           Id = "use7TVglobalEmotes",
+                           Value = "true"
+                       })
+                @await Html.PartialAsync("_Checkbox", new InputModel
+                       {
+                           Label = "Enable Channel Emotes",
+                           Id = "use7TVchannelEmotes",
                            Value = "true"
                        })
                 @await Html.PartialAsync("_Checkbox", new InputModel
@@ -62,13 +68,21 @@
                            Value = "true"
                        })
             </div>
-
+            
             @await Html.PartialAsync("_Checkbox", new InputModel
                    {
                        Label = "BetterTTV Integration",
-                       Id = "userBetterTTV",
+                       Id = "useBetterTTV",
                        Value = "true"
                    })
+            <div style="margin-left: 30px;">
+                @await Html.PartialAsync("_Checkbox", new InputModel
+                       {
+                           Label = "Enable Global Emotes",
+                           Id = "useBetterTTVglobalEmotes",
+                           Value = "true"
+                       })
+            </div>
 
             @await Html.PartialAsync("_Checkbox", new InputModel
                    {

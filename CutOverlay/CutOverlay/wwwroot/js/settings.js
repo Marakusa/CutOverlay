@@ -1,5 +1,24 @@
 const config = {};
 
+function checkConfigs() {
+    const settingsFields = document.getElementsByClassName("settingsInput");
+    for (let i = 0; i < settingsFields.length; i++) {
+        if (settingsFields[i].classList.contains("checkboxInput")) {
+            const input = settingsFields[i].childNodes[1];
+            if (config[input.id] == null) {
+                saveConfig();
+                break;
+            }
+        } else {
+            const input = settingsFields[i].childNodes[3];
+            if (config[input.id] == null) {
+                saveConfig();
+                break;
+            }
+        }
+    }
+}
+
 function saveConfig() {
     const settingsFields = document.getElementsByClassName("settingsInput");
     for (let i = 0; i < settingsFields.length; i++) {
@@ -56,6 +75,7 @@ function loadConfig() {
                             config[fieldName] = fieldValue;
                         }
                     }
+                    checkConfigs();
                 });
             } else {
                 console.error("Failed to fetch configuration");

@@ -95,7 +95,9 @@ function emptyConfig() {
     progressData = null;
 
     const progressText = document.getElementById("progressText");
-    progressText.parentElement.parentElement.style.display = "none";
+    if (progressText != null) {
+        progressText.parentElement.parentElement.style.display = "none";
+    }
 }
 
 // Handle the music progress bar

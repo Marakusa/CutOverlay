@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace CutOverlay.Pages
+namespace CutOverlay.Pages;
+
+public class FollowSubsModel : PageModel
 {
-    public class FollowSubsModel : PageModel
+    public void OnGet()
     {
-        public void OnGet()
-        {
-        }
     }
 }

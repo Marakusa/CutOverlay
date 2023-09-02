@@ -18,8 +18,6 @@ public class Data
 
     [JsonProperty("animated")] public bool Animated { get; set; }
 
-    [JsonProperty("owner")] public Owner Owner { get; set; }
-
     [JsonProperty("host")] public Host Host { get; set; }
 
     [JsonProperty("tags")] public List<string> Tags { get; set; }
@@ -64,45 +62,7 @@ public class Host
     [JsonProperty("files")] public List<File> Files { get; set; }
 }
 
-public class Owner
-{
-    [JsonProperty("id")] public string Id { get; set; }
-
-    [JsonProperty("username")] public string Username { get; set; }
-
-    [JsonProperty("display_name")] public string DisplayName { get; set; }
-
-    [JsonProperty("avatar_url")] public string AvatarUrl { get; set; }
-
-    [JsonProperty("style")] public Style Style { get; set; }
-
-    [JsonProperty("roles")] public List<string> Roles { get; set; }
-}
-
 public class SevenTvEmotes
 {
-    [JsonProperty("id")] public string Id { get; set; }
-
-    [JsonProperty("name")] public string Name { get; set; }
-
-    [JsonProperty("flags")] public int Flags { get; set; }
-
-    [JsonProperty("tags")] public List<object> Tags { get; set; }
-
-    [JsonProperty("immutable")] public bool Immutable { get; set; }
-
-    [JsonProperty("privileged")] public bool Privileged { get; set; }
-
     [JsonProperty("emotes")] public List<Emote> Emotes { get; set; }
-
-    [JsonProperty("emote_count")] public int EmoteCount { get; set; }
-
-    [JsonProperty("capacity")] public int Capacity { get; set; }
-
-    [JsonProperty("owner")] public Owner Owner { get; set; }
-}
-
-public class Style
-{
-    [JsonProperty("color")] public int? Color { get; set; }
 }

@@ -39,7 +39,7 @@ public class Pulsoid : OverlayApp
             !configurations.ContainsKey("pulsoidAccessToken") ||
             string.IsNullOrEmpty(configurations["pulsoidAccessToken"]))
         {
-            _logger.LogError("Pulsoid access token missing");
+            _logger.LogWarning("Pulsoid access token missing (No need if unused)");
             return;
         }
 
