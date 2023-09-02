@@ -68,18 +68,24 @@
                            Value = "true"
                        })
             </div>
-            
+
             @await Html.PartialAsync("_Checkbox", new InputModel
-                   {
-                       Label = "BetterTTV Integration",
-                       Id = "useBetterTTV",
-                       Value = "true"
-                   })
+            {
+                Label = "BetterTTV Integration",
+                Id = "useBetterTTV",
+                Value = "true"
+            })
             <div style="margin-left: 30px;">
                 @await Html.PartialAsync("_Checkbox", new InputModel
                        {
                            Label = "Enable Global Emotes",
                            Id = "useBetterTTVglobalEmotes",
+                           Value = "true"
+                       })
+                @await Html.PartialAsync("_Checkbox", new InputModel
+                       {
+                           Label = "Enable Channel Emotes",
+                           Id = "useBetterTTVchannelEmotes",
                            Value = "true"
                        })
             </div>

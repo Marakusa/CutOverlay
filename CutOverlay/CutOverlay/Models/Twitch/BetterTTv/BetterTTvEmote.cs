@@ -15,7 +15,4 @@ public class BetterTTvEmote
 
     [JsonProperty("animated")]
     public bool Animated { get; set; }
-
-    [JsonProperty("userId")]
-    public string UserId { get; set; }
 }

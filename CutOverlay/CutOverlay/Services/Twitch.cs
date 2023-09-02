@@ -21,7 +21,6 @@ using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Events;
-using Emote = CutOverlay.Models.Twitch.SevenTv.Emote;
 
 namespace CutOverlay.Services;
 
@@ -60,13 +59,14 @@ public class Twitch : OverlayApp
     private Dictionary<string, string?>? _configurations;
     private SevenTvCosmetics? _cosmetics;
     private DateTime _lastFetch = DateTime.UnixEpoch;
-    private List<Emote> _sevenTvEmotes;
-    private List<Emote> _sevenTvChannelEmotes;
+    private List<SevenTvEmote> _sevenTvEmotes;
+    private List<SevenTvEmote> _sevenTvChannelEmotes;
+    private List<BetterTTvEmote> _betterTTvEmotes;
+    private List<BetterTTvEmote> _betterTTvChannelEmotes;
     private string _stateToken = "";
 
     private TwitchClient? _twitchBotClient;
     private readonly LoggerService _logger;
-    private List<BetterTTvEmote> _betterTTvEmotes;
 
     public Twitch(ConfigurationService configurationService, LoggerService logger)
     {
@@ -82,8 +82,10 @@ public class Twitch : OverlayApp
 
         _subscribers = new List<string>();
 
-        _sevenTvEmotes = new List<Emote>();
-        _sevenTvChannelEmotes = new List<Emote>();
+        _sevenTvEmotes = new List<SevenTvEmote>();
+        _sevenTvChannelEmotes = new List<SevenTvEmote>();
+        _betterTTvEmotes = new List<BetterTTvEmote>();
+        _betterTTvChannelEmotes = new List<BetterTTvEmote>();
 
         SetupChatBot();
 
@@ -254,12 +256,14 @@ public class Twitch : OverlayApp
 
         // BetterTTV stuff
         _betterTTvEmotes = await GetBetterTTvGlobalEmotesAsync();
+        _betterTTvChannelEmotes = await GetBetterTTvChannelEmotesAsync();
 
         _logger.LogInformation($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Badges.Count)} 7TV badges");
         _logger.LogInformation($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Paints.Count)} 7TV paints");
         _logger.LogInformation($"Loaded {_sevenTvEmotes.Count} 7TV global emotes");
         _logger.LogInformation($"Loaded {_sevenTvChannelEmotes.Count} 7TV channel emotes");
         _logger.LogInformation($"Loaded {_betterTTvEmotes.Count} BetterTTV global emotes");
+        _logger.LogInformation($"Loaded {_betterTTvChannelEmotes.Count} BetterTTV channel emotes");
     }
 
     private async Task<TwitchUser> HandleExtensionsAsync(User user)
@@ -335,7 +339,7 @@ public class Twitch : OverlayApp
         return null;
     }
 
-    private async Task<List<Emote>> Get7TvGlobalEmotesAsync()
+    private async Task<List<SevenTvEmote>> Get7TvGlobalEmotesAsync()
     {
         try
         {
@@ -351,19 +355,19 @@ public class Twitch : OverlayApp
         catch (Exception ex)
         {
             Status = ServiceStatusType.Error;
-            _logger.LogError($"Failed to fetch 7TV cosmetics: {ex}");
+            _logger.LogError($"Failed to fetch 7TV emotes: {ex}");
         }
 
-        return new List<Emote>();
+        return new List<SevenTvEmote>();
     }
 
-    private async Task<List<Emote>> Get7TvChannelEmotesAsync()
+    private async Task<List<SevenTvEmote>> Get7TvChannelEmotesAsync()
     {
         try
         {
             long timestampMilliseconds = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc))
                 .TotalMilliseconds;
-            string emotesApiUri = $"https://7tv.io/v3/users/twitch/{_broadcasterId}?sigh={timestampMilliseconds}";
+            string emotesApiUri = $"https://7tv.io/v3/users/twitch/{_broadcasterId}?cache={timestampMilliseconds}";
 
             HttpResponseMessage response = await HttpClient?.GetAsync(emotesApiUri)!;
 
@@ -375,10 +379,10 @@ public class Twitch : OverlayApp
         catch (Exception ex)
         {
             Status = ServiceStatusType.Error;
-            _logger.LogError($"Failed to fetch 7TV cosmetics: {ex}");
+            _logger.LogError($"Failed to fetch 7TV emotes: {ex}");
         }
 
-        return new List<Emote>();
+        return new List<SevenTvEmote>();
     }
 
     private TwitchUserPaint Parse7TvPaint(TwitchUser twitchUser, string twitchId)
@@ -478,7 +482,31 @@ public class Twitch : OverlayApp
         catch (Exception ex)
         {
             Status = ServiceStatusType.Error;
-            _logger.LogError($"Failed to fetch BetterTTV cosmetics: {ex}");
+            _logger.LogError($"Failed to fetch BetterTTV emotes: {ex}");
+        }
+
+        return new List<BetterTTvEmote>();
+    }
+
+    private async Task<List<BetterTTvEmote>> GetBetterTTvChannelEmotesAsync()
+    {
+        try
+        {
+            long timestampMilliseconds = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc))
+                .TotalMilliseconds;
+            string emotesApiUri = $"https://api.betterttv.net/3/cached/users/twitch/{_broadcasterId}?cache={timestampMilliseconds}";
+            
+            HttpResponseMessage response = await HttpClient?.GetAsync(emotesApiUri)!;
+
+            string content = await response.Content.ReadAsStringAsync();
+            BetterTTvUser? user = JsonConvert.DeserializeObject<BetterTTvUser> (content);
+
+            if (user != null) return user.SharedEmotes;
+        }
+        catch (Exception ex)
+        {
+            Status = ServiceStatusType.Error;
+            _logger.LogError($"Failed to fetch BetterTTV emotes: {ex}");
         }
 
         return new List<BetterTTvEmote>();
@@ -654,7 +682,7 @@ public class Twitch : OverlayApp
 
     private async Task ReceiveMessageAsync(ChatMessage chatMessage)
     {
-        _logger.LogInformation($"New message from {chatMessage.DisplayName}: {chatMessage.Message}");
+        _logger.LogDebug($"New message from {chatMessage.DisplayName}: {chatMessage.Message}");
 
         TwitchUser? user = _userCache.Find(f => f.DisplayName == chatMessage.DisplayName);
         if (user == null)
@@ -666,9 +694,7 @@ public class Twitch : OverlayApp
             foreach (User u in users.Users) _userCache.Add(await HandleExtensionsAsync(u));
             user = await HandleExtensionsAsync(users.Users.First());
         }
-
-        _logger.LogInformation("1");
-
+        
         UserChatMessage message = new()
         {
             UserId = chatMessage.UserId,
@@ -689,9 +715,7 @@ public class Twitch : OverlayApp
             },
             MessageEmotes = new List<EmoteData>()
         };
-
-        _logger.LogInformation("2");
-
+        
         // Set badges
         foreach (BadgeVersion badgeVersion in from badge in chatMessage.Badges
                                               let index = _badges.FindIndex(f => f.SetId == badge.Key)
@@ -707,9 +731,7 @@ public class Twitch : OverlayApp
         // Add 7TV badges
         if (_configurations?["use7TV"] == "true" && _configurations?["use7TVbadges"] == "true")
             message.UserBadges.AddRange(user.SevenTvBadges);
-
-        _logger.LogInformation("4");
-
+        
         // Set emotes
         foreach (EmoteData emoteData in chatMessage.EmoteSet.Emotes.Select(emote => new EmoteData
         {
@@ -722,9 +744,7 @@ public class Twitch : OverlayApp
                 $"https://static-cdn.jtvnw.net/emoticons/v2/{emoteData.Url?.Split("/")[5]}/default/light/2.0";
             message.MessageEmotes.Add(emoteData);
         }
-
-        _logger.LogInformation("5");
-
+        
         // Set 7TV emotes
         if (_configurations?["use7TV"] == "true")
         {
@@ -739,7 +759,7 @@ public class Twitch : OverlayApp
 
                     // Find the 7TV emote from the word
                     string word = currentWord;
-                    Emote? emote = null;
+                    SevenTvEmote? emote = null;
 
                     if (_configurations?["use7TVglobalEmotes"] == "true")
                     {
@@ -796,9 +816,7 @@ public class Twitch : OverlayApp
                 _logger.LogError(ex);
             }
         }
-
-        _logger.LogInformation("6");
-
+        
         // Set BetterTTV emotes
         if (_configurations?["useBetterTTV"] == "true")
         {
@@ -811,8 +829,19 @@ public class Twitch : OverlayApp
 
                 // Find the 7TV emote from the word
                 string word = currentWord;
-                BetterTTvEmote? emote = _betterTTvEmotes.Find(f => f.Code == word);
 
+                BetterTTvEmote? emote = null;
+
+                if (_configurations?["useBetterTTVglobalEmotes"] == "true")
+                {
+                    emote = _betterTTvEmotes.Find(f => f.Code == word);
+                }
+
+                if (_configurations?["useBetterTTVchannelEmotes"] == "true")
+                {
+                    emote = _betterTTvChannelEmotes.Find(f => f.Code == word) ?? emote;
+                }
+                
                 if (emote != null)
                     message.MessageEmotes.Add(new EmoteData
                     {
@@ -848,9 +877,7 @@ public class Twitch : OverlayApp
 
         // Sort emotes
         message.MessageEmotes = message.MessageEmotes.OrderBy(o => o.StartIndex).ToList();
-
-        _logger.LogInformation("7");
-
+        
         await SendMessageToAllAsync(JsonConvert.SerializeObject(message));
     }
 

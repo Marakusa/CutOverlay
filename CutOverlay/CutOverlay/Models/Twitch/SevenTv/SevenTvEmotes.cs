@@ -23,7 +23,7 @@ public class Data
     [JsonProperty("tags")] public List<string> Tags { get; set; }
 }
 
-public class Emote
+public class SevenTvEmote
 {
     [JsonProperty("id")] public string Id { get; set; }
 
@@ -64,5 +64,5 @@ public class Host
 
 public class SevenTvEmotes
 {
-    [JsonProperty("emotes")] public List<Emote> Emotes { get; set; }
+    [JsonProperty("emotes")] public List<SevenTvEmote> Emotes { get; set; }
 }
