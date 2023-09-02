@@ -142,7 +142,7 @@ function replaceEmotes(message, emotes) {
     var emoteList = [];
 
     emotes.forEach(function(emoteData) {
-        emoteList.push([emoteData.url, [emoteData.startIndex, emoteData.endIndex], emoteData.overlay]);
+        emoteList.push([emoteData.url, [emoteData.startIndex, emoteData.endIndex], emoteData.overlay, emoteData.aspectRatio]);
     });
 
     // Sort emote list by position in descending order
@@ -156,10 +156,10 @@ function replaceEmotes(message, emotes) {
         let emoji = false;
         // Check if theres any emojis in this index point, if there is then add it to the output and skip to the end of the range
         for (let j = 0; j < emoteList.length; j++) {
-            const [url, [start, end], overlay] = emoteList[j];
+            const [url, [start, end], overlay, aspectRatio] = emoteList[j];
             if (i === start) {
                 const emoteImage =
-                    `<img src="${url}" alt="" ` + (overlay ? 'style="margin-left: -33px;"' : "") + ` />`;
+                    `<img src="${url}" alt="" style="` + (overlay ? 'margin-left: -33px; ' : "") + `width: ${(aspectRatio * 32)}px;" />`;
                 output += emoteImage;
                 i = end;
                 emoji = true;

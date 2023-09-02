@@ -32,6 +32,8 @@ public class EmoteData
     [JsonProperty("endIndex")] public int EndIndex { get; set; }
 
     [JsonProperty("overlay")] public bool Overlay { get; set; }
+
+    [JsonProperty("aspectRatio")] public int AspectRatio { get; set; } = 1;
 }
 
 public class Flags

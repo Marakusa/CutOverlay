@@ -6,6 +6,7 @@ using System.Text;
 using CutOverlay.App;
 using CutOverlay.Models.Twitch;
 using CutOverlay.Models.Twitch.BetterTTv;
+using CutOverlay.Models.Twitch.FrankerFaceZ;
 using CutOverlay.Models.Twitch.SevenTv;
 using Newtonsoft.Json;
 using TwitchLib.Api;
@@ -63,6 +64,8 @@ public class Twitch : OverlayApp
     private List<SevenTvEmote> _sevenTvChannelEmotes;
     private List<BetterTTvEmote> _betterTTvEmotes;
     private List<BetterTTvEmote> _betterTTvChannelEmotes;
+    private List<FrankerFaceZEmote> _frankerFaceZEmotes;
+    private List<FrankerFaceZEmote> _frankerFaceZChannelEmotes;
     private string _stateToken = "";
 
     private TwitchClient? _twitchBotClient;
@@ -86,6 +89,8 @@ public class Twitch : OverlayApp
         _sevenTvChannelEmotes = new List<SevenTvEmote>();
         _betterTTvEmotes = new List<BetterTTvEmote>();
         _betterTTvChannelEmotes = new List<BetterTTvEmote>();
+        _frankerFaceZEmotes = new List<FrankerFaceZEmote>();
+        _frankerFaceZChannelEmotes = new List<FrankerFaceZEmote>();
 
         SetupChatBot();
 
@@ -258,12 +263,18 @@ public class Twitch : OverlayApp
         _betterTTvEmotes = await GetBetterTTvGlobalEmotesAsync();
         _betterTTvChannelEmotes = await GetBetterTTvChannelEmotesAsync();
 
+        // BetterTTV stuff
+        _frankerFaceZEmotes = await GetFrankerFaceZGlobalEmotesAsync();
+        _frankerFaceZChannelEmotes = await GetFrankerFaceZChannelEmotesAsync();
+
         _logger.LogInformation($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Badges.Count)} 7TV badges");
         _logger.LogInformation($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Paints.Count)} 7TV paints");
         _logger.LogInformation($"Loaded {_sevenTvEmotes.Count} 7TV global emotes");
         _logger.LogInformation($"Loaded {_sevenTvChannelEmotes.Count} 7TV channel emotes");
         _logger.LogInformation($"Loaded {_betterTTvEmotes.Count} BetterTTV global emotes");
         _logger.LogInformation($"Loaded {_betterTTvChannelEmotes.Count} BetterTTV channel emotes");
+        _logger.LogInformation($"Loaded {_frankerFaceZEmotes.Count} FrankerFaceZ global emotes");
+        _logger.LogInformation($"Loaded {_frankerFaceZChannelEmotes.Count} FrankerFaceZ channel emotes");
     }
 
     private async Task<TwitchUser> HandleExtensionsAsync(User user)
@@ -514,6 +525,67 @@ public class Twitch : OverlayApp
 
     #endregion
 
+    #region FrankerFaceZ
+
+    private async Task<List<FrankerFaceZEmote>> GetFrankerFaceZGlobalEmotesAsync()
+    {
+        var output = new List<FrankerFaceZEmote>();
+
+        try
+        {
+            const string emotesApiUri = "https://api.frankerfacez.com/v1/set/global";
+
+            HttpResponseMessage response = await HttpClient?.GetAsync(emotesApiUri)!;
+
+            string content = await response.Content.ReadAsStringAsync();
+            FrankerFaceZSets? sets = JsonConvert.DeserializeObject<FrankerFaceZSets>(content);
+
+            if (sets == null) return output;
+
+            foreach ((string _, Set? set) in sets.Sets) output.AddRange(set.Emoticons);
+
+            return output;
+        }
+        catch (Exception ex)
+        {
+            Status = ServiceStatusType.Error;
+            _logger.LogError($"Failed to fetch FrankerFaceZ emotes: {ex}");
+        }
+
+        return output;
+    }
+
+    private async Task<List<FrankerFaceZEmote>> GetFrankerFaceZChannelEmotesAsync()
+    {
+        var output = new List<FrankerFaceZEmote>();
+
+        try
+        {
+            long timestampMilliseconds = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc))
+                .TotalMilliseconds;
+            string emotesApiUri = $"https://api.frankerfacez.com/v1/room/id/{_broadcasterId}?cache={timestampMilliseconds}";
+
+            HttpResponseMessage response = await HttpClient?.GetAsync(emotesApiUri)!;
+
+            string content = await response.Content.ReadAsStringAsync();
+            FrankerFaceZRoom? room = JsonConvert.DeserializeObject<FrankerFaceZRoom>(content);
+
+            if (room == null) return output;
+
+            foreach ((string _, Set? set) in room.Sets) output.AddRange(set.Emoticons);
+
+            return output;
+        }
+        catch (Exception ex)
+        {
+            Status = ServiceStatusType.Error;
+            _logger.LogError($"Failed to fetch FrankerFaceZ emotes: {ex}");
+        }
+
+        return output;
+    }
+
+    #endregion
 
     #region Twitch Bot Client Events
 
@@ -725,9 +797,7 @@ public class Twitch : OverlayApp
                                               where badgeVersion?.ImageUrl1x != null
                                               select badgeVersion)
             message.UserBadges.Add(badgeVersion.ImageUrl4x);
-
-        _logger.LogInformation("3");
-
+        
         // Add 7TV badges
         if (_configurations?["use7TV"] == "true" && _configurations?["use7TVbadges"] == "true")
             message.UserBadges.AddRange(user.SevenTvBadges);
@@ -737,7 +807,8 @@ public class Twitch : OverlayApp
         {
             Url = emote.ImageUrl,
             StartIndex = emote.StartIndex,
-            EndIndex = emote.EndIndex
+            EndIndex = emote.EndIndex,
+            AspectRatio = 1
         }))
         {
             emoteData.Url =
@@ -778,7 +849,8 @@ public class Twitch : OverlayApp
                                 $"https:{emote.Data.Host.Url}/{emote.Data.Host.Files.FindLast(f => f.Format.Equals("AVIF", StringComparison.InvariantCultureIgnoreCase))?.Name}",
                             StartIndex = start,
                             EndIndex = end,
-                            Overlay = IsOverlayEmote(emote.Data.Flags)
+                            Overlay = IsOverlayEmote(emote.Data.Flags),
+                            AspectRatio = emote.Data.Host.Files.Last().Width / emote.Data.Host.Files.Last().Height
                         });
                 }
                 catch (Exception ex)
@@ -822,57 +894,145 @@ public class Twitch : OverlayApp
         {
             void AddBetterTTvEmote(int start, int end, string currentWord)
             {
-                int s = start;
-                // Return if any emotes are already added at the start position
-                if (message.MessageEmotes.Find(f => f.StartIndex == s) != null)
-                    return;
-
-                // Find the 7TV emote from the word
-                string word = currentWord;
-
-                BetterTTvEmote? emote = null;
-
-                if (_configurations?["useBetterTTVglobalEmotes"] == "true")
+                try
                 {
-                    emote = _betterTTvEmotes.Find(f => f.Code == word);
-                }
+                    int s = start;
+                    // Return if any emotes are already added at the start position
+                    if (message.MessageEmotes.Find(f => f.StartIndex == s) != null)
+                        return;
 
-                if (_configurations?["useBetterTTVchannelEmotes"] == "true")
-                {
-                    emote = _betterTTvChannelEmotes.Find(f => f.Code == word) ?? emote;
-                }
-                
-                if (emote != null)
-                    message.MessageEmotes.Add(new EmoteData
+                    // Find the 7TV emote from the word
+                    string word = currentWord;
+
+                    BetterTTvEmote? emote = null;
+
+                    if (_configurations?["useBetterTTVglobalEmotes"] == "true")
                     {
-                        Url = $"https://cdn.betterttv.net/emote/{emote.Id}/3x.{emote.ImageType}",
-                        StartIndex = start,
-                        EndIndex = end,
-                        Overlay = false
-                    });
+                        emote = _betterTTvEmotes.Find(f => f.Code == word);
+                    }
+
+                    if (_configurations?["useBetterTTVchannelEmotes"] == "true")
+                    {
+                        emote = _betterTTvChannelEmotes.Find(f => f.Code == word) ?? emote;
+                    }
+
+                    if (emote != null)
+                        message.MessageEmotes.Add(new EmoteData
+                        {
+                            Url = $"https://cdn.betterttv.net/emote/{emote.Id}/3x.{emote.ImageType}",
+                            StartIndex = start,
+                            EndIndex = end,
+                            Overlay = false,
+                            AspectRatio = 1
+                        });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex);
+                }
             }
 
-            int i = 0;
-            int start = 0;
-            string currentWord = "";
-            while (i < chatMessage.Message.Length)
+            try
             {
-                if (chatMessage.Message[i] == ' ')
+                int i = 0;
+                int start = 0;
+                string currentWord = "";
+                while (i < chatMessage.Message.Length)
                 {
-                    AddBetterTTvEmote(start, i - 1, currentWord);
+                    if (chatMessage.Message[i] == ' ')
+                    {
+                        AddBetterTTvEmote(start, i - 1, currentWord);
 
-                    start = i + 1;
-                    currentWord = "";
+                        start = i + 1;
+                        currentWord = "";
+                    }
+                    else
+                    {
+                        currentWord += chatMessage.Message[i];
+                    }
+
+                    i++;
                 }
-                else
+
+                AddBetterTTvEmote(start, i - 1, currentWord);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex);
+            }
+        }
+
+        // Set FrankerFaceZ emotes
+        if (_configurations?["useFrankerFaceZ"] == "true")
+        {
+            void AddFrankerFaceZEmote(int start, int end, string currentWord)
+            {
+                try
                 {
-                    currentWord += chatMessage.Message[i];
-                }
+                    int s = start;
+                    // Return if any emotes are already added at the start position
+                    if (message.MessageEmotes.Find(f => f.StartIndex == s) != null)
+                        return;
 
-                i++;
+                    // Find the 7TV emote from the word
+                    string word = currentWord;
+
+                    FrankerFaceZEmote? emote = null;
+
+                    if (_configurations?["useFrankerFaceZglobalEmotes"] == "true")
+                    {
+                        emote = _frankerFaceZEmotes.Find(f => f.Name == word);
+                    }
+
+                    if (_configurations?["useFrankerFaceZchannelEmotes"] == "true")
+                    {
+                        emote = _frankerFaceZChannelEmotes.Find(f => f.Name == word) ?? emote;
+                    }
+
+                    if (emote != null)
+                        message.MessageEmotes.Add(new EmoteData
+                        {
+                            Url = emote.Urls.Last().Value,
+                            StartIndex = start,
+                            EndIndex = end,
+                            Overlay = false,
+                            AspectRatio = emote.Width / emote.Height
+                        });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex);
+                }
             }
 
-            AddBetterTTvEmote(start, i - 1, currentWord);
+            try
+            {
+                int i = 0;
+                int start = 0;
+                string currentWord = "";
+                while (i < chatMessage.Message.Length)
+                {
+                    if (chatMessage.Message[i] == ' ')
+                    {
+                        AddFrankerFaceZEmote(start, i - 1, currentWord);
+
+                        start = i + 1;
+                        currentWord = "";
+                    }
+                    else
+                    {
+                        currentWord += chatMessage.Message[i];
+                    }
+
+                    i++;
+                }
+
+                AddFrankerFaceZEmote(start, i - 1, currentWord);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex);
+            }
         }
 
         // Sort emotes

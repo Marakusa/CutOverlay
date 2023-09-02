@@ -95,7 +95,21 @@
                        Label = "FrankerFaceZ Integration",
                        Id = "useFrankerFaceZ",
                        Value = "true"
-                   })
+            })
+            <div style="margin-left: 30px;">
+                @await Html.PartialAsync("_Checkbox", new InputModel
+                       {
+                           Label = "Enable Global Emotes",
+                           Id = "useFrankerFaceZglobalEmotes",
+                           Value = "true"
+                       })
+                @await Html.PartialAsync("_Checkbox", new InputModel
+                       {
+                           Label = "Enable Channel Emotes",
+                           Id = "useFrankerFaceZchannelEmotes",
+                           Value = "true"
+                       })
+            </div>
 
             <hr/>
 
