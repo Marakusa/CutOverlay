@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using CutOverlay.App;
+using CutOverlay.Models.ChatPlex;
 using CutOverlay.Models.Twitch;
 using CutOverlay.Models.Twitch.BetterTTv;
 using CutOverlay.Models.Twitch.FrankerFaceZ;
@@ -66,6 +67,7 @@ public class Twitch : OverlayApp
     private List<BetterTTvEmote> _betterTTvChannelEmotes;
     private List<FrankerFaceZEmote> _frankerFaceZEmotes;
     private List<FrankerFaceZEmote> _frankerFaceZChannelEmotes;
+    private List<ChatPlexData> _chatPlexGradients;
     private string _stateToken = "";
 
     private TwitchClient? _twitchBotClient;
@@ -188,7 +190,10 @@ public class Twitch : OverlayApp
                 throw new Exception("Failed to verify the request");
 
             _accessToken = oAuth;
-            
+
+            // ChatPlex stuff
+            _chatPlexGradients = await GetChatPlexGradientsAsync();
+
             _twitchApi = new TwitchAPI
             {
                 Settings =
@@ -254,6 +259,9 @@ public class Twitch : OverlayApp
 
     private async Task LoadIntegrationsDataAsync()
     {
+        // ChatPlex stuff
+        _chatPlexGradients = await GetChatPlexGradientsAsync();
+
         // 7TV stuff
         _cosmetics = await Get7TvCosmeticsAsync();
         _sevenTvEmotes = await Get7TvGlobalEmotesAsync();
@@ -297,6 +305,9 @@ public class Twitch : OverlayApp
             SevenTvBadges = new List<string>()
         };
 
+        if (!newUser.Paint.IsLocked)
+            newUser.Paint = ParseChatPlexPaint(newUser, user.Id);
+
         try
         {
             const string userApiUri = "https://7tv.io/v2/users/{0}";
@@ -311,7 +322,8 @@ public class Twitch : OverlayApp
 
             if (sevenTvUser?.TwitchId != null)
             {
-                newUser.Paint = Parse7TvPaint(newUser, sevenTvUser.TwitchId);
+                if (!newUser.Paint.IsLocked)
+                    newUser.Paint = Parse7TvPaint(newUser, sevenTvUser.TwitchId);
                 newUser.SevenTvBadges = Parse7TvBadges(newUser, sevenTvUser.TwitchId);
             }
         }
@@ -324,6 +336,68 @@ public class Twitch : OverlayApp
         return newUser;
     }
 
+    #endregion
+
+    #region ChatPlex
+
+    private async Task<List<ChatPlexData>> GetChatPlexGradientsAsync()
+    {
+        try
+        {
+            const string gradientsApiUri = "https://data.chatplex.org/twitch_gradient_names.json";
+
+            HttpResponseMessage response = await HttpClient?.GetAsync(gradientsApiUri)!;
+
+            string content = await response.Content.ReadAsStringAsync();
+            var gradients = JsonConvert.DeserializeObject<List<ChatPlexData>?>(content);
+            
+            return gradients ?? new List<ChatPlexData>();
+        }
+        catch (Exception ex)
+        {
+            Status = ServiceStatusType.Error;
+            _logger.LogError($"Failed to fetch ChatPlex gradients: {ex}");
+        }
+
+        return new List<ChatPlexData>();
+    }
+
+    private TwitchUserPaint ParseChatPlexPaint(TwitchUser twitchUser, string twitchId)
+    {
+        try
+        {
+            TwitchUserPaint paint = twitchUser.Paint;
+
+            ChatPlexData? gradient = _chatPlexGradients.Find(f => f.Users.Contains(twitchId));
+            
+            if (gradient == null)
+                return paint;
+
+            var stops = new List<string>();
+
+            for (int i = 0; i < gradient.Stops[0].Count; i++)
+            {
+                double stop = (double)gradient.Stops[0][i];
+                string color = gradient.Stops[1][i].ToString()!;
+                stops.Add($"{color} {stop * 100.0}%");
+            }
+
+            paint.BackgroundImage = $"linear-gradient(to right, {string.Join(',', stops)})";
+            paint.BackgroundColor = "#ffffff";
+            paint.BackgroundSize = "contain";
+            paint.IsLocked = true;
+
+            return paint;
+        }
+        catch (Exception ex)
+        {
+            Status = ServiceStatusType.Error;
+            _logger.LogError($"Failed to get ChatPlex gradient for user {twitchId}: {ex}");
+        }
+
+        return twitchUser.Paint;
+    }
+    
     #endregion
 
     #region 7TV
@@ -428,6 +502,7 @@ public class Twitch : OverlayApp
             if (cosmetic.Color != null) paint.BackgroundColor = Parse7TvColor((int)cosmetic.Color);
 
             paint.BackgroundSize = "contain";
+            paint.IsLocked = true;
             return paint;
         }
         catch (Exception ex)

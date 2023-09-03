@@ -4,6 +4,8 @@ namespace CutOverlay.Models.Twitch;
 
 public class TwitchUserPaint
 {
+    [JsonIgnore] public bool IsLocked { get; set; } = false;
+
     [JsonProperty("backgroundImage")] public string? BackgroundImage { get; set; }
 
     [JsonProperty("filter")] public string? Filter { get; set; }
