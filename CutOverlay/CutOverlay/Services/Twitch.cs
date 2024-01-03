@@ -259,30 +259,72 @@ public class Twitch : OverlayApp
 
     private async Task LoadIntegrationsDataAsync()
     {
-        // ChatPlex stuff
-        _chatPlexGradients = await GetChatPlexGradientsAsync();
+        try
+        {
+            // ChatPlex stuff
+            _chatPlexGradients = await GetChatPlexGradientsAsync();
 
-        // 7TV stuff
-        _cosmetics = await Get7TvCosmeticsAsync();
-        _sevenTvEmotes = await Get7TvGlobalEmotesAsync();
-        _sevenTvChannelEmotes = await Get7TvChannelEmotesAsync();
+            // 7TV stuff
+            if (_configurations?["use7TV"] == "true")
+            {
+                if (_configurations?["use7TVbadges"] == "true" || _configurations?["use7TVpaints"] == "true")
+                    _cosmetics = await Get7TvCosmeticsAsync();
 
-        // BetterTTV stuff
-        _betterTTvEmotes = await GetBetterTTvGlobalEmotesAsync();
-        _betterTTvChannelEmotes = await GetBetterTTvChannelEmotesAsync();
+                if (_configurations?["use7TVbadges"] == "true")
+                    _logger.LogInformation($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Badges.Count)} 7TV badges");
 
-        // BetterTTV stuff
-        _frankerFaceZEmotes = await GetFrankerFaceZGlobalEmotesAsync();
-        _frankerFaceZChannelEmotes = await GetFrankerFaceZChannelEmotesAsync();
+                if (_configurations?["use7TVpaints"] == "true")
+                    _logger.LogInformation($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Paints.Count)} 7TV paints");
 
-        _logger.LogInformation($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Badges.Count)} 7TV badges");
-        _logger.LogInformation($"Loaded {(_cosmetics == null ? 0 : _cosmetics.Paints.Count)} 7TV paints");
-        _logger.LogInformation($"Loaded {_sevenTvEmotes.Count} 7TV global emotes");
-        _logger.LogInformation($"Loaded {_sevenTvChannelEmotes.Count} 7TV channel emotes");
-        _logger.LogInformation($"Loaded {_betterTTvEmotes.Count} BetterTTV global emotes");
-        _logger.LogInformation($"Loaded {_betterTTvChannelEmotes.Count} BetterTTV channel emotes");
-        _logger.LogInformation($"Loaded {_frankerFaceZEmotes.Count} FrankerFaceZ global emotes");
-        _logger.LogInformation($"Loaded {_frankerFaceZChannelEmotes.Count} FrankerFaceZ channel emotes");
+                if (_configurations?["use7TVglobalEmotes"] == "true")
+                {
+                    _sevenTvEmotes = await Get7TvGlobalEmotesAsync();
+                    _logger.LogInformation($"Loaded {_sevenTvEmotes.Count} 7TV global emotes");
+                }
+
+                if (_configurations?["use7TVchannelEmotes"] == "true")
+                {
+                    _sevenTvChannelEmotes = await Get7TvChannelEmotesAsync();
+                    _logger.LogInformation($"Loaded {_sevenTvChannelEmotes.Count} 7TV channel emotes");
+                }
+            }
+
+            // BetterTTV stuff
+            if (_configurations?["useBetterTTV"] == "true")
+            {
+                if (_configurations?["useBetterTTVglobalEmotes"] == "true")
+                {
+                    _betterTTvEmotes = await GetBetterTTvGlobalEmotesAsync();
+                    _logger.LogInformation($"Loaded {_betterTTvEmotes.Count} BetterTTV global emotes");
+                }
+
+                if (_configurations?["useBetterTTVchannelEmotes"] == "true")
+                {
+                    _betterTTvChannelEmotes = await GetBetterTTvChannelEmotesAsync();
+                    _logger.LogInformation($"Loaded {_betterTTvChannelEmotes.Count} BetterTTV channel emotes");
+                }
+            }
+
+            // BetterTTV stuff
+            if (_configurations?["useFrankerFaceZ"] == "true")
+            {
+                if (_configurations?["useFrankerFaceZglobalEmotes"] == "true")
+                {
+                    _frankerFaceZEmotes = await GetFrankerFaceZGlobalEmotesAsync();
+                    _logger.LogInformation($"Loaded {_frankerFaceZEmotes.Count} FrankerFaceZ global emotes");
+                }
+
+                if (_configurations?["useFrankerFaceZchannelEmotes"] == "true")
+                {
+                    _frankerFaceZChannelEmotes = await GetFrankerFaceZChannelEmotesAsync();
+                    _logger.LogInformation($"Loaded {_frankerFaceZChannelEmotes.Count} FrankerFaceZ channel emotes");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex);
+        }
     }
 
     private async Task<TwitchUser> HandleExtensionsAsync(User user)
